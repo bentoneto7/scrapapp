@@ -1,0 +1,11 @@
+{
+  "name": "scrapapp-nle",
+  "version": "2.0.0",
+  "description": "Nome Limpo Express - Sistema completo de captura de leads",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
