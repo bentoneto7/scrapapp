@@ -54,12 +54,11 @@ const NLE_AUTH = (function () {
     const user = {
       id: _uid(),
       nome: nome.trim(),
+      email: (extra.email || '').trim().toLowerCase(),
       login: login.trim().toLowerCase(),
       senha: _hash(senha),
       role: role || 'vendedor',
       whatsapp: whatsapp,
-      cidade: (extra.cidade || '').trim(),
-      bio: (extra.bio || '').trim(),
       ativo: true,
       criadoEm: new Date().toISOString()
     };
@@ -86,8 +85,7 @@ const NLE_AUTH = (function () {
     if (data.role !== undefined) users[idx].role = data.role;
     if (data.ativo !== undefined) users[idx].ativo = data.ativo;
     if (data.whatsapp !== undefined) users[idx].whatsapp = _cleanPhone(data.whatsapp);
-    if (data.cidade !== undefined) users[idx].cidade = data.cidade.trim();
-    if (data.bio !== undefined) users[idx].bio = data.bio.trim();
+    if (data.email !== undefined) users[idx].email = data.email.trim().toLowerCase();
     saveUsers(users);
     return { ok: true, user: users[idx] };
   }
@@ -118,9 +116,8 @@ const NLE_AUTH = (function () {
       nome: user.nome,
       login: user.login,
       role: user.role,
+      email: user.email || '',
       whatsapp: user.whatsapp || '',
-      cidade: user.cidade || '',
-      bio: user.bio || '',
       inicio: new Date().toISOString()
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));

@@ -95,9 +95,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
     <thead>
       <tr>
         <th>Nome</th>
-        <th>Login</th>
+        <th>Email</th>
         <th>WhatsApp</th>
-        <th>Cidade</th>
         <th>Cargo</th>
         <th>Status</th>
         <th>Leads</th>
@@ -123,7 +122,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
       <input type="text" id="mNome" placeholder="Ex: Joao Silva">
     </div>
     <div class="form-group">
-      <label>Login</label>
+      <label>Email</label>
+      <input type="email" id="mEmail" placeholder="Ex: joao@email.com">
+    </div>
+    <div class="form-group">
+      <label>Login (usuario para entrar)</label>
       <input type="text" id="mLogin" placeholder="Ex: joao">
     </div>
     <div class="form-group">
@@ -134,14 +137,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
       <label>WhatsApp (com DDD)</label>
       <input type="text" id="mWhatsapp" placeholder="Ex: 11999887766" oninput="previewWaLink()">
       <small id="waPreview" style="color:#8b949e;font-size:.75rem;margin-top:.2rem;display:block"></small>
-    </div>
-    <div class="form-group">
-      <label>Cidade</label>
-      <input type="text" id="mCidade" placeholder="Ex: Sao Paulo">
-    </div>
-    <div class="form-group">
-      <label>Bio / Descricao (aparece nos posts)</label>
-      <input type="text" id="mBio" placeholder="Ex: Especialista em limpeza de nome">
     </div>
     <div class="form-group">
       <label>Cargo</label>
@@ -203,9 +198,8 @@ function render() {
     const waDisplay = u.whatsapp ? formatPhone(u.whatsapp) : '<span style="color:#484f58">-</span>';
     return `<tr>
       <td>${u.nome}${isMe ? ' (voce)' : ''}</td>
-      <td>${u.login}</td>
+      <td>${u.email || '<span style="color:#484f58">-</span>'}</td>
       <td>${waDisplay}</td>
-      <td>${u.cidade || '<span style="color:#484f58">-</span>'}</td>
       <td><span class="badge badge-${u.role}">${u.role}</span></td>
       <td><span class="badge badge-${u.ativo ? 'ativo' : 'inativo'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
       <td>${leadsPerUser[u.id] || 0}</td>
@@ -240,9 +234,8 @@ function openModal(editing) {
     document.getElementById('mLogin').value = '';
     document.getElementById('mSenha').value = '';
     document.getElementById('mSenhaLabel').textContent = 'Senha';
+    document.getElementById('mEmail').value = '';
     document.getElementById('mWhatsapp').value = '';
-    document.getElementById('mCidade').value = '';
-    document.getElementById('mBio').value = '';
     document.getElementById('waPreview').textContent = '';
     document.getElementById('mRole').value = 'vendedor';
     document.getElementById('mNome').focus();
@@ -263,9 +256,8 @@ function editUser(id) {
   document.getElementById('mLogin').value = user.login;
   document.getElementById('mSenha').value = '';
   document.getElementById('mSenhaLabel').textContent = 'Nova senha (deixe vazio pra manter)';
+  document.getElementById('mEmail').value = user.email || '';
   document.getElementById('mWhatsapp').value = user.whatsapp || '';
-  document.getElementById('mCidade').value = user.cidade || '';
-  document.getElementById('mBio').value = user.bio || '';
   previewWaLink();
   document.getElementById('mRole').value = user.role;
   openModal(true);
@@ -278,9 +270,8 @@ function saveUser() {
   const nome = document.getElementById('mNome').value.trim();
   const login = document.getElementById('mLogin').value.trim();
   const senha = document.getElementById('mSenha').value;
+  const email = document.getElementById('mEmail').value.trim();
   const whatsapp = document.getElementById('mWhatsapp').value.trim();
-  const cidade = document.getElementById('mCidade').value.trim();
-  const bio = document.getElementById('mBio').value.trim();
   const role = document.getElementById('mRole').value;
 
   if (!nome || !login) {
@@ -291,7 +282,7 @@ function saveUser() {
 
   let result;
   if (id) {
-    result = NLE_AUTH.updateUser(id, { nome, login, senha: senha || undefined, whatsapp, cidade, bio, role });
+    result = NLE_AUTH.updateUser(id, { nome, login, senha: senha || undefined, email, whatsapp, role });
   } else {
     if (!senha || senha.length < 4) {
       errEl.textContent = 'Senha deve ter no minimo 4 caracteres';
@@ -303,7 +294,7 @@ function saveUser() {
       errEl.style.display = 'block';
       return;
     }
-    result = NLE_AUTH.createUser(nome, login, senha, role, { whatsapp, cidade, bio });
+    result = NLE_AUTH.createUser(nome, login, senha, role, { email, whatsapp });
   }
 
   if (!result.ok) {
