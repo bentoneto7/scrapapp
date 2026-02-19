@@ -96,10 +96,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
       <tr>
         <th>Nome</th>
         <th>Login</th>
+        <th>WhatsApp</th>
+        <th>Cidade</th>
         <th>Cargo</th>
         <th>Status</th>
         <th>Leads</th>
-        <th>Criado em</th>
         <th>Acoes</th>
       </tr>
     </thead>
@@ -130,6 +131,19 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
       <input type="password" id="mSenha" placeholder="Minimo 4 caracteres">
     </div>
     <div class="form-group">
+      <label>WhatsApp (com DDD)</label>
+      <input type="text" id="mWhatsapp" placeholder="Ex: 11999887766" oninput="previewWaLink()">
+      <small id="waPreview" style="color:#8b949e;font-size:.75rem;margin-top:.2rem;display:block"></small>
+    </div>
+    <div class="form-group">
+      <label>Cidade</label>
+      <input type="text" id="mCidade" placeholder="Ex: Sao Paulo">
+    </div>
+    <div class="form-group">
+      <label>Bio / Descricao (aparece nos posts)</label>
+      <input type="text" id="mBio" placeholder="Ex: Especialista em limpeza de nome">
+    </div>
+    <div class="form-group">
       <label>Cargo</label>
       <select id="mRole">
         <option value="vendedor">Vendedor</option>
@@ -147,6 +161,25 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
 <script src="/shared/auth.js"></script>
 <script>
 if (!NLE_AUTH.requireAdmin()) throw new Error('Not admin');
+
+function formatPhone(p) {
+  if (!p) return '';
+  p = p.replace(/\D/g,'');
+  if (p.length === 11) return '(' + p.slice(0,2) + ') ' + p.slice(2,7) + '-' + p.slice(7);
+  if (p.length === 13 && p.startsWith('55')) return '+55 (' + p.slice(2,4) + ') ' + p.slice(4,9) + '-' + p.slice(9);
+  return p;
+}
+
+function previewWaLink() {
+  const v = document.getElementById('mWhatsapp').value.replace(/\D/g,'');
+  const el = document.getElementById('waPreview');
+  if (v.length >= 10) {
+    const num = v.startsWith('55') ? v : '55' + v;
+    el.textContent = 'Link: wa.me/' + num;
+  } else {
+    el.textContent = '';
+  }
+}
 
 function render() {
   const users = NLE_AUTH.getUsers();
@@ -167,14 +200,15 @@ function render() {
 
   tbody.innerHTML = users.map(u => {
     const isMe = u.id === session.userId;
-    const dt = new Date(u.criadoEm).toLocaleDateString('pt-BR');
+    const waDisplay = u.whatsapp ? formatPhone(u.whatsapp) : '<span style="color:#484f58">-</span>';
     return `<tr>
       <td>${u.nome}${isMe ? ' (voce)' : ''}</td>
       <td>${u.login}</td>
+      <td>${waDisplay}</td>
+      <td>${u.cidade || '<span style="color:#484f58">-</span>'}</td>
       <td><span class="badge badge-${u.role}">${u.role}</span></td>
       <td><span class="badge badge-${u.ativo ? 'ativo' : 'inativo'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
       <td>${leadsPerUser[u.id] || 0}</td>
-      <td>${dt}</td>
       <td class="actions">
         <button class="btn btn-secondary btn-sm" onclick="editUser('${u.id}')">Editar</button>
         ${!isMe ? `<button class="btn btn-sm" style="background:none;color:${u.ativo ? '#f85149' : '#2ea043'};border:1px solid ${u.ativo ? '#f85149' : '#2ea043'};padding:.2rem .5rem" onclick="toggleActive('${u.id}',${!u.ativo})">${u.ativo ? 'Desativar' : 'Ativar'}</button>` : ''}
@@ -206,6 +240,10 @@ function openModal(editing) {
     document.getElementById('mLogin').value = '';
     document.getElementById('mSenha').value = '';
     document.getElementById('mSenhaLabel').textContent = 'Senha';
+    document.getElementById('mWhatsapp').value = '';
+    document.getElementById('mCidade').value = '';
+    document.getElementById('mBio').value = '';
+    document.getElementById('waPreview').textContent = '';
     document.getElementById('mRole').value = 'vendedor';
     document.getElementById('mNome').focus();
   }
@@ -225,6 +263,10 @@ function editUser(id) {
   document.getElementById('mLogin').value = user.login;
   document.getElementById('mSenha').value = '';
   document.getElementById('mSenhaLabel').textContent = 'Nova senha (deixe vazio pra manter)';
+  document.getElementById('mWhatsapp').value = user.whatsapp || '';
+  document.getElementById('mCidade').value = user.cidade || '';
+  document.getElementById('mBio').value = user.bio || '';
+  previewWaLink();
   document.getElementById('mRole').value = user.role;
   openModal(true);
 }
@@ -236,6 +278,9 @@ function saveUser() {
   const nome = document.getElementById('mNome').value.trim();
   const login = document.getElementById('mLogin').value.trim();
   const senha = document.getElementById('mSenha').value;
+  const whatsapp = document.getElementById('mWhatsapp').value.trim();
+  const cidade = document.getElementById('mCidade').value.trim();
+  const bio = document.getElementById('mBio').value.trim();
   const role = document.getElementById('mRole').value;
 
   if (!nome || !login) {
@@ -246,14 +291,19 @@ function saveUser() {
 
   let result;
   if (id) {
-    result = NLE_AUTH.updateUser(id, { nome, login, senha: senha || undefined, role });
+    result = NLE_AUTH.updateUser(id, { nome, login, senha: senha || undefined, whatsapp, cidade, bio, role });
   } else {
     if (!senha || senha.length < 4) {
       errEl.textContent = 'Senha deve ter no minimo 4 caracteres';
       errEl.style.display = 'block';
       return;
     }
-    result = NLE_AUTH.createUser(nome, login, senha, role);
+    if (!whatsapp) {
+      errEl.textContent = 'WhatsApp e obrigatorio para vendedores';
+      errEl.style.display = 'block';
+      return;
+    }
+    result = NLE_AUTH.createUser(nome, login, senha, role, { whatsapp, cidade, bio });
   }
 
   if (!result.ok) {

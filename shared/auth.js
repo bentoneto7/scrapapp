@@ -46,21 +46,30 @@ const NLE_AUTH = (function () {
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
   }
 
-  function createUser(nome, login, senha, role) {
+  function createUser(nome, login, senha, role, extra) {
     const users = getUsers();
     if (users.find(u => u.login === login)) return { ok: false, msg: 'Login ja existe' };
+    extra = extra || {};
+    const whatsapp = _cleanPhone(extra.whatsapp || '');
     const user = {
       id: _uid(),
       nome: nome.trim(),
       login: login.trim().toLowerCase(),
       senha: _hash(senha),
       role: role || 'vendedor',
+      whatsapp: whatsapp,
+      cidade: (extra.cidade || '').trim(),
+      bio: (extra.bio || '').trim(),
       ativo: true,
       criadoEm: new Date().toISOString()
     };
     users.push(user);
     saveUsers(users);
     return { ok: true, user };
+  }
+
+  function _cleanPhone(phone) {
+    return phone.replace(/\D/g, '');
   }
 
   function updateUser(id, data) {
@@ -76,6 +85,9 @@ const NLE_AUTH = (function () {
     if (data.senha !== undefined && data.senha !== '') users[idx].senha = _hash(data.senha);
     if (data.role !== undefined) users[idx].role = data.role;
     if (data.ativo !== undefined) users[idx].ativo = data.ativo;
+    if (data.whatsapp !== undefined) users[idx].whatsapp = _cleanPhone(data.whatsapp);
+    if (data.cidade !== undefined) users[idx].cidade = data.cidade.trim();
+    if (data.bio !== undefined) users[idx].bio = data.bio.trim();
     saveUsers(users);
     return { ok: true, user: users[idx] };
   }
@@ -106,6 +118,9 @@ const NLE_AUTH = (function () {
       nome: user.nome,
       login: user.login,
       role: user.role,
+      whatsapp: user.whatsapp || '',
+      cidade: user.cidade || '',
+      bio: user.bio || '',
       inicio: new Date().toISOString()
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -224,6 +239,34 @@ const NLE_AUTH = (function () {
     document.body.appendChild(bar);
   }
 
+  // Get full user object for current session
+  function getCurrentUser() {
+    const s = getSession();
+    if (!s) return null;
+    return getUsers().find(u => u.id === s.userId) || null;
+  }
+
+  // Generate WhatsApp link for current user (or any user)
+  function waLink(msg, userId) {
+    let phone;
+    if (userId) {
+      const u = getUsers().find(x => x.id === userId);
+      phone = u ? u.whatsapp : '';
+    } else {
+      const s = getSession();
+      phone = s ? s.whatsapp : '';
+    }
+    if (!phone) return '#';
+    const num = phone.startsWith('55') ? phone : '55' + phone;
+    const encoded = msg ? encodeURIComponent(msg) : '';
+    return 'https://wa.me/' + num + (encoded ? '?text=' + encoded : '');
+  }
+
+  // Get just the wa.me URL (no message)
+  function waUrl(userId) {
+    return waLink('', userId);
+  }
+
   init();
 
   return {
@@ -231,6 +274,6 @@ const NLE_AUTH = (function () {
     login, logout, getSession, isLoggedIn, isAdmin,
     requireAuth, requireAdmin,
     userKey, getUserData, setUserData, getDataForUser, getAllLeads,
-    renderUserBar, _hash
+    renderUserBar, getCurrentUser, waLink, waUrl, _hash
   };
 })();

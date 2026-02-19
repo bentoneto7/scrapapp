@@ -805,6 +805,27 @@ function renderWeeks(){
 }
 
 renderWeeks();
+
+// Inject seller WhatsApp link into all posts
+(function injectWaLink(){
+  const session = NLE_AUTH.getSession();
+  if (!session || !session.whatsapp) return;
+  const link = NLE_AUTH.waLink('Oi! Vi seu post sobre limpeza de nome e quero saber mais.');
+  const shortLink = NLE_AUTH.waUrl();
+  // Replace [LINK DA LANDING PAGE] placeholders with actual wa.me link
+  document.querySelectorAll('.post-block p').forEach(p => {
+    if (p.textContent.includes('[LINK DA LANDING PAGE]')) {
+      p.textContent = p.textContent.replace('[LINK DA LANDING PAGE]', shortLink);
+    }
+  });
+  // Add wa.me badge at bottom of desafio tab
+  const badge = document.createElement('div');
+  badge.className = 'alert-box';
+  badge.style.borderColor = '#2ea043';
+  badge.innerHTML = `<strong style="color:#2ea043">Seu link de WhatsApp:</strong> <a href="${link}" target="_blank" style="color:#58a6ff;word-break:break-all">${shortLink}</a><br><small style="color:#8b949e">Este link ja esta sendo inserido automaticamente nos posts acima.</small>`;
+  const desafioPanel = document.getElementById('desafio');
+  desafioPanel.appendChild(badge);
+})();
 </script>
 </body>
 </html>
