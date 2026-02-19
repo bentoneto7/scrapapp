@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador Anti-Padrao — Nome Limpo Express</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f5f5f5;color:#212121;line-height:1.6;min-height:100vh;}
+header{background:#1a237e;color:#fff;padding:18px 24px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+header h1{font-size:1.5rem;font-weight:700;letter-spacing:.5px;}
+header h1 span{color:#90caf9;font-weight:400;}
+.stats-bar{background:#283593;color:#c5cae9;text-align:center;padding:8px 16px;font-size:.85rem;letter-spacing:.3px;}
+.stats-bar strong{color:#fff;}
+.app-wrapper{display:flex;max-width:1280px;margin:0 auto;padding:16px;gap:16px;}
+.main-col{flex:1;min-width:0;}
+.sidebar-col{width:300px;flex-shrink:0;}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);padding:20px;margin-bottom:16px;}
+.panel-title{font-size:.95rem;font-weight:700;color:#1a237e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.chip{padding:7px 14px;border-radius:20px;border:2px solid #c5cae9;background:#fff;color:#1a237e;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.chip:hover{background:#e8eaf6;}
+.chip.active{background:#1a237e;color:#fff;border-color:#1a237e;}
+.control-row{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-bottom:16px;}
+.control-label{font-size:.82rem;font-weight:600;color:#555;margin-bottom:4px;}
+.wave-group{display:flex;gap:6px;}
+.wave-btn{width:36px;height:36px;border-radius:50%;border:2px solid #c5cae9;background:#fff;color:#1a237e;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;}
+.wave-btn:hover{background:#e8eaf6;}
+.wave-btn.active{background:#1a237e;color:#fff;border-color:#1a237e;}
+.mode-group{display:flex;gap:6px;}
+.mode-btn{padding:7px 14px;border-radius:6px;border:2px solid #c5cae9;background:#fff;color:#1a237e;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.mode-btn:hover{background:#e8eaf6;}
+.mode-btn.active{background:#1a237e;color:#fff;border-color:#1a237e;}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.checkbox-row input[type=checkbox]{width:18px;height:18px;accent-color:#1a237e;cursor:pointer;}
+.checkbox-row label{font-size:.85rem;color:#333;cursor:pointer;user-select:none;}
+.btn-generate{display:block;width:100%;padding:14px;border:none;border-radius:8px;background:#2e7d32;color:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;transition:background .2s;letter-spacing:.3px;}
+.btn-generate:hover{background:#1b5e20;}
+.btn-generate:active{transform:scale(.99);}
+.btn-row{display:flex;gap:10px;margin-top:12px;}
+.btn-secondary{flex:1;padding:10px;border:2px solid #c5cae9;border-radius:8px;background:#fff;color:#1a237e;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-secondary:hover{background:#e8eaf6;}
+.btn-copy{flex:1;padding:10px;border:none;border-radius:8px;background:#0277bd;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.btn-copy:hover{background:#01579b;}
+.btn-copy.copied{background:#2e7d32;}
+.output-area{background:#fafafa;border:2px solid #e0e0e0;border-radius:8px;padding:20px;min-height:200px;font-size:.95rem;line-height:1.75;white-space:pre-wrap;word-wrap:break-word;color:#212121;margin-bottom:0;position:relative;}
+.output-area.empty{color:#999;font-style:italic;display:flex;align-items:center;justify-content:center;text-align:center;}
+.dna-panel{background:#263238;border-radius:8px;padding:16px;color:#b0bec5;font-family:'Courier New',Courier,monospace;font-size:.75rem;line-height:1.8;}
+.dna-panel .dna-title{color:#4fc3f7;font-weight:700;font-size:.8rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.dna-row{display:flex;gap:6px;}
+.dna-key{color:#80cbc4;min-width:90px;}
+.dna-val{color:#e0e0e0;word-break:break-all;}
+.history-item{padding:12px;border:1px solid #e0e0e0;border-radius:6px;margin-bottom:8px;cursor:pointer;transition:all .2s;font-size:.78rem;line-height:1.5;color:#555;background:#fafafa;}
+.history-item:hover{border-color:#1a237e;background:#e8eaf6;}
+.history-item .hi-type{display:inline-block;background:#1a237e;color:#fff;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:600;margin-bottom:4px;}
+.history-item .hi-preview{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.history-empty{color:#999;font-size:.82rem;font-style:italic;text-align:center;padding:24px 12px;}
+.history-list{max-height:540px;overflow-y:auto;}
+.counter-badge{display:inline-block;background:#e8eaf6;color:#1a237e;padding:2px 10px;border-radius:10px;font-size:.75rem;font-weight:600;margin-left:8px;}
+@media(max-width:900px){
+  .app-wrapper{flex-direction:column;}
+  .sidebar-col{width:100%;}
+  .history-list{max-height:260px;}
+}
+@media(max-width:600px){
+  header h1{font-size:1.15rem;}
+  .panel{padding:14px;}
+  .chip{padding:6px 10px;font-size:.76rem;}
+  .output-area{padding:14px;font-size:.88rem;min-height:160px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gerador Anti-Padrao <span>— Nome Limpo Express</span></h1>
+</header>
+<div class="stats-bar"><strong>2.000.000+</strong> combinacoes unicas &bull; 8 camadas de randomizacao &bull; Anti-deteccao de conteudo duplicado</div>
+
+<div class="app-wrapper">
+  <div class="main-col">
+
+    <div class="panel">
+      <div class="panel-title">Tipo de Post</div>
+      <div class="chip-group" id="typeChips">
+        <button class="chip active" data-type="educativo">Educativo</button>
+        <button class="chip" data-type="mito">Mito</button>
+        <button class="chip" data-type="pergunta">Pergunta</button>
+        <button class="chip" data-type="custo">Custo</button>
+        <button class="chip" data-type="historia">Historia</button>
+        <button class="chip" data-type="conversao">Conversao</button>
+        <button class="chip" data-type="comentario">Comentario</button>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <div class="control-label">Onda (Wave)</div>
+          <div class="wave-group" id="waveGroup">
+            <button class="wave-btn active" data-wave="1">1</button>
+            <button class="wave-btn" data-wave="2">2</button>
+            <button class="wave-btn" data-wave="3">3</button>
+            <button class="wave-btn" data-wave="4">4</button>
+          </div>
+        </div>
+        <div>
+          <div class="control-label">Modo</div>
+          <div class="mode-group" id="modeGroup">
+            <button class="mode-btn active" data-mode="posts">Posts</button>
+            <button class="mode-btn" data-mode="comentarios">Comentarios</button>
+            <button class="mode-btn" data-mode="inbox">Mensagens Inbox</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="noLinkCheck">
+        <label for="noLinkCheck">Grupo proibe links (modo sem-link)</label>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <div class="control-label">Regra de Adaptacao</div>
+          <div class="mode-group" id="ruleGroup">
+            <button class="mode-btn active" data-rule="livre">Livre</button>
+            <button class="mode-btn" data-rule="sem-link">Sem Link</button>
+            <button class="mode-btn" data-rule="so-bio">So Bio</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-generate" id="btnGenerate">Gerar Conteudo</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Conteudo Gerado</div>
+      <div class="output-area empty" id="outputArea">Clique em "Gerar Conteudo" para criar um post unico.</div>
+      <div class="btn-row">
+        <button class="btn-copy" id="btnCopy">Copiar Texto</button>
+        <button class="btn-secondary" id="btnRegenerate">Regenerar</button>
+      </div>
+    </div>
+
+    <div class="panel" id="dnaContainer" style="display:none;">
+      <div class="dna-panel">
+        <div class="dna-title">DNA do Conteudo</div>
+        <div id="dnaContent"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar-col">
+    <div class="panel">
+      <div class="panel-title">Historico <span class="counter-badge" id="historyCount">0</span></div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">Nenhum conteudo gerado ainda.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ===== CONTENT ENGINE DATA ===== */
+  var CE = {
+    openings: {
+      educativo: [
+        'Informacao que pode mudar sua situacao financeira:',
+        'Pouca gente sabe disso, mas a lei te protege:',
+        'Voce sabia que existe um caminho legal?',
+        '3 fatos que todo negativado precisa saber:',
+        'Importante pra quem ta com nome restrito:',
+        'Seu direito como consumidor:',
+        'Atencao pra essa informacao:',
+        'O que ninguem te conta sobre negativacao:',
+        'Fato pouco conhecido sobre o Serasa:',
+        'Uma informacao que vale ouro:'
+      ],
+      mito: [
+        'MITO: "So pagando a divida o nome sai"',
+        'MITO: "Nome sujo e pra sempre"',
+        'MITO: "Quem deve nao tem direito"',
+        'MITO: "O Serasa decide quem fica negativado"',
+        'MITO: "Depois de 5 anos a divida some"',
+        'MITO: "Renegociar e a unica opcao"'
+      ],
+      pergunta: [
+        'Pergunta pra quem ta com nome sujo:',
+        'Voce ja parou pra pensar nisso?',
+        'Me responde uma coisa:',
+        'Enquete rapida pra quem esta negativado:',
+        'Ja se perguntou por que seu credito e negado?',
+        'Teste rapido: voce sabe seus direitos?'
+      ],
+      custo: [
+        'Ja calculou quanto o nome sujo te custa por mes?',
+        'O imposto invisivel de estar negativado:',
+        'A conta que ninguem faz:',
+        'Cada dia negativado custa dinheiro. Quanto?',
+        'A matematica cruel de estar com nome sujo:'
+      ],
+      historia: [
+        'Caso real (anonimizado):',
+        'Isso aconteceu essa semana:',
+        'Historia que a gente ve todo dia:',
+        'Mais um caso resolvido:',
+        'Situacao que se repete muito:'
+      ],
+      conversao: [
+        'Resultado da semana:',
+        'Pra quem quer resolver de verdade:',
+        'Oportunidade pra quem ta negativado:',
+        'Analise gratuita disponivel:',
+        'Ultimas vagas dessa semana:'
+      ],
+      comentario: [
+        'Isso tem solucao legal.',
+        'Muita gente nao sabe, mas:',
+        'Pela minha experiencia:',
+        'So pra complementar:',
+        'Boa pergunta. O que eu sei e:'
+      ]
+    },
+    bodies: [
+      'O Codigo de Defesa do Consumidor (art. 43) exige que voce seja NOTIFICADO antes de qualquer negativacao. Se nao foi, a inclusao pode ser irregular.',
+      'Nenhuma negativacao pode permanecer nos orgaos de protecao por mais de 5 anos. Se a sua tem mais que isso, ela esta la de forma ilegal.',
+      'A LGPD (art. 18) te da direito de corrigir dados incorretos em qualquer cadastro financeiro, incluindo Serasa, SPC e Boa Vista.',
+      'A Sumula 548 do STJ e clara: se voce pagou e o credor nao retirou em 5 dias, cabe indenizacao por dano moral.',
+      'Dever nao anula seus direitos. O credor tem obrigacoes legais no processo de negativacao. Quando nao cumpre, o consumidor pode contestar.',
+      'Muita gente confunde renegociar com limpar nome. Sao coisas diferentes. Limpar e verificar se a negativacao seguiu a lei.',
+      'Os bancos classificam voce internamente de AA a H. Nome limpo no Serasa NAO garante bom rating bancario.',
+      'O SCR do Banco Central registra TODAS as operacoes de credito. E la que os bancos realmente olham antes de aprovar.',
+      'A prescricao da divida (5 anos, art. 206 CC) impede cobranca judicial. Mas a negativacao tem prazo proprio no art. 43 CDC.',
+      'Consulte o Registrato (registrato.bcb.gov.br) gratuitamente. La voce ve tudo vinculado ao seu CPF no sistema financeiro.',
+      'Negativacao sem notificacao previa e irregular. E a base de milhares de decisoes judiciais favoraveis ao consumidor.',
+      'Pra MEI e empreendedores: o banco olha o CPF do titular, nao o CNPJ. Regularizar o CPF e investir no negocio.'
+    ],
+    closings: [
+      'Conheca seus direitos.',
+      'Compartilha com quem precisa.',
+      'Guarda essa informacao.',
+      'Quem mais nao sabia disso?',
+      'A lei existe pra proteger voce.',
+      'Se serviu, passa pra frente.',
+      'Conhecimento e poder.',
+      'Qualquer duvida, comenta.',
+      'Informacao acessivel pra todos.'
+    ],
+    ctaSemLink: [
+      'Se quiser entender seu caso, me chama no inbox.',
+      'Duvida? Me manda mensagem.',
+      'Quer saber se o seu caso tem solucao? Inbox aberto.',
+      'Me chama que te explico.'
+    ],
+    ctaComLink: [
+      'Analise gratuita: me chama no WhatsApp (link na bio).',
+      'Quer resolver? Link do WhatsApp na bio.',
+      'Me chama no inbox ou no WhatsApp pra analise gratis.'
+    ],
+    connectors: [
+      '\n\n',
+      '\n\nOu seja: ',
+      '\n\nNa pratica: ',
+      '\n\nResumo: ',
+      '\n\nIsso significa que: ',
+      '\n\n'
+    ]
+  };
+
+  /* ===== STATE ===== */
+  var state = {
+    type: 'educativo',
+    wave: 1,
+    mode: 'posts',
+    rule: 'livre',
+    noLink: false,
+    history: [],
+    lastDna: null,
+    lastText: ''
+  };
+
+  var MAX_HISTORY = 10;
+  var usedSeeds = [];
+
+  /* ===== HELPERS ===== */
+  function pick(a) {
+    return a[Math.floor(Math.random() * a.length)];
+  }
+
+  function shuffle(a) {
+    var b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = b[i];
+      b[i] = b[j];
+      b[j] = t;
+    }
+    return b;
+  }
+
+  function makeSeed(dna) {
+    return dna.opening.substring(0, 20) + '|' + dna.body1.substring(0, 20) + '|' + dna.body2.substring(0, 20);
+  }
+
+  function isDuplicate(dna) {
+    var seed = makeSeed(dna);
+    for (var i = 0; i < usedSeeds.length; i++) {
+      if (usedSeeds[i] === seed) return true;
+    }
+    return false;
+  }
+
+  function addSeed(dna) {
+    var seed = makeSeed(dna);
+    usedSeeds.push(seed);
+    if (usedSeeds.length > 50) {
+      usedSeeds = usedSeeds.slice(-30);
+    }
+  }
+
+  function resolveAllowLink() {
+    if (state.noLink) return false;
+    if (state.rule === 'sem-link') return false;
+    if (state.rule === 'so-bio') return true;
+    return true;
+  }
+
+  /* ===== GENERATION LOGIC ===== */
+  function genContent(type, allowLink, wave) {
+    var opening = pick(CE.openings[type]);
+    var bodies = shuffle(CE.bodies).slice(0, 2);
+    var closing = pick(CE.closings);
+    var connector = pick(CE.connectors);
+    var cta = '';
+
+    if (wave >= 4) {
+      cta = allowLink ? pick(CE.ctaComLink) : pick(CE.ctaSemLink);
+    } else if (wave >= 2 && type !== 'comentario') {
+      cta = pick(CE.ctaSemLink);
+    }
+
+    return {
+      text: opening + '\n\n' + bodies[0] + connector + bodies[1] + '\n\n' + closing + (cta ? '\n\n' + cta : ''),
+      dna: {
+        opening: opening,
+        body1: bodies[0].substring(0, 40) + '...',
+        body2: bodies[1].substring(0, 40) + '...',
+        closing: closing,
+        connector: connector.trim() || '(quebra de linha)',
+        cta: cta || 'nenhum'
+      }
+    };
+  }
+
+  function genComentario(allowLink, wave) {
+    var opening = pick(CE.openings.comentario);
+    var body = pick(CE.bodies);
+    var cta = '';
+
+    if (wave >= 4) {
+      cta = allowLink ? pick(CE.ctaComLink) : pick(CE.ctaSemLink);
+    } else if (wave >= 3) {
+      cta = pick(CE.ctaSemLink);
+    }
+
+    return {
+      text: opening + '\n\n' + body + (cta ? '\n\n' + cta : ''),
+      dna: {
+        opening: opening,
+        body1: body.substring(0, 40) + '...',
+        body2: '(modo comentario — 1 corpo)',
+        closing: '(sem fechamento)',
+        connector: '(direto)',
+        cta: cta || 'nenhum'
+      }
+    };
+  }
+
+  function genInbox(allowLink, wave) {
+    var body = pick(CE.bodies);
+    var greeting = pick([
+      'Oi! Vi que voce esta com duvida sobre negativacao.',
+      'Ola! Tudo bem? Vi seu comentario no grupo.',
+      'Oi! Me chamo equipe NLE e vi sua situacao.',
+      'Ola! Posso te ajudar com essa questao do nome.'
+    ]);
+    var cta = '';
+
+    if (wave >= 3) {
+      cta = allowLink ? pick(CE.ctaComLink) : pick(CE.ctaSemLink);
+    } else {
+      cta = 'Me conta mais sobre sua situacao que te oriento.';
+    }
+
+    return {
+      text: greeting + '\n\n' + body + '\n\n' + cta,
+      dna: {
+        opening: greeting,
+        body1: body.substring(0, 40) + '...',
+        body2: '(modo inbox — 1 corpo)',
+        closing: '(sem fechamento)',
+        connector: '(direto)',
+        cta: cta
+      }
+    };
+  }
+
+  function generate() {
+    var allowLink = resolveAllowLink();
+    var result;
+    var attempts = 0;
+
+    do {
+      if (state.mode === 'comentarios') {
+        result = genComentario(allowLink, state.wave);
+      } else if (state.mode === 'inbox') {
+        result = genInbox(allowLink, state.wave);
+      } else {
+        result = genContent(state.type, allowLink, state.wave);
+      }
+      attempts++;
+    } while (isDuplicate(result.dna) && attempts < 20);
+
+    addSeed(result.dna);
+
+    result.dna.tipo = state.type;
+    result.dna.onda = state.wave;
+    result.dna.modo = state.mode;
+    result.dna.regra = state.rule;
+
+    state.lastText = result.text;
+    state.lastDna = result.dna;
+
+    addToHistory(result.text, result.dna);
+    renderOutput(result.text);
+    renderDna(result.dna);
+  }
+
+  /* ===== HISTORY ===== */
+  function addToHistory(text, dna) {
+    state.history.unshift({
+      text: text,
+      dna: dna,
+      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    });
+    if (state.history.length > MAX_HISTORY) {
+      state.history = state.history.slice(0, MAX_HISTORY);
+    }
+    renderHistory();
+  }
+
+  /* ===== RENDERING ===== */
+  function $(id) { return document.getElementById(id); }
+
+  function renderOutput(text) {
+    var el = $('outputArea');
+    el.textContent = text;
+    el.classList.remove('empty');
+  }
+
+  function renderDna(dna) {
+    var container = $('dnaContainer');
+    container.style.display = 'block';
+    var html = '';
+    var keys = [
+      { k: 'tipo', label: 'Tipo' },
+      { k: 'modo', label: 'Modo' },
+      { k: 'onda', label: 'Onda' },
+      { k: 'regra', label: 'Regra' },
+      { k: 'opening', label: 'Abertura' },
+      { k: 'body1', label: 'Corpo 1' },
+      { k: 'body2', label: 'Corpo 2' },
+      { k: 'closing', label: 'Fechamento' },
+      { k: 'connector', label: 'Conector' },
+      { k: 'cta', label: 'CTA' }
+    ];
+    for (var i = 0; i < keys.length; i++) {
+      var val = dna[keys[i].k];
+      if (val === undefined || val === null) val = '—';
+      html += '<div class="dna-row"><span class="dna-key">' + keys[i].label + ':</span><span class="dna-val">' + escHtml(String(val)) + '</span></div>';
+    }
+    $('dnaContent').innerHTML = html;
+  }
+
+  function renderHistory() {
+    var el = $('historyList');
+    $('historyCount').textContent = state.history.length;
+
+    if (state.history.length === 0) {
+      el.innerHTML = '<div class="history-empty">Nenhum conteudo gerado ainda.</div>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < state.history.length; i++) {
+      var item = state.history[i];
+      var typeLabel = item.dna.tipo || 'post';
+      var preview = item.text.substring(0, 120).replace(/\n/g, ' ');
+      html += '<div class="history-item" data-index="' + i + '">';
+      html += '<span class="hi-type">' + escHtml(typeLabel) + '</span> ';
+      html += '<span style="font-size:.7rem;color:#999;">' + escHtml(item.time) + '</span>';
+      html += '<div class="hi-preview">' + escHtml(preview) + '</div>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+
+    var items = el.querySelectorAll('.history-item');
+    for (var j = 0; j < items.length; j++) {
+      items[j].addEventListener('click', handleHistoryClick);
+    }
+  }
+
+  function handleHistoryClick(e) {
+    var target = e.currentTarget;
+    var idx = parseInt(target.getAttribute('data-index'), 10);
+    if (isNaN(idx) || !state.history[idx]) return;
+    var item = state.history[idx];
+    renderOutput(item.text);
+    renderDna(item.dna);
+    state.lastText = item.text;
+    state.lastDna = item.dna;
+  }
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  /* ===== CLIPBOARD ===== */
+  function copyToClipboard() {
+    if (!state.lastText) return;
+    var btn = $('btnCopy');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(state.lastText).then(function() {
+        showCopied(btn);
+      }, function() {
+        fallbackCopy(btn);
+      });
+    } else {
+      fallbackCopy(btn);
+    }
+  }
+
+  function fallbackCopy(btn) {
+    var ta = document.createElement('textarea');
+    ta.value = state.lastText;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showCopied(btn);
+    } catch (e) {
+      btn.textContent = 'Erro ao copiar';
+    }
+    document.body.removeChild(ta);
+  }
+
+  function showCopied(btn) {
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copiar Texto';
+      btn.classList.remove('copied');
+    }, 2000);
+  }
+
+  /* ===== EVENT BINDING ===== */
+  function bindChips(containerId, stateKey, isNumber) {
+    var container = $(containerId);
+    var buttons = container.querySelectorAll('button');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].addEventListener('click', function() {
+        var siblings = this.parentElement.querySelectorAll('button');
+        for (var s = 0; s < siblings.length; s++) {
+          siblings[s].classList.remove('active');
+        }
+        this.classList.add('active');
+        var val = this.getAttribute('data-type') || this.getAttribute('data-wave') || this.getAttribute('data-mode') || this.getAttribute('data-rule');
+        if (isNumber) val = parseInt(val, 10);
+        state[stateKey] = val;
+      });
+    }
+  }
+
+  function init() {
+    bindChips('typeChips', 'type', false);
+    bindChips('waveGroup', 'wave', true);
+    bindChips('modeGroup', 'mode', false);
+    bindChips('ruleGroup', 'rule', false);
+
+    $('noLinkCheck').addEventListener('change', function() {
+      state.noLink = this.checked;
+    });
+
+    $('btnGenerate').addEventListener('click', function() {
+      generate();
+    });
+
+    $('btnRegenerate').addEventListener('click', function() {
+      generate();
+    });
+
+    $('btnCopy').addEventListener('click', function() {
+      copyToClipboard();
+    });
+
+    /* Keyboard shortcut: Enter to generate */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        generate();
+      }
+    });
+  }
+
+  /* ===== COMBINATORICS COUNTER ===== */
+  function calcCombinations() {
+    var totalOpenings = 0;
+    var types = Object.keys(CE.openings);
+    for (var i = 0; i < types.length; i++) {
+      totalOpenings += CE.openings[types[i]].length;
+    }
+    var bodyPairs = CE.bodies.length * (CE.bodies.length - 1);
+    var total = totalOpenings * bodyPairs * CE.closings.length * CE.connectors.length *
+                (CE.ctaSemLink.length + CE.ctaComLink.length + 1) * 3 * 4;
+    return total;
+  }
+
+  /* ===== BOOT ===== */
+  document.addEventListener('DOMContentLoaded', function() {
+    init();
+    var combCount = calcCombinations();
+    var formatted = combCount.toLocaleString('pt-BR');
+    document.querySelector('.stats-bar').innerHTML =
+      '<strong>' + formatted + '+</strong> combinacoes unicas &bull; 8 camadas de randomizacao &bull; Anti-deteccao de conteudo duplicado';
+  });
+
+})();
+</script>
+</body>
+</html>

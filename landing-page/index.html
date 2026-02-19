@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nome Limpo Express — Regularização financeira legal. Limpe seu nome de forma segura, com base na lei.">
+  <title>Nome Limpo Express — Limpe Seu Nome Legalmente</title>
+  <style>
+    /* ========== RESET & BASE ========== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+      color: #333;
+      background: #f8f9fa;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* ========== VARIABLES (via custom properties) ========== */
+    :root {
+      --primary: #1a237e;
+      --primary-light: #283593;
+      --primary-dark: #0d1451;
+      --accent: #2e7d32;
+      --accent-light: #388e3c;
+      --accent-dark: #1b5e20;
+      --white: #ffffff;
+      --off-white: #f8f9fa;
+      --gray-100: #f1f3f5;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-500: #868e96;
+      --gray-700: #495057;
+      --gray-900: #212529;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --transition: 0.3s ease;
+      --max-width: 1140px;
+    }
+
+    /* ========== UTILITY ========== */
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--gray-500);
+      margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    section {
+      padding: 80px 0;
+    }
+
+    /* ========== HEADER (STICKY) ========== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow var(--transition);
+    }
+
+    .header.scrolled {
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .header-cta {
+      display: inline-block;
+      padding: 8px 20px;
+      background: var(--accent);
+      color: var(--white);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: background var(--transition), transform var(--transition);
+      border: none;
+      cursor: pointer;
+    }
+
+    .header-cta:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    /* ========== HERO ========== */
+    .hero {
+      position: relative;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
+      color: var(--white);
+      padding: 140px 0 100px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -25%;
+      width: 150%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: linear-gradient(to top, var(--off-white), transparent);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+      padding: 6px 18px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      max-width: 780px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: #81c784;
+    }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 620px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .btn-cta {
+      display: inline-block;
+      padding: 16px 40px;
+      background: var(--accent);
+      color: var(--white);
+      border: none;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 20px rgba(46,125,50,0.4);
+    }
+
+    .btn-cta:hover {
+      background: var(--accent-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(46,125,50,0.5);
+    }
+
+    .hero-trust {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .hero-trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-trust-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ========== PAIN POINTS ========== */
+    .pain-points {
+      background: var(--off-white);
+    }
+
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .pain-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), box-shadow var(--transition);
+      border: 1px solid var(--gray-200);
+    }
+
+    .pain-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .pain-icon {
+      width: 56px;
+      height: 56px;
+      background: #fce4ec;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 1.5rem;
+    }
+
+    .pain-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .pain-card p {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    /* ========== 3 STEPS ========== */
+    .steps {
+      background: var(--white);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      position: relative;
+    }
+
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 44px;
+      left: 16.66%;
+      width: 66.66%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      border-radius: 2px;
+    }
+
+    .step-card {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-number {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 12px rgba(26,35,126,0.3);
+      border: 4px solid var(--white);
+    }
+
+    .step-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 10px;
+    }
+
+    .step-card p {
+      font-size: 0.95rem;
+      color: var(--gray-500);
+      line-height: 1.7;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* ========== LEGAL FOUNDATION ========== */
+    .legal {
+      background: var(--off-white);
+    }
+
+    .legal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .legal-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--primary);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .legal-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .legal-tag {
+      display: inline-block;
+      background: #e8eaf6;
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .legal-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .legal-card p {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      line-height: 1.65;
+    }
+
+    /* ========== FORM ========== */
+    .form-section {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: var(--white);
+      position: relative;
+    }
+
+    .form-section .section-title {
+      color: var(--white);
+    }
+
+    .form-section .section-subtitle {
+      color: rgba(255,255,255,0.75);
+    }
+
+    .form-wrapper {
+      max-width: 540px;
+      margin: 0 auto;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+
+    .form-group label .required {
+      color: #e53935;
+      margin-left: 2px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--gray-900);
+      background: var(--white);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,35,126,0.1);
+    }
+
+    .form-control.error {
+      border-color: #e53935;
+      box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+    }
+
+    .form-control.success {
+      border-color: var(--accent);
+    }
+
+    .error-msg {
+      font-size: 0.8rem;
+      color: #e53935;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    select.form-control {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23868e96' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      margin-top: 8px;
+    }
+
+    .form-submit:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    .form-submit:disabled {
+      background: var(--gray-300);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-privacy {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--gray-500);
+      margin-top: 16px;
+      line-height: 1.5;
+    }
+
+    .form-privacy svg {
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    /* ========== FAQ ========== */
+    .faq {
+      background: var(--white);
+    }
+
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: box-shadow var(--transition);
+    }
+
+    .faq-item:hover {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .faq-question {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      background: var(--white);
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      text-align: left;
+      font-family: inherit;
+      transition: background var(--transition);
+    }
+
+    .faq-question:hover {
+      background: var(--gray-100);
+    }
+
+    .faq-arrow {
+      width: 24px;
+      height: 24px;
+      transition: transform var(--transition);
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+
+    .faq-item.active .faq-arrow {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 300px;
+    }
+
+    .faq-answer-inner {
+      padding: 0 24px 20px;
+      font-size: 0.95rem;
+      color: var(--gray-500);
+      line-height: 1.7;
+    }
+
+    /* ========== FOOTER ========== */
+    .footer {
+      background: var(--gray-900);
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      padding: 32px 0;
+      font-size: 0.85rem;
+    }
+
+    .footer strong {
+      color: var(--white);
+    }
+
+    .footer p + p {
+      margin-top: 6px;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 992px) {
+      .pain-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .steps-grid::before {
+        display: none;
+      }
+
+      .legal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      html { font-size: 15px; }
+
+      section { padding: 60px 0; }
+
+      .hero {
+        padding: 120px 0 80px;
+      }
+
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .hero-sub {
+        font-size: 1.05rem;
+      }
+
+      .section-title {
+        font-size: 1.7rem;
+      }
+
+      .form-wrapper {
+        padding: 28px 20px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .pain-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+
+      .header-cta {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+      }
+
+      .hero-trust {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn-cta {
+        padding: 14px 32px;
+        font-size: 1rem;
+      }
+    }
+
+    /* ========== ANIMATIONS ========== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a href="#" class="logo">Nome Limpo <span>Express</span></a>
+      <a href="#formulario" class="header-cta">Quero Limpar Meu Nome</a>
+    </div>
+  </header>
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-badge">Regularizacao financeira com base na lei</div>
+      <h1 class="fade-in">Limpe Seu Nome de Forma <em>Legal e Definitiva</em></h1>
+      <p class="hero-sub fade-in">
+        Nao somos renegociacao de divida. Atuamos na <strong>verificacao juridica</strong>
+        de cada negativacao no seu CPF, removendo as que sao irregulares com base
+        no Codigo de Defesa do Consumidor e na LGPD.
+      </p>
+      <a href="#formulario" class="btn-cta fade-in">Fazer Analise Gratuita</a>
+      <div class="hero-trust fade-in">
+        <div class="hero-trust-item">
+          <span class="hero-trust-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </span>
+          Dados protegidos pela LGPD
+        </div>
+        <div class="hero-trust-item">
+          <span class="hero-trust-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </span>
+          Base legal comprovada
+        </div>
+        <div class="hero-trust-item">
+          <span class="hero-trust-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+          Analise gratuita em 24h
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PAIN POINTS ==================== -->
+  <section class="pain-points" id="dor">
+    <div class="container">
+      <h2 class="section-title fade-in">O Preco de Estar Negativado</h2>
+      <p class="section-subtitle fade-in">
+        Ter o nome sujo afeta muito mais do que voce imagina. Veja como isso impacta sua vida todos os dias.
+      </p>
+
+      <div class="pain-grid">
+        <!-- Card 1 -->
+        <div class="pain-card fade-in">
+          <div class="pain-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3>Juros Abusivos</h3>
+          <p>Com o nome negativado, voce paga ate 3x mais juros em qualquer tipo de credito ou parcelamento.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="pain-card fade-in">
+          <div class="pain-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><line x1="1" y1="4" x2="23" y2="20" stroke-dasharray="2 2"/></svg>
+          </div>
+          <h3>Credito Negado</h3>
+          <p>Cartoes, emprestimos e financiamentos sao automaticamente recusados. Portas fechadas para crescer.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="pain-card fade-in">
+          <div class="pain-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/><line x1="4" y1="15" x2="8" y2="15" stroke-dasharray="2 2"/></svg>
+          </div>
+          <h3>Aluguel Bloqueado</h3>
+          <p>Imobiliarias consultam SPC/Serasa. Nome sujo significa fiador negado e moradia comprometida.</p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="pain-card fade-in">
+          <div class="pain-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><line x1="6" y1="14" x2="10" y2="14" stroke-dasharray="2 2"/></svg>
+          </div>
+          <h3>Oportunidades Perdidas</h3>
+          <p>Muitas empresas fazem consulta de credito na contratacao. Seu emprego dos sonhos pode escapar por isso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 3 STEPS ==================== -->
+  <section class="steps" id="solucao">
+    <div class="container">
+      <h2 class="section-title fade-in">Solucao em 3 Passos</h2>
+      <p class="section-subtitle fade-in">
+        Um processo simples, transparente e 100% fundamentado na legislacao brasileira.
+      </p>
+
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="step-card fade-in">
+          <div class="step-number">1</div>
+          <h3>Analise Gratuita</h3>
+          <p>Voce envia seus dados e nossa equipe faz uma analise completa de todas as negativacoes registradas no seu CPF, sem nenhum custo.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card fade-in">
+          <div class="step-number">2</div>
+          <h3>Verificacao Juridica</h3>
+          <p>Cada negativacao e verificada individualmente com base no CDC, LGPD e jurisprudencia do STJ para identificar irregularidades.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card fade-in">
+          <div class="step-number">3</div>
+          <h3>Remocao Formal</h3>
+          <p>Negativacoes irregulares sao contestadas formalmente junto aos orgaos de protecao ao credito para remocao definitiva.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== LEGAL FOUNDATION ==================== -->
+  <section class="legal" id="base-legal">
+    <div class="container">
+      <h2 class="section-title fade-in">Base Legal Solida</h2>
+      <p class="section-subtitle fade-in">
+        Nosso trabalho e fundamentado em legislacao federal e jurisprudencia consolidada dos tribunais superiores.
+      </p>
+
+      <div class="legal-grid">
+        <!-- CDC Art. 43 -->
+        <div class="legal-card fade-in">
+          <span class="legal-tag">Codigo de Defesa do Consumidor</span>
+          <h3>CDC &mdash; Art. 43</h3>
+          <p>O consumidor tem direito de acesso as informacoes em cadastros e bancos de dados. Dados inexatos devem ser corrigidos imediatamente, e registros nao podem ultrapassar 5 anos.</p>
+        </div>
+
+        <!-- LGPD Art. 18 -->
+        <div class="legal-card fade-in">
+          <span class="legal-tag">Lei Geral de Protecao de Dados</span>
+          <h3>LGPD &mdash; Art. 18</h3>
+          <p>O titular dos dados pode solicitar a correcao de dados incompletos, inexatos ou desatualizados, alem da eliminacao de dados tratados de forma irregular.</p>
+        </div>
+
+        <!-- Sumula 548 STJ -->
+        <div class="legal-card fade-in">
+          <span class="legal-tag">Superior Tribunal de Justica</span>
+          <h3>Sumula 548 &mdash; STJ</h3>
+          <p>Incumbe ao credor a exclusao do registro da divida em nome do devedor no cadastro de inadimplentes no prazo de cinco dias uteis apos o pagamento.</p>
+        </div>
+
+        <!-- Sumula 323 STJ -->
+        <div class="legal-card fade-in">
+          <span class="legal-tag">Superior Tribunal de Justica</span>
+          <h3>Sumula 323 &mdash; STJ</h3>
+          <p>A inscricao do nome do devedor pode ser mantida nos servicos de protecao ao credito ate o prazo maximo de cinco anos, independentemente da prescricao da execucao.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FORM ==================== -->
+  <section class="form-section" id="formulario">
+    <div class="container">
+      <h2 class="section-title fade-in">Comece Sua Analise Gratuita</h2>
+      <p class="section-subtitle fade-in">
+        Preencha o formulario abaixo e nossa equipe entrara em contato pelo WhatsApp em ate 24 horas.
+      </p>
+
+      <div class="form-wrapper fade-in">
+        <form id="leadForm" novalidate>
+          <!-- Nome -->
+          <div class="form-group">
+            <label for="nome">Nome completo <span class="required">*</span></label>
+            <input
+              type="text"
+              id="nome"
+              name="nome"
+              class="form-control"
+              placeholder="Seu nome completo"
+              required
+              autocomplete="name"
+            >
+            <div class="error-msg" id="nome-error">Por favor, informe seu nome completo.</div>
+          </div>
+
+          <!-- WhatsApp -->
+          <div class="form-group">
+            <label for="whatsapp">WhatsApp <span class="required">*</span></label>
+            <input
+              type="tel"
+              id="whatsapp"
+              name="whatsapp"
+              class="form-control"
+              placeholder="(11) 99999-9999"
+              required
+              autocomplete="tel"
+              maxlength="15"
+            >
+            <div class="error-msg" id="whatsapp-error">Informe um numero de WhatsApp valido.</div>
+          </div>
+
+          <!-- Situacao -->
+          <div class="form-group">
+            <label for="situacao">Qual sua situacao? <span class="required">*</span></label>
+            <select id="situacao" name="situacao" class="form-control" required>
+              <option value="" disabled selected>Selecione sua situacao</option>
+              <option value="negativado">Estou negativado(a)</option>
+              <option value="credito_negado">Tive credito negado</option>
+              <option value="divida_antiga">Tenho divida antiga (5+ anos)</option>
+              <option value="cobranca_indevida">Estou recebendo cobranca indevida</option>
+              <option value="empresario">Sou empresario com restricoes</option>
+            </select>
+            <div class="error-msg" id="situacao-error">Selecione sua situacao atual.</div>
+          </div>
+
+          <!-- Necessidade -->
+          <div class="form-group">
+            <label for="necessidade">O que voce precisa? <span class="required">*</span></label>
+            <select id="necessidade" name="necessidade" class="form-control" required>
+              <option value="" disabled selected>Selecione sua necessidade</option>
+              <option value="credito">Conseguir credito</option>
+              <option value="financiamento">Fazer um financiamento</option>
+              <option value="aluguel">Alugar um imovel</option>
+              <option value="emprego">Conseguir emprego</option>
+              <option value="negocio">Abrir ou regularizar negocio</option>
+              <option value="outro">Outro motivo</option>
+            </select>
+            <div class="error-msg" id="necessidade-error">Selecione sua principal necessidade.</div>
+          </div>
+
+          <button type="submit" class="form-submit" id="submitBtn">
+            Enviar e Falar no WhatsApp
+          </button>
+        </form>
+
+        <p class="form-privacy">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#868e96" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Seus dados estao seguros e protegidos conforme a LGPD.
+          Nao compartilhamos suas informacoes com terceiros.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FAQ ==================== -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <h2 class="section-title fade-in">Perguntas Frequentes</h2>
+      <p class="section-subtitle fade-in">
+        Tire suas duvidas sobre o processo de regularizacao financeira.
+      </p>
+
+      <div class="faq-list">
+        <!-- FAQ 1 -->
+        <div class="faq-item fade-in">
+          <button class="faq-question" aria-expanded="false">
+            <span>Isso funciona mesmo?</span>
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Sim. Nosso trabalho e fundamentado no Codigo de Defesa do Consumidor (Art. 43),
+              na Lei Geral de Protecao de Dados (Art. 18) e em sumulas do Superior Tribunal de
+              Justica. Verificamos cada negativacao individualmente e contestamos formalmente
+              aquelas que apresentam irregularidades legais. Milhares de consumidores ja
+              tiveram negativacoes indevidas removidas com base nessas mesmas leis.
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item fade-in">
+          <button class="faq-question" aria-expanded="false">
+            <span>Quanto custa o servico?</span>
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              O investimento e de R$650,00 por caso completo. A analise inicial e totalmente
+              gratuita — voce so paga se decidir prosseguir apos conhecer as possibilidades
+              do seu caso. Aceitamos pagamento via Pix, cartao de credito (em ate 12x) e boleto bancario.
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item fade-in">
+          <button class="faq-question" aria-expanded="false">
+            <span>Quanto tempo demora para limpar meu nome?</span>
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              O prazo depende da complexidade do seu caso e da quantidade de negativacoes.
+              Em media, os resultados aparecem entre 15 a 45 dias apos o inicio do processo.
+              Casos mais simples podem ser resolvidos em menos tempo, enquanto situacoes
+              com multiplas negativacoes podem demandar um prazo maior. Voce recebe
+              atualizacoes durante todo o processo.
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item fade-in">
+          <button class="faq-question" aria-expanded="false">
+            <span>E se nao funcionar no meu caso?</span>
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Somos transparentes: nem todos os casos se qualificam para a remocao. Se a
+              negativacao for regular e estiver dentro dos parametros legais, informamos isso
+              na analise gratuita, antes de qualquer cobranca. Nosso compromisso e com a
+              honestidade — so prosseguimos quando ha fundamento juridico real para atuar.
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 5 -->
+        <div class="faq-item fade-in">
+          <button class="faq-question" aria-expanded="false">
+            <span>Preciso contratar um advogado?</span>
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Nao. A Nome Limpo Express cuida de toda a analise tecnico-juridica por voce.
+              Nossa equipe especializada verifica cada negativacao, prepara a documentacao
+              necessaria e realiza as contestacoes formais junto aos orgaos de protecao ao
+              credito. Voce nao precisa se preocupar com nenhuma parte burocrática do processo.
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 6 -->
+        <div class="faq-item fade-in">
+          <button class="faq-question" aria-expanded="false">
+            <span>Meus dados estao seguros?</span>
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Absolutamente. Levamos a seguranca dos seus dados muito a serio. Todas as
+              informacoes sao tratadas em conformidade com a Lei Geral de Protecao de Dados
+              (LGPD — Lei 13.709/2018). Seus dados pessoais sao utilizados exclusivamente
+              para a analise do seu caso e nunca sao compartilhados com terceiros sem sua
+              autorizacao expressa.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <div class="container">
+      <p><strong>Nome Limpo Express</strong> &mdash; Regularizacao financeira com base na lei.</p>
+      <p>Este servico nao constitui assessoria juridica. Consulte um advogado para questoes legais especificas.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    /* ========================================================
+       CONFIG
+       ======================================================== */
+    var seuNumero = '5511999999999';
+
+    /* ========================================================
+       UTILITY: Get UTM parameters from URL
+       ======================================================== */
+    function getUTMParams() {
+      var params = new URLSearchParams(window.location.search);
+      return {
+        utm_source: params.get('utm_source') || '',
+        utm_medium: params.get('utm_medium') || '',
+        utm_campaign: params.get('utm_campaign') || '',
+        utm_group: params.get('utm_group') || ''
+      };
+    }
+
+    /* ========================================================
+       STICKY HEADER SHADOW
+       ======================================================== */
+    (function() {
+      var header = document.getElementById('header');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 10) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      });
+    })();
+
+    /* ========================================================
+       PHONE MASK  (XX) XXXXX-XXXX
+       ======================================================== */
+    (function() {
+      var whatsappInput = document.getElementById('whatsapp');
+
+      whatsappInput.addEventListener('input', function(e) {
+        var value = e.target.value.replace(/\D/g, '');
+
+        if (value.length > 11) {
+          value = value.substring(0, 11);
+        }
+
+        if (value.length > 0) {
+          // Format: (XX) XXXXX-XXXX
+          var formatted = '';
+          if (value.length <= 2) {
+            formatted = '(' + value;
+          } else if (value.length <= 7) {
+            formatted = '(' + value.substring(0, 2) + ') ' + value.substring(2);
+          } else {
+            formatted = '(' + value.substring(0, 2) + ') ' + value.substring(2, 7) + '-' + value.substring(7);
+          }
+          e.target.value = formatted;
+        }
+      });
+
+      // Prevent non-numeric input on keypress
+      whatsappInput.addEventListener('keypress', function(e) {
+        var char = String.fromCharCode(e.which || e.keyCode);
+        if (!/[\d]/.test(char) && e.which !== 8 && e.which !== 0) {
+          // Allow backspace and special keys through, block non-digits
+          // However, some formatted chars like ( ) - are added programmatically
+        }
+      });
+    })();
+
+    /* ========================================================
+       FORM VALIDATION & SUBMISSION
+       ======================================================== */
+    (function() {
+      var form = document.getElementById('leadForm');
+      var submitBtn = document.getElementById('submitBtn');
+
+      // Situacao labels map for WhatsApp message
+      var situacaoLabels = {
+        'negativado': 'Estou negativado(a)',
+        'credito_negado': 'Tive credito negado',
+        'divida_antiga': 'Divida antiga (5+ anos)',
+        'cobranca_indevida': 'Cobranca indevida',
+        'empresario': 'Empresario com restricoes'
+      };
+
+      var necessidadeLabels = {
+        'credito': 'Conseguir credito',
+        'financiamento': 'Fazer financiamento',
+        'aluguel': 'Alugar imovel',
+        'emprego': 'Conseguir emprego',
+        'negocio': 'Abrir/regularizar negocio',
+        'outro': 'Outro motivo'
+      };
+
+      function showError(fieldId) {
+        var field = document.getElementById(fieldId);
+        var errorEl = document.getElementById(fieldId + '-error');
+        field.classList.add('error');
+        field.classList.remove('success');
+        if (errorEl) errorEl.classList.add('visible');
+      }
+
+      function clearError(fieldId) {
+        var field = document.getElementById(fieldId);
+        var errorEl = document.getElementById(fieldId + '-error');
+        field.classList.remove('error');
+        if (errorEl) errorEl.classList.remove('visible');
+      }
+
+      function markSuccess(fieldId) {
+        var field = document.getElementById(fieldId);
+        field.classList.remove('error');
+        field.classList.add('success');
+        var errorEl = document.getElementById(fieldId + '-error');
+        if (errorEl) errorEl.classList.remove('visible');
+      }
+
+      // Live validation on blur
+      var fields = ['nome', 'whatsapp', 'situacao', 'necessidade'];
+      fields.forEach(function(fieldId) {
+        var el = document.getElementById(fieldId);
+        el.addEventListener('blur', function() {
+          if (!validateField(fieldId)) {
+            showError(fieldId);
+          } else {
+            markSuccess(fieldId);
+          }
+        });
+        el.addEventListener('input', function() {
+          if (el.classList.contains('error')) {
+            if (validateField(fieldId)) {
+              markSuccess(fieldId);
+            }
+          }
+        });
+      });
+
+      function validateField(fieldId) {
+        var el = document.getElementById(fieldId);
+        var value = el.value.trim();
+
+        switch (fieldId) {
+          case 'nome':
+            return value.length >= 3;
+          case 'whatsapp':
+            var digits = value.replace(/\D/g, '');
+            return digits.length >= 10 && digits.length <= 11;
+          case 'situacao':
+            return value !== '';
+          case 'necessidade':
+            return value !== '';
+          default:
+            return true;
+        }
+      }
+
+      function validateAll() {
+        var valid = true;
+        fields.forEach(function(fieldId) {
+          if (!validateField(fieldId)) {
+            showError(fieldId);
+            valid = false;
+          } else {
+            markSuccess(fieldId);
+          }
+        });
+        return valid;
+      }
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (!validateAll()) {
+          // Scroll to first error
+          var firstError = form.querySelector('.form-control.error');
+          if (firstError) {
+            firstError.focus();
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        // Disable button to prevent double submit
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
+
+        var nome = document.getElementById('nome').value.trim();
+        var whatsapp = document.getElementById('whatsapp').value.trim();
+        var situacao = document.getElementById('situacao').value;
+        var necessidade = document.getElementById('necessidade').value;
+        var utm = getUTMParams();
+
+        // Build lead object
+        var lead = {
+          id: Date.now(),
+          nome: nome,
+          whatsapp: whatsapp,
+          situacao: situacao,
+          necessidade: necessidade,
+          utm_source: utm.utm_source,
+          utm_medium: utm.utm_medium,
+          utm_campaign: utm.utm_campaign,
+          utm_group: utm.utm_group,
+          data: new Date().toISOString()
+        };
+
+        // Save to localStorage
+        var leads = [];
+        try {
+          var stored = localStorage.getItem('nle_leads');
+          if (stored) {
+            leads = JSON.parse(stored);
+          }
+        } catch (err) {
+          leads = [];
+        }
+        leads.push(lead);
+        try {
+          localStorage.setItem('nle_leads', JSON.stringify(leads));
+        } catch (err) {
+          // localStorage may be full or disabled; continue anyway
+        }
+
+        // Build WhatsApp URL
+        var situacaoText = situacaoLabels[situacao] || situacao;
+        var necessidadeText = necessidadeLabels[necessidade] || necessidade;
+
+        var waMessage = 'Oi! Meu nome é ' + nome + '. Situação: ' + situacaoText + '. Preciso de ajuda com: ' + necessidadeText;
+        var waURL = 'https://wa.me/' + seuNumero + '?text=' + encodeURIComponent(waMessage);
+
+        // Short delay so user sees feedback, then redirect
+        setTimeout(function() {
+          window.open(waURL, '_blank');
+          // Reset form
+          form.reset();
+          fields.forEach(function(fid) { clearError(fid); });
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Enviar e Falar no WhatsApp';
+        }, 600);
+      });
+    })();
+
+    /* ========================================================
+       FAQ ACCORDION
+       ======================================================== */
+    (function() {
+      var faqItems = document.querySelectorAll('.faq-item');
+
+      faqItems.forEach(function(item) {
+        var questionBtn = item.querySelector('.faq-question');
+
+        questionBtn.addEventListener('click', function() {
+          var isActive = item.classList.contains('active');
+
+          // Close all items
+          faqItems.forEach(function(other) {
+            other.classList.remove('active');
+            other.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+          });
+
+          // Toggle current
+          if (!isActive) {
+            item.classList.add('active');
+            questionBtn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+    })();
+
+    /* ========================================================
+       SCROLL FADE-IN ANIMATION (IntersectionObserver)
+       ======================================================== */
+    (function() {
+      if (!('IntersectionObserver' in window)) {
+        // Fallback: show everything immediately
+        document.querySelectorAll('.fade-in').forEach(function(el) {
+          el.classList.add('visible');
+        });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      document.querySelectorAll('.fade-in').forEach(function(el) {
+        observer.observe(el);
+      });
+    })();
+
+    /* ========================================================
+       SMOOTH SCROLL FOR ANCHOR LINKS (fallback for older browsers)
+       ======================================================== */
+    (function() {
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          var targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+
+          var target = document.querySelector(targetId);
+          if (target) {
+            e.preventDefault();
+            var headerHeight = document.getElementById('header').offsetHeight;
+            var targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

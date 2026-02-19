@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onda Organica — Calendario de 30 Dias | Nome Limpo Express</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f4f6f8;color:#333;min-height:100vh}
+header{background:#1a237e;color:#fff;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+header h1{font-size:1.4rem;font-weight:700;letter-spacing:.5px}
+header h1 span{color:#90caf9;font-weight:400}
+.header-actions{display:flex;gap:10px}
+.btn{padding:10px 18px;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;transition:all .2s}
+.btn-export{background:#2e7d32;color:#fff}
+.btn-export:hover{background:#388e3c}
+.btn-regen{background:#5c6bc0;color:#fff}
+.btn-regen:hover{background:#3f51b5}
+.stats-bar{display:flex;justify-content:center;gap:32px;padding:12px 24px;background:#fff;border-bottom:1px solid #e0e0e0}
+.stat-item{text-align:center}
+.stat-num{display:block;font-size:1.4rem;font-weight:800;color:#1a237e}
+.stat-label{font-size:.72rem;color:#666;text-transform:uppercase;letter-spacing:.3px}
+.wave-bar{display:flex;gap:0;margin:0;background:#fff;border-bottom:1px solid #e0e0e0}
+.wave-block{flex:1;padding:14px 16px;cursor:pointer;text-align:center;position:relative;transition:all .2s}
+.wave-block.active{transform:none;box-shadow:inset 0 -4px 0 currentColor}
+.wave-block .wave-label{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.5px}
+.wave-block .wave-days{font-size:.75rem;opacity:.8;margin-top:2px}
+.wave-block .wave-obj{font-size:.72rem;margin-top:4px;opacity:.7}
+.wave-block[data-wave="1"]{color:#42a5f5;border-top:4px solid #42a5f5}
+.wave-block[data-wave="2"]{color:#66bb6a;border-top:4px solid #66bb6a}
+.wave-block[data-wave="3"]{color:#ffa726;border-top:4px solid #ffa726}
+.wave-block[data-wave="4"]{color:#ef5350;border-top:4px solid #ef5350}
+.main-area{display:flex;gap:0;min-height:calc(100vh - 160px)}
+.calendar-section{flex:1;padding:20px 24px;overflow-y:auto}
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.week-nav h2{font-size:1.1rem;color:#1a237e}
+.week-nav button{background:#e8eaf6;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-size:.85rem;color:#1a237e;transition:background .2s}
+.week-nav button:hover{background:#c5cae9}
+.week-nav button:disabled{opacity:.35;cursor:default}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.day-cell{background:#fff;border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #ccc;min-height:120px;position:relative}
+.day-cell:hover{box-shadow:0 4px 16px rgba(0,0,0,.13);transform:translateY(-2px)}
+.day-cell.selected{box-shadow:0 4px 16px rgba(26,35,126,.25);transform:translateY(-2px)}
+.day-cell[data-wave="1"]{border-left-color:#42a5f5}
+.day-cell[data-wave="2"]{border-left-color:#66bb6a}
+.day-cell[data-wave="3"]{border-left-color:#ffa726}
+.day-cell[data-wave="4"]{border-left-color:#ef5350}
+.day-num{font-size:1.3rem;font-weight:700;color:#1a237e}
+.day-wave-tag{display:inline-block;font-size:.65rem;padding:2px 8px;border-radius:10px;color:#fff;margin-top:4px;font-weight:600}
+.day-cell[data-wave="1"] .day-wave-tag{background:#42a5f5}
+.day-cell[data-wave="2"] .day-wave-tag{background:#66bb6a}
+.day-cell[data-wave="3"] .day-wave-tag{background:#ffa726}
+.day-cell[data-wave="4"] .day-wave-tag{background:#ef5350}
+.day-type-icon{margin-top:8px;font-size:.85rem}
+.day-preview{margin-top:6px;font-size:.75rem;color:#666;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.side-panel{width:420px;background:#fff;border-left:1px solid #e0e0e0;padding:0;overflow-y:auto;transition:all .3s;position:relative}
+.side-panel.closed{width:0;padding:0;overflow:hidden;border:none}
+.panel-inner{padding:24px;min-width:420px}
+.panel-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888;z-index:2}
+.panel-close:hover{color:#333}
+.panel-day-num{font-size:2rem;font-weight:800;color:#1a237e}
+.panel-wave-badge{display:inline-block;padding:4px 14px;border-radius:14px;color:#fff;font-size:.8rem;font-weight:700;margin:8px 0 4px}
+.panel-wave-badge.w1{background:#42a5f5}
+.panel-wave-badge.w2{background:#66bb6a}
+.panel-wave-badge.w3{background:#ffa726}
+.panel-wave-badge.w4{background:#ef5350}
+.panel-type{font-size:.85rem;color:#666;margin-bottom:16px}
+.panel-content{background:#f9fafb;border:1px solid #e8e8e8;border-radius:8px;padding:16px;font-size:.9rem;line-height:1.65;white-space:pre-wrap;margin-bottom:16px;min-height:120px}
+.panel-actions{display:flex;gap:10px;margin-bottom:20px}
+.btn-copy{background:#1a237e;color:#fff}
+.btn-copy:hover{background:#283593}
+.btn-vary{background:#ff8f00;color:#fff}
+.btn-vary:hover{background:#ff6f00}
+.panel-rules{background:#e8eaf6;border-radius:8px;padding:14px;font-size:.78rem;line-height:1.5;color:#37474f}
+.panel-rules h4{color:#1a237e;margin-bottom:6px;font-size:.85rem}
+.panel-rules ul{padding-left:18px}
+.panel-rules li{margin-bottom:4px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:12px 28px;border-radius:8px;font-size:.88rem;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+@media(max-width:900px){
+  .main-area{flex-direction:column}
+  .side-panel{width:100%!important;border-left:none;border-top:1px solid #e0e0e0}
+  .side-panel.closed{height:0}
+  .panel-inner{min-width:auto}
+  .cal-grid{grid-template-columns:1fr}
+  .day-cell{min-height:auto}
+  header{flex-direction:column;align-items:flex-start}
+  .wave-bar{flex-wrap:wrap}
+  .wave-block{min-width:50%}
+}
+@media(max-width:480px){
+  .calendar-section{padding:12px}
+  .panel-inner{padding:16px}
+  header h1{font-size:1.1rem}
+  .stats-bar{gap:12px;flex-wrap:wrap;padding:10px 12px}
+  .stat-num{font-size:1.1rem}
+  .stat-label{font-size:.65rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Onda Organica <span>— Calendario de 30 Dias</span></h1>
+  <div class="header-actions">
+    <button class="btn btn-regen" onclick="regenAll()">Regenerar Tudo</button>
+    <button class="btn btn-export" onclick="exportCalendar()">Exportar Calendario</button>
+  </div>
+</header>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat-item">
+    <span class="stat-num" id="statComments">14</span>
+    <span class="stat-label">Comentarios</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" id="statEducational">7</span>
+    <span class="stat-label">Posts Educativos</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" id="statAuthority">8</span>
+    <span class="stat-label">Posts Autoridade</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" id="statConversion">3</span>
+    <span class="stat-label">Posts Conversao</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" id="statTotal">50</span>
+    <span class="stat-label">Total de Conteudos</span>
+  </div>
+</div>
+
+<div class="wave-bar" id="waveBar">
+  <div class="wave-block" data-wave="1" onclick="goToWave(1)">
+    <div class="wave-label">Onda 1 — Infiltracao</div>
+    <div class="wave-days">Dias 1-7</div>
+    <div class="wave-obj">Presenca no grupo</div>
+  </div>
+  <div class="wave-block" data-wave="2" onclick="goToWave(2)">
+    <div class="wave-label">Onda 2 — Educacao</div>
+    <div class="wave-days">Dias 8-14</div>
+    <div class="wave-obj">Ensinar sobre direitos</div>
+  </div>
+  <div class="wave-block" data-wave="3" onclick="goToWave(3)">
+    <div class="wave-label">Onda 3 — Autoridade</div>
+    <div class="wave-days">Dias 15-22</div>
+    <div class="wave-obj">Referencia no assunto</div>
+  </div>
+  <div class="wave-block" data-wave="4" onclick="goToWave(4)">
+    <div class="wave-label">Onda 4 — Conversao</div>
+    <div class="wave-days">Dias 23-30</div>
+    <div class="wave-obj">Colher leads</div>
+  </div>
+</div>
+
+<div class="main-area">
+  <div class="calendar-section">
+    <div class="week-nav">
+      <button id="prevBtn" onclick="changeWeek(-1)">Semana anterior</button>
+      <h2 id="weekLabel">Semana 1 — Dias 1-7</h2>
+      <button id="nextBtn" onclick="changeWeek(1)">Proxima semana</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+  <div class="side-panel closed" id="sidePanel">
+    <div class="panel-inner">
+      <button class="panel-close" onclick="closePanel()">&#10005;</button>
+      <div id="panelBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== CONTENT ENGINE ===== */
+var CE = {
+  openings: {
+    educativo: ['Informacao que pode mudar sua situacao financeira:','Pouca gente sabe disso, mas a lei te protege:','Voce sabia que existe um caminho legal?','3 fatos que todo negativado precisa saber:','Importante pra quem ta com nome restrito:','Seu direito como consumidor:','Atencao pra essa informacao:','O que ninguem te conta sobre negativacao:','Fato pouco conhecido sobre o Serasa:','Uma informacao que vale ouro:'],
+    mito: ['MITO: "So pagando a divida o nome sai"','MITO: "Nome sujo e pra sempre"','MITO: "Quem deve nao tem direito"','MITO: "O Serasa decide quem fica negativado"','MITO: "Depois de 5 anos a divida some"','MITO: "Renegociar e a unica opcao"'],
+    pergunta: ['Pergunta pra quem ta com nome sujo:','Voce ja parou pra pensar nisso?','Me responde uma coisa:','Enquete rapida pra quem esta negativado:','Ja se perguntou por que seu credito e negado?','Teste rapido: voce sabe seus direitos?'],
+    custo: ['Ja calculou quanto o nome sujo te custa por mes?','O imposto invisivel de estar negativado:','A conta que ninguem faz:','Cada dia negativado custa dinheiro. Quanto?','A matematica cruel de estar com nome sujo:'],
+    historia: ['Caso real (anonimizado):','Isso aconteceu essa semana:','Historia que a gente ve todo dia:','Mais um caso resolvido:','Situacao que se repete muito:'],
+    conversao: ['Resultado da semana:','Pra quem quer resolver de verdade:','Oportunidade pra quem ta negativado:','Analise gratuita disponivel:','Ultimas vagas dessa semana:'],
+    comentario: ['Isso tem solucao legal.','Muita gente nao sabe, mas:','Pela minha experiencia:','So pra complementar:','Boa pergunta. O que eu sei e:']
+  },
+  bodies: [
+    'O Codigo de Defesa do Consumidor (art. 43) exige que voce seja NOTIFICADO antes de qualquer negativacao. Se nao foi, a inclusao pode ser irregular.',
+    'Nenhuma negativacao pode permanecer nos orgaos de protecao por mais de 5 anos. Se a sua tem mais que isso, ela esta la de forma ilegal.',
+    'A LGPD (art. 18) te da direito de corrigir dados incorretos em qualquer cadastro financeiro, incluindo Serasa, SPC e Boa Vista.',
+    'A Sumula 548 do STJ e clara: se voce pagou e o credor nao retirou em 5 dias, cabe indenizacao por dano moral.',
+    'Dever nao anula seus direitos. O credor tem obrigacoes legais no processo de negativacao. Quando nao cumpre, o consumidor pode contestar.',
+    'Muita gente confunde renegociar com limpar nome. Sao coisas diferentes. Limpar e verificar se a negativacao seguiu a lei.',
+    'Os bancos classificam voce internamente de AA a H. Nome limpo no Serasa NAO garante bom rating bancario.',
+    'O SCR do Banco Central registra TODAS as operacoes de credito. E la que os bancos realmente olham antes de aprovar.',
+    'A prescricao da divida (5 anos, art. 206 CC) impede cobranca judicial. Mas a negativacao tem prazo proprio no art. 43 CDC.',
+    'Consulte o Registrato (registrato.bcb.gov.br) gratuitamente. La voce ve tudo vinculado ao seu CPF no sistema financeiro.',
+    'Negativacao sem notificacao previa e irregular. E a base de milhares de decisoes judiciais favoraveis ao consumidor.',
+    'Pra MEI e empreendedores: o banco olha o CPF do titular, nao o CNPJ. Regularizar o CPF e investir no negocio.'
+  ],
+  closings: ['Conheca seus direitos.','Compartilha com quem precisa.','Guarda essa informacao.','Quem mais nao sabia disso?','A lei existe pra proteger voce.','Se serviu, passa pra frente.','Conhecimento e poder.','Qualquer duvida, comenta.','Informacao acessivel pra todos.'],
+  ctaSemLink: ['Se quiser entender seu caso, me chama no inbox.','Duvida? Me manda mensagem.','Quer saber se o seu caso tem solucao? Inbox aberto.','Me chama que te explico.'],
+  ctaComLink: ['Analise gratuita: me chama no WhatsApp (link na bio).','Quer resolver? Link do WhatsApp na bio.','Me chama no inbox ou no WhatsApp pra analise gratis.'],
+  connectors: ['\n\n','\n\nOu seja: ','\n\nNa pratica: ','\n\nResumo: ','\n\nIsso significa que: ','\n\n']
+};
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function pickIdx(arr,avoid){var i;do{i=Math.floor(Math.random()*arr.length)}while(arr.length>1&&i===avoid);return i}
+
+/* ===== WAVE RULES ===== */
+var WAVES = [
+  {id:1,name:'Infiltracao',days:[1,7],color:'#42a5f5',obj:'Presenca no grupo — APENAS comentarios',rules:['ZERO posts proprios','Apenas comentarios empaticos em posts alheios','2 comentarios por dia','Sem CTA, sem link, sem autopromo','Tom: solidario, informativo, humano']},
+  {id:2,name:'Educacao',days:[8,14],color:'#66bb6a',obj:'Ensinar sobre direitos do consumidor',rules:['1 post educativo por dia','Conteudo puro, sem vender','CTA soft no maximo: "me chama no inbox"','Usar dados e leis reais','Tom: professor acessivel']},
+  {id:3,name:'Autoridade',days:[15,22],color:'#ffa726',obj:'Posicionar como referencia',rules:['1 post por dia (cases, jurisprudencia, dados)','Citar leis especificas e sumulas','Mostrar resultados reais (anonimizados)','CTA soft: "me chama no inbox"','Tom: especialista confiavel']},
+  {id:4,name:'Conversao',days:[23,30],color:'#ef5350',obj:'Colher leads com CTA direto',rules:['Proporcao 1 conversao : 2 educativos','CTA forte: WhatsApp / link na bio','Oferecer analise gratuita','Alternar entre post de conversao e educativo','Tom: urgencia comedida + autoridade']}
+];
+
+function getWave(day){
+  for(var i=0;i<WAVES.length;i++){if(day>=WAVES[i].days[0]&&day<=WAVES[i].days[1])return WAVES[i]}
+  return WAVES[3];
+}
+
+/* ===== CONTENT GENERATOR ===== */
+function genComment(){
+  var o=pick(CE.openings.comentario);
+  var b=pick(CE.bodies);
+  return o+'\n\n'+b;
+}
+
+function genEducational(withCta){
+  var openType=pick(['educativo','mito','pergunta']);
+  var o=pick(CE.openings[openType]);
+  var bIdx=pickIdx(CE.bodies,-1);
+  var b=CE.bodies[bIdx];
+  var c=pick(CE.connectors);
+  var bIdx2=pickIdx(CE.bodies,bIdx);
+  var extra=CE.bodies[bIdx2];
+  var cl=pick(CE.closings);
+  var text=o+'\n\n'+b+c+cl;
+  if(withCta)text+='\n\n'+pick(CE.ctaSemLink);
+  return text;
+}
+
+function genAuthority(){
+  var openType=pick(['historia','custo','educativo']);
+  var o=pick(CE.openings[openType]);
+  var bIdx=pickIdx(CE.bodies,-1);
+  var b=CE.bodies[bIdx];
+  var c=pick(CE.connectors);
+  var bIdx2=pickIdx(CE.bodies,bIdx);
+  var extra=CE.bodies[bIdx2];
+  var cl=pick(CE.closings);
+  var cta=pick(CE.ctaSemLink);
+  return o+'\n\n'+b+c+extra+'\n\n'+cl+'\n\n'+cta;
+}
+
+function genConversion(){
+  var o=pick(CE.openings.conversao);
+  var bIdx=pickIdx(CE.bodies,-1);
+  var b=CE.bodies[bIdx];
+  var cl=pick(CE.closings);
+  var cta=pick(CE.ctaComLink);
+  return o+'\n\n'+b+'\n\n'+cl+'\n\n'+cta;
+}
+
+function genConversionEducational(){
+  var o=pick(CE.openings.educativo);
+  var b=pick(CE.bodies);
+  var cl=pick(CE.closings);
+  var cta=pick(CE.ctaSemLink);
+  return o+'\n\n'+b+'\n\n'+cl+'\n\n'+cta;
+}
+
+function generateForDay(day){
+  var w=getWave(day);
+  if(w.id===1){
+    var slotInWave=day-1;
+    var c1=genComment();
+    var c2=genComment();
+    return {type:'Comentario',label:'2 comentarios',items:[
+      {title:'Comentario da manha',text:c1},
+      {title:'Comentario da tarde',text:c2}
+    ]};
+  }
+  if(w.id===2){
+    return {type:'Post Educativo',label:'Post educativo',items:[
+      {title:'Post educativo do dia',text:genEducational(true)}
+    ]};
+  }
+  if(w.id===3){
+    return {type:'Post Autoridade',label:'Post de autoridade',items:[
+      {title:'Post de autoridade do dia',text:genAuthority()}
+    ]};
+  }
+  if(w.id===4){
+    var posInWave=day-23;
+    var isConversion=(posInWave%3===0);
+    if(isConversion){
+      return {type:'Post Conversao',label:'Post de conversao',items:[
+        {title:'Post de conversao',text:genConversion()}
+      ]};
+    } else {
+      return {type:'Post Educativo (suporte)',label:'Educativo + CTA soft',items:[
+        {title:'Post educativo de suporte',text:genConversionEducational()}
+      ]};
+    }
+  }
+}
+
+/* ===== PRE-GENERATE ALL 30 DAYS ===== */
+var calendarData=[];
+function initCalendar(){
+  calendarData=[];
+  for(var d=1;d<=30;d++){
+    calendarData.push({day:d,wave:getWave(d),content:generateForDay(d)});
+  }
+}
+initCalendar();
+
+/* ===== STATE ===== */
+var currentWeek=0;
+var selectedDay=null;
+
+/* ===== ICONS ===== */
+var typeIcons={'Comentario':'\u{1F4AC}','Post Educativo':'\u{1F4D6}','Post Autoridade':'\u{1F3C6}','Post Conversao':'\u{1F3AF}','Post Educativo (suporte)':'\u{1F4D6}'};
+
+/* ===== RENDER ===== */
+function renderWaveBar(){
+  var blocks=document.querySelectorAll('.wave-block');
+  blocks.forEach(function(b){
+    var wid=parseInt(b.getAttribute('data-wave'));
+    if(selectedDay){
+      b.classList.toggle('active',getWave(selectedDay).id===wid);
+    } else {
+      var weekStart=currentWeek*7+1;
+      b.classList.toggle('active',getWave(weekStart).id===wid);
+    }
+  });
+}
+
+function renderCalendar(){
+  var grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  var start=currentWeek*7;
+  var end=Math.min(start+7,30);
+  var weekNum=currentWeek+1;
+  document.getElementById('weekLabel').textContent='Semana '+weekNum+' — Dias '+(start+1)+'-'+end;
+  document.getElementById('prevBtn').disabled=(currentWeek===0);
+  var totalWeeks=Math.ceil(30/7);
+  document.getElementById('nextBtn').disabled=(currentWeek>=totalWeeks-1);
+
+  for(var i=start;i<end;i++){
+    var d=calendarData[i];
+    var cell=document.createElement('div');
+    cell.className='day-cell'+(selectedDay===d.day?' selected':'');
+    cell.setAttribute('data-wave',d.wave.id);
+    cell.onclick=(function(day){return function(){selectDay(day)}})(d.day);
+
+    var preview=d.content.items[0].text.substring(0,90)+'...';
+    cell.innerHTML='<div class="day-num">Dia '+d.day+'</div>'+
+      '<span class="day-wave-tag">Onda '+d.wave.id+'</span>'+
+      '<div class="day-type-icon">'+(typeIcons[d.content.type]||'')+' '+d.content.label+'</div>'+
+      '<div class="day-preview">'+preview+'</div>';
+    grid.appendChild(cell);
+  }
+  renderWaveBar();
+}
+
+function selectDay(day){
+  selectedDay=day;
+  renderCalendar();
+  renderPanel();
+  document.getElementById('sidePanel').classList.remove('closed');
+}
+
+function closePanel(){
+  selectedDay=null;
+  document.getElementById('sidePanel').classList.add('closed');
+  renderCalendar();
+}
+
+function renderPanel(){
+  if(!selectedDay)return;
+  var d=calendarData[selectedDay-1];
+  var w=d.wave;
+  var html='<div class="panel-day-num">Dia '+d.day+'</div>';
+  html+='<span class="panel-wave-badge w'+w.id+'">Onda '+w.id+' — '+w.name+'</span>';
+  html+='<div class="panel-type">'+(typeIcons[d.content.type]||'')+' '+d.content.type+'</div>';
+
+  for(var i=0;i<d.content.items.length;i++){
+    var item=d.content.items[i];
+    html+='<h4 style="margin:12px 0 6px;font-size:.88rem;color:#37474f">'+item.title+'</h4>';
+    html+='<div class="panel-content" id="content_'+selectedDay+'_'+i+'">'+escapeHtml(item.text)+'</div>';
+    html+='<div class="panel-actions">';
+    html+='<button class="btn btn-copy" onclick="copyContent('+selectedDay+','+i+')">Copiar</button>';
+    html+='<button class="btn btn-vary" onclick="regenerate('+selectedDay+','+i+')">Gerar Variacao</button>';
+    html+='</div>';
+  }
+
+  html+='<div class="panel-rules"><h4>Regras da Onda '+w.id+' ('+w.name+')</h4>';
+  html+='<p style="margin-bottom:6px"><strong>Objetivo:</strong> '+w.obj+'</p><ul>';
+  for(var r=0;r<w.rules.length;r++){
+    html+='<li>'+w.rules[r]+'</li>';
+  }
+  html+='</ul></div>';
+  document.getElementById('panelBody').innerHTML=html;
+}
+
+function escapeHtml(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ===== ACTIONS ===== */
+function copyContent(day,idx){
+  var el=document.getElementById('content_'+day+'_'+idx);
+  if(!el)return;
+  var text=el.textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){showToast('Conteudo copiado!')});
+  } else {
+    var ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    showToast('Conteudo copiado!');
+  }
+}
+
+function regenerate(day,idx){
+  var d=calendarData[day-1];
+  var newContent=generateForDay(day);
+  if(idx<newContent.items.length){
+    d.content.items[idx]=newContent.items[idx];
+  } else {
+    d.content=newContent;
+  }
+  renderPanel();
+  renderCalendar();
+  showToast('Variacao gerada!');
+}
+
+function changeWeek(dir){
+  var totalWeeks=Math.ceil(30/7);
+  currentWeek+=dir;
+  if(currentWeek<0)currentWeek=0;
+  if(currentWeek>=totalWeeks)currentWeek=totalWeeks-1;
+  selectedDay=null;
+  document.getElementById('sidePanel').classList.add('closed');
+  renderCalendar();
+}
+
+function goToWave(waveId){
+  var w=WAVES[waveId-1];
+  var dayStart=w.days[0];
+  currentWeek=Math.floor((dayStart-1)/7);
+  selectedDay=null;
+  document.getElementById('sidePanel').classList.add('closed');
+  renderCalendar();
+}
+
+/* ===== EXPORT ===== */
+function exportCalendar(){
+  var lines=[];
+  lines.push('==============================================');
+  lines.push('  ONDA ORGANICA — CALENDARIO DE 30 DIAS');
+  lines.push('  Nome Limpo Express (NLE)');
+  lines.push('  Estrategia de Infiltracao Organica');
+  lines.push('==============================================');
+  lines.push('');
+
+  for(var i=0;i<30;i++){
+    var d=calendarData[i];
+    var w=d.wave;
+    lines.push('----------------------------------------------');
+    lines.push('DIA '+d.day+' | Onda '+w.id+' — '+w.name+' | '+d.content.type);
+    lines.push('----------------------------------------------');
+    for(var j=0;j<d.content.items.length;j++){
+      var item=d.content.items[j];
+      lines.push('');
+      lines.push('['+item.title+']');
+      lines.push(item.text);
+    }
+    lines.push('');
+    lines.push('Regras: '+w.rules.join(' | '));
+    lines.push('');
+  }
+
+  lines.push('==============================================');
+  lines.push('  Gerado por Nome Limpo Express');
+  lines.push('  Estrategia Onda Organica');
+  lines.push('==============================================');
+
+  var blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='onda-organica-calendario-30dias.txt';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Calendario exportado!');
+}
+
+/* ===== TOAST ===== */
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},2200);
+}
+
+/* ===== REGEN ALL ===== */
+function regenAll(){
+  initCalendar();
+  selectedDay=null;
+  document.getElementById('sidePanel').classList.add('closed');
+  renderCalendar();
+  updateStats();
+  showToast('Todo o calendario foi regenerado!');
+}
+
+/* ===== STATS ===== */
+function updateStats(){
+  var comments=0,edu=0,auth=0,conv=0,total=0;
+  for(var i=0;i<calendarData.length;i++){
+    var d=calendarData[i];
+    if(d.wave.id===1){comments+=d.content.items.length;total+=d.content.items.length}
+    else if(d.wave.id===2){edu++;total++}
+    else if(d.wave.id===3){auth++;total++}
+    else if(d.content.type==='Post Conversao'){conv++;total++}
+    else{edu++;total++}
+  }
+  document.getElementById('statComments').textContent=comments;
+  document.getElementById('statEducational').textContent=edu;
+  document.getElementById('statAuthority').textContent=auth;
+  document.getElementById('statConversion').textContent=conv;
+  document.getElementById('statTotal').textContent=total;
+}
+
+/* ===== INIT ===== */
+renderCalendar();
+updateStats();
+</script>
+</body>
+</html>

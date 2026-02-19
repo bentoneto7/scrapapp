@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NLE - Central de Operacoes</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+body{display:flex;min-height:100vh;background:#f0f2f5;color:#333}
+:root{--sidebar-bg:#1a237e;--sidebar-w:220px;--green:#2e7d32;--green-light:#43a047;--card-shadow:0 2px 8px rgba(0,0,0,.1);--radius:8px}
+.sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s}
+.sidebar .logo{padding:20px 16px;font-size:1.1rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,.15);text-align:center;letter-spacing:.5px}
+.sidebar .logo small{display:block;font-weight:400;font-size:.7rem;opacity:.7;margin-top:2px}
+.sidebar nav{flex:1;overflow-y:auto;padding:8px 0}
+.sidebar nav button{display:flex;align-items:center;gap:10px;width:100%;padding:13px 18px;background:none;border:none;color:rgba(255,255,255,.75);font-size:.9rem;cursor:pointer;text-align:left;transition:all .2s}
+.sidebar nav button:hover,.sidebar nav button.active{background:rgba(255,255,255,.12);color:#fff}
+.sidebar nav button .icon{font-size:1.15rem;width:24px;text-align:center}
+.hamburger{display:none;position:fixed;top:12px;left:12px;z-index:200;background:var(--sidebar-bg);color:#fff;border:none;border-radius:6px;padding:8px 12px;font-size:1.3rem;cursor:pointer}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90}
+.main{margin-left:var(--sidebar-w);flex:1;padding:24px;min-height:100vh;width:calc(100% - var(--sidebar-w))}
+.page{display:none}
+.page.active{display:block}
+h2{font-size:1.4rem;margin-bottom:18px;color:#1a237e}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border:none;border-radius:var(--radius);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:var(--green-light)}
+.btn-secondary{background:#e0e0e0;color:#333}
+.btn-secondary:hover{background:#bdbdbd}
+.btn-danger{background:#c62828;color:#fff}
+.btn-danger:hover{background:#e53935}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:18px;margin-bottom:16px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.82rem;font-weight:600;margin-bottom:5px;color:#555}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:6px;font-size:.88rem;transition:border .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--green)}
+.form-group textarea{resize:vertical;min-height:80px}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:600;color:#fff}
+.progress-bar{background:#e0e0e0;border-radius:10px;height:10px;overflow:hidden;margin:6px 0}
+.progress-bar .fill{height:100%;background:var(--green);border-radius:10px;transition:width .4s}
+.stats-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.stat-card{flex:1;min-width:120px;background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);padding:14px;text-align:center}
+.stat-card .val{font-size:1.6rem;font-weight:700;color:var(--green)}
+.stat-card .lbl{font-size:.72rem;color:#888;margin-top:2px}
+.tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:14px}
+.tabs button{padding:8px 16px;border:none;background:none;font-size:.82rem;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-weight:600}
+.tabs button.active{color:var(--green);border-bottom-color:var(--green)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.mission-card{border-left:4px solid #ccc;padding-left:14px}
+.mission-card.done{opacity:.65;border-left-color:var(--green)}
+.chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;margin-right:4px;color:#fff}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #eee}
+.list-item:last-child{border-bottom:none}
+.color-dot{width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:middle}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:140px;padding:10px 0}
+.bar-chart .bar{flex:1;background:var(--green);border-radius:4px 4px 0 0;min-width:20px;position:relative;transition:height .3s}
+.bar-chart .bar span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.6rem;color:#888;white-space:nowrap}
+.toast{position:fixed;bottom:24px;right:24px;background:#333;color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:.85rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.script-box{background:#f5f5f5;border-radius:6px;padding:14px;font-size:.85rem;line-height:1.6;white-space:pre-wrap;margin-bottom:10px;border:1px solid #e0e0e0}
+.dna-box{background:#e8eaf6;border-radius:6px;padding:10px;font-size:.75rem;color:#555;margin-top:10px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;max-width:500px;width:90%;max-height:85vh;overflow-y:auto}
+.modal h3{margin-bottom:16px}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .hamburger{display:block}
+  .overlay.show{display:block}
+  .main{margin-left:0;width:100%;padding:16px;padding-top:56px}
+  .grid-2{grid-template-columns:1fr}
+  .stats-row{gap:8px}
+  .stat-card{min-width:80px;padding:10px}
+}
+</style>
+</head>
+<body>
+<button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="logo">Nome Limpo Express<small>Central de Operacoes</small></div>
+  <nav id="sideNav"></nav>
+</aside>
+<main class="main">
+  <!-- PAGE: MISSOES -->
+  <div class="page" id="pg-missoes">
+    <h2>Missoes do Dia</h2>
+    <div class="stats-row" id="missionStats"></div>
+    <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="gerarMissoes()">Gerar Missoes</button>
+    </div>
+    <div class="progress-bar" style="height:14px;margin-bottom:18px"><div class="fill" id="overallProgress" style="width:0%"></div></div>
+    <div id="missionList"></div>
+  </div>
+  <!-- PAGE: PERFIS -->
+  <div class="page" id="pg-perfis">
+    <h2>Perfis</h2>
+    <button class="btn btn-primary" onclick="openPerfilModal()" style="margin-bottom:16px">+ Novo Perfil</button>
+    <div class="card" id="perfilList"></div>
+  </div>
+  <!-- PAGE: GRUPOS -->
+  <div class="page" id="pg-grupos">
+    <h2>Grupos</h2>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openGrupoModal()">+ Novo Grupo</button>
+      <button class="btn btn-secondary" onclick="openImportModal()">Importar em Lote</button>
+    </div>
+    <div class="card" id="grupoList"></div>
+  </div>
+  <!-- PAGE: SCRIPTS -->
+  <div class="page" id="pg-scripts">
+    <h2>Scripts WhatsApp</h2>
+    <div class="tabs" id="scriptTabs"></div>
+    <div id="scriptContent"></div>
+  </div>
+  <!-- PAGE: GERADOR -->
+  <div class="page" id="pg-gerador">
+    <h2>Gerador de Conteudo</h2>
+    <div class="card">
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Tipo de Post</label>
+          <select id="genType"><option value="educativo">Educativo</option><option value="mito">Mito</option><option value="pergunta">Pergunta</option><option value="custo">Custo</option><option value="historia">Historia</option><option value="conversao">Conversao</option><option value="comentario">Comentario</option></select>
+        </div>
+        <div class="form-group">
+          <label>Onda (1-4)</label>
+          <select id="genWave"><option value="1">1 - Valor puro</option><option value="2">2 - Valor + CTA suave</option><option value="3">3 - Valor + CTA medio</option><option value="4">4 - CTA direto</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="genNoLink"> Grupo proibe links</label>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <button class="btn btn-primary" onclick="gerarConteudo()">Gerar</button>
+        <button class="btn btn-secondary" onclick="copiarGen()">Copiar</button>
+      </div>
+      <div class="script-box" id="genOutput" style="min-height:120px">Clique em "Gerar" para criar conteudo.</div>
+      <div class="dna-box" id="genDna" style="display:none"></div>
+    </div>
+  </div>
+  <!-- PAGE: CONFIG -->
+  <div class="page" id="pg-config">
+    <h2>Configuracoes</h2>
+    <div class="card">
+      <div class="form-group">
+        <label>Numero WhatsApp</label>
+        <input type="text" id="cfgWhats" placeholder="5511999999999">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Onda Atual (1-4)</label>
+          <select id="cfgWave"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+        </div>
+        <div class="form-group">
+          <label>Dia no Ciclo (1-30)</label>
+          <input type="number" id="cfgDay" min="1" max="30" value="1">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="salvarConfig()" style="margin-bottom:18px">Salvar Configuracoes</button>
+      <hr style="margin:18px 0;border:none;border-top:1px solid #eee">
+      <h3 style="font-size:1rem;margin-bottom:12px">Dados</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="exportData()">Exportar JSON</button>
+        <label class="btn btn-secondary" style="cursor:pointer">Importar JSON<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+        <button class="btn btn-danger" onclick="resetData()">Resetar Tudo</button>
+      </div>
+    </div>
+  </div>
+  <!-- PAGE: METRICAS -->
+  <div class="page" id="pg-metricas">
+    <h2>Metricas</h2>
+    <div class="stats-row" id="metricStats"></div>
+    <div class="card">
+      <h3 style="font-size:1rem;margin-bottom:12px">Desempenho Diario</h3>
+      <div class="bar-chart" id="metricChart"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="font-size:1rem;margin-bottom:12px">Historico</h3>
+      <div id="metricLog"></div>
+    </div>
+  </div>
+</main>
+<!-- MODALS -->
+<div class="modal-overlay" id="modalPerfil">
+  <div class="modal">
+    <h3 id="perfilModalTitle">Novo Perfil</h3>
+    <input type="hidden" id="pf_id">
+    <div class="form-group"><label>Nome</label><input type="text" id="pf_nome"></div>
+    <div class="form-group"><label>Apelido (operacional)</label><input type="text" id="pf_apelido"></div>
+    <div class="form-group"><label>Cor</label><input type="color" id="pf_cor" value="#1a237e" style="height:40px"></div>
+    <div class="form-group"><label>Max Grupos/Dia</label><input type="number" id="pf_max" value="5" min="1" max="50"></div>
+    <div class="form-group"><label>Notas</label><textarea id="pf_notas"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeModal('modalPerfil')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarPerfil()">Salvar</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalGrupo">
+  <div class="modal">
+    <h3 id="grupoModalTitle">Novo Grupo</h3>
+    <input type="hidden" id="gr_id">
+    <div class="form-group"><label>Nome</label><input type="text" id="gr_nome"></div>
+    <div class="form-group"><label>Membros</label><input type="number" id="gr_membros" min="0"></div>
+    <div class="form-group"><label>Categoria</label>
+      <select id="gr_categoria"><option value="negativados">Negativados</option><option value="credito">Credito</option><option value="mei">MEI</option><option value="financas">Financas</option><option value="imoveis">Imoveis</option><option value="emprego">Emprego</option><option value="geral">Geral</option></select>
+    </div>
+    <div class="form-group"><label>Link</label><input type="text" id="gr_link" placeholder="https://facebook.com/groups/..."></div>
+    <div class="form-group"><label>Permite Links?</label>
+      <select id="gr_permiteLinks"><option value="sim">Sim</option><option value="nao">Nao</option></select>
+    </div>
+    <div class="form-group"><label>Moderacao</label>
+      <select id="gr_moderacao"><option value="baixa">Baixa</option><option value="media">Media</option><option value="alta">Alta</option></select>
+    </div>
+    <div class="form-group"><label>Regras</label><textarea id="gr_regras"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeModal('modalGrupo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarGrupo()">Salvar</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalImport">
+  <div class="modal">
+    <h3>Importar Grupos em Lote</h3>
+    <div class="form-group">
+      <label>Formato: nome|membros|categoria|link (um por linha)</label>
+      <textarea id="importText" style="min-height:160px" placeholder="Negativados Brasil|45000|negativados|https://fb.com/groups/1&#10;Credito Facil|32000|credito|https://fb.com/groups/2"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-secondary" onclick="closeModal('modalImport')">Cancelar</button>
+      <button class="btn btn-primary" onclick="importarGrupos()">Importar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* ==================== UTILITIES ==================== */
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function uid(){return Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,6);}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+function copyText(txt){navigator.clipboard.writeText(txt).then(function(){toast('Copiado!');}).catch(function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copiado!');});}
+
+/* ==================== STORAGE ==================== */
+function load(key,def){try{var d=localStorage.getItem(key);return d?JSON.parse(d):def;}catch(e){return def;}}
+function save(key,data){localStorage.setItem(key,JSON.stringify(data));}
+
+var perfis=load('nle_pf',[]);
+var grupos=load('nle_gr',[]);
+var missoes=load('nle_ms',[]);
+var dist=load('nle_dist',[]);
+var config=load('nle_cfg',{whatsapp:'5511999999999',wave:1,day:1});
+var historico=load('nle_hist',[]);
+
+/* ==================== CONTENT ENGINE ==================== */
+var CE={
+  openings:{
+    educativo:['Informacao que pode mudar sua situacao financeira:','Pouca gente sabe disso, mas a lei te protege:','Voce sabia que existe um caminho legal?','3 fatos que todo negativado precisa saber:','Importante pra quem ta com nome restrito:','Seu direito como consumidor:','Atencao pra essa informacao:','O que ninguem te conta sobre negativacao:','Fato pouco conhecido sobre o Serasa:','Uma informacao que vale ouro:'],
+    mito:['MITO: "So pagando a divida o nome sai"','MITO: "Nome sujo e pra sempre"','MITO: "Quem deve nao tem direito"','MITO: "O Serasa decide quem fica negativado"','MITO: "Depois de 5 anos a divida some"','MITO: "Renegociar e a unica opcao"'],
+    pergunta:['Pergunta pra quem ta com nome sujo:','Voce ja parou pra pensar nisso?','Me responde uma coisa:','Enquete rapida pra quem esta negativado:','Ja se perguntou por que seu credito e negado?','Teste rapido: voce sabe seus direitos?'],
+    custo:['Ja calculou quanto o nome sujo te custa por mes?','O imposto invisivel de estar negativado:','A conta que ninguem faz:','Cada dia negativado custa dinheiro. Quanto?','A matematica cruel de estar com nome sujo:'],
+    historia:['Caso real (anonimizado):','Isso aconteceu essa semana:','Historia que a gente ve todo dia:','Mais um caso resolvido:','Situacao que se repete muito:'],
+    conversao:['Resultado da semana:','Pra quem quer resolver de verdade:','Oportunidade pra quem ta negativado:','Analise gratuita disponivel:','Ultimas vagas dessa semana:'],
+    comentario:['Isso tem solucao legal.','Muita gente nao sabe, mas:','Pela minha experiencia:','So pra complementar:','Boa pergunta. O que eu sei e:']
+  },
+  bodies:['O Codigo de Defesa do Consumidor (art. 43) exige que voce seja NOTIFICADO antes de qualquer negativacao. Se nao foi, a inclusao pode ser irregular.','Nenhuma negativacao pode permanecer nos orgaos de protecao por mais de 5 anos. Se a sua tem mais que isso, ela esta la de forma ilegal.','A LGPD (art. 18) te da direito de corrigir dados incorretos em qualquer cadastro financeiro, incluindo Serasa, SPC e Boa Vista.','A Sumula 548 do STJ e clara: se voce pagou e o credor nao retirou em 5 dias, cabe indenizacao por dano moral.','Dever nao anula seus direitos. O credor tem obrigacoes legais no processo de negativacao. Quando nao cumpre, o consumidor pode contestar.','Muita gente confunde renegociar com limpar nome. Sao coisas diferentes. Limpar e verificar se a negativacao seguiu a lei.','Os bancos classificam voce internamente de AA a H. Nome limpo no Serasa NAO garante bom rating bancario.','O SCR do Banco Central registra TODAS as operacoes de credito. E la que os bancos realmente olham antes de aprovar.','A prescricao da divida (5 anos, art. 206 CC) impede cobranca judicial. Mas a negativacao tem prazo proprio no art. 43 CDC.','Consulte o Registrato (registrato.bcb.gov.br) gratuitamente. La voce ve tudo vinculado ao seu CPF no sistema financeiro.','Negativacao sem notificacao previa e irregular. E a base de milhares de decisoes judiciais favoraveis ao consumidor.','Pra MEI e empreendedores: o banco olha o CPF do titular, nao o CNPJ. Regularizar o CPF e investir no negocio.'],
+  closings:['Conheca seus direitos.','Compartilha com quem precisa.','Guarda essa informacao.','Quem mais nao sabia disso?','A lei existe pra proteger voce.','Se serviu, passa pra frente.','Conhecimento e poder.','Qualquer duvida, comenta.','Informacao acessivel pra todos.'],
+  ctaSemLink:['Se quiser entender seu caso, me chama no inbox.','Duvida? Me manda mensagem.','Quer saber se o seu caso tem solucao? Inbox aberto.','Me chama que te explico.'],
+  ctaComLink:['Analise gratuita: me chama no WhatsApp (link na bio).','Quer resolver? Link do WhatsApp na bio.','Me chama no inbox ou no WhatsApp pra analise gratis.'],
+  connectors:['\n\n','\n\nOu seja: ','\n\nNa pratica: ','\n\nResumo: ','\n\nIsso significa que: ','\n\n']
+};
+
+function genContent(type,allowLink,wave){
+  var opening=pick(CE.openings[type]);
+  var bodyShuffle=shuffle(CE.bodies);
+  var b1=bodyShuffle[0],b2=bodyShuffle[1];
+  var closing=pick(CE.closings);
+  var connector=pick(CE.connectors);
+  var cta='';
+  if(wave>=4){cta=allowLink==='sim'?pick(CE.ctaComLink):pick(CE.ctaSemLink);}
+  else if(wave>=2&&type!=='comentario'){cta=pick(CE.ctaSemLink);}
+  var dna={type:type,wave:wave,allowLink:allowLink,openingIdx:CE.openings[type].indexOf(opening),body1Idx:CE.bodies.indexOf(b1),body2Idx:CE.bodies.indexOf(b2),closingIdx:CE.closings.indexOf(closing)};
+  var text=opening+'\n\n'+b1+connector+b2+'\n\n'+closing+(cta?'\n\n'+cta:'');
+  return{text:text,dna:dna};
+}
+
+/* ==================== SCRIPTS WHATSAPP ==================== */
+var SCRIPTS={
+  abertura:{
+    title:'Abertura',
+    variants:[
+      {label:'Lead generico',text:'Oi! Tudo bem? Vi que voce se interessou pelo assunto de limpeza de nome.\n\nMe conta, qual a sua situacao hoje? Tem alguma negativacao no Serasa ou SPC?\n\nVou te ajudar a entender se existe alguma solucao pro seu caso.'},
+      {label:'Lead com contexto',text:'Oi! Vi seu comentario no grupo sobre [situacao]. Entendo como e frustrante.\n\nOlha, dependendo do caso, existe uma forma legal de resolver isso.\n\nPosso te fazer algumas perguntas rapidas pra entender melhor?'},
+      {label:'Lead desconfiado',text:'Oi! Sem compromisso nenhum, ta?\n\nSo quero te passar uma informacao sobre direitos do consumidor que pouca gente conhece.\n\nSe fizer sentido pra voce, a gente conversa mais. Se nao, tranquilo. Pode ser?'}
+    ]
+  },
+  qualificacao:{
+    title:'Qualificacao',
+    variants:[
+      {label:'Pergunta 1',text:'Pra comecar: ha quanto tempo voce esta com o nome negativado?'},
+      {label:'Pergunta 2',text:'Voce sabe quantas negativacoes tem? E de quais empresas?'},
+      {label:'Pergunta 3',text:'Voce foi notificado por carta ou email ANTES de ser negativado?'},
+      {label:'Pergunta 4',text:'Ja tentou resolver diretamente com o credor? O que aconteceu?'},
+      {label:'Pergunta 5',text:'Tem alguma divida que voce ja pagou mas continua aparecendo como pendente?'},
+      {label:'Pergunta 6',text:'O que mais te incomoda hoje por estar com o nome sujo? Credito negado, aluguel, emprego?'}
+    ]
+  },
+  apresentacao:{
+    title:'Apresentacao',
+    variants:[
+      {label:'Script padrao',text:'Entendi seu caso. Olha, com base no que voce me contou, existem alguns pontos que podem ser analisados.\n\nO que a gente faz e o seguinte: nossa equipe juridica analisa CADA negativacao sua pra verificar se o credor cumpriu todos os requisitos legais.\n\nSe encontramos irregularidades (e na maioria dos casos encontramos), entramos com as medidas juridicas cabíveis.\n\nIsso pode resultar na retirada da negativacao e ate em indenizacao por dano moral.\n\nTudo dentro da lei, com advogados especializados.'},
+      {label:'Divida antiga (5+ anos)',text:'Seu caso e bem interessante. Dividas com mais de 5 anos tem um tratamento especial na lei.\n\nPelo Codigo de Defesa do Consumidor (art. 43), nenhuma negativacao pode ficar mais de 5 anos. Se a sua esta la alem desse prazo, ela e ILEGAL.\n\nAlem disso, a prescricao da divida (art. 206 do Codigo Civil) pode impedir ate a cobranca judicial.\n\nOu seja: voce pode ter direito a limpar o nome E nao precisar pagar essa divida.'},
+      {label:'Multiplas negativacoes',text:'Com varias negativacoes, a chance de encontrar irregularidades e ainda maior.\n\nCada negativacao precisa seguir um processo legal rigoroso. Notificacao previa, prazo correto, dados exatos.\n\nQuando um credor nao segue essas regras, a negativacao pode ser contestada e removida.\n\nNo seu caso, vamos analisar CADA uma individualmente. Ja tivemos clientes com 5, 6 negativacoes que conseguiram limpar quase todas.'}
+    ]
+  },
+  proposta:{
+    title:'Proposta',
+    variants:[
+      {label:'Proposta padrao - R$650',text:'O investimento pra analise completa + acao juridica e de R$650.\n\nSo pra voce ter uma ideia: um advogado particular cobraria entre R$2.000 e R$5.000 pelo mesmo servico.\n\nE pensa assim: quanto voce perde POR MES por estar negativado? Juros maiores, credito negado, oportunidades perdidas...\n\nR$650 e provavelmente menos do que um mes de "custo invisivel" do nome sujo.\n\nA gente ainda facilita: pode ser em 2x de R$350 ou 3x de R$240.'},
+      {label:'Ancoragem de valor',text:'Sabe quanto custa uma consulta com advogado especializado em direito do consumidor? Entre R$300 e R$500. So a consulta.\n\nE depois tem os honorarios do processo, que ficam entre R$2.000 e R$5.000.\n\nO que a gente oferece e o pacote completo: analise + acao + acompanhamento, tudo por R$650.\n\nIsso porque trabalhamos em escala, com uma equipe dedicada so pra isso.'},
+      {label:'Fechamento com urgencia',text:'Deixa eu ser direto: cada dia que passa com o nome sujo e dinheiro perdido.\n\nSe voce ja decidiu que quer resolver, o proximo passo e simples: a gente formaliza e a equipe juridica comeca a analise em ate 48h.\n\nO investimento e R$650, pode ser 2x de R$350 ou 3x de R$240.\n\nQuer que eu te mande os dados pra pagamento?'}
+    ]
+  },
+  objecoes:{
+    title:'Objecoes',
+    variants:[
+      {label:'E caro / Nao tenho dinheiro',text:'Entendo. Mas me faz um calculo rapido: quanto voce perde por mes por estar negativado?\n\nJuros maiores no cartao, credito negado, aluguel recusado...\n\nEm media, um negativado paga R$200 a R$500 A MAIS por mes em juros. Ou seja: em 2 meses voce ja "gasta" mais que o valor do servico.\n\nE a gente facilita: 2x de R$350 ou 3x de R$240. O que cabe melhor pra voce?'},
+      {label:'Vou pensar',text:'Claro, sem pressa! E uma decisao importante mesmo.\n\nSo te peco uma coisa: enquanto pensa, anota essa informacao - cada dia negativado tem um custo real.\n\nE a analise que a gente faz tem prazo, porque depende da disponibilidade da equipe juridica.\n\nPosso te mandar um resumo do que conversamos pra voce analisar com calma?'},
+      {label:'Isso funciona mesmo?',text:'Boa pergunta. Vou ser honesto: nem todo caso e igual. Mas os numeros falam:\n\n- Mais de 70% dos casos que analisamos tem alguma irregularidade\n- A lei e clara sobre notificacao previa e prazo de 5 anos\n- Sao milhares de decisoes judiciais favoraveis ao consumidor\n\nO que posso te garantir e: se nao encontrarmos nenhuma irregularidade, a gente te avisa antes de qualquer acao.\n\nO risco pra voce e minimo, o beneficio potencial e enorme.'},
+      {label:'Parece golpe',text:'Entendo a desconfianca. Infelizmente tem muita gente mal intencionada por ai.\n\nPor isso quero ser transparente:\n- Trabalhamos com advogados registrados na OAB\n- Tudo e formalizado por contrato\n- Voce recebe acompanhamento do processo\n- Nao prometemos resultado, prometemos analise seria\n\nSe quiser, posso te mandar nosso contrato social e o numero da OAB dos advogados pra voce verificar.\n\nConfianca se constroi com transparencia.'},
+      {label:'Preciso falar com esposa/marido',text:'Totalmente compreensivel! Inclusive, se a outra pessoa tambem estiver negativada, a gente pode analisar os dois casos juntos.\n\nQuer que eu prepare um resumo simples do servico pra voce mostrar?\n\nAssim fica mais facil explicar e decidir juntos.\n\nPosso te mandar por aqui mesmo.'},
+      {label:'Nao tenho dinheiro agora',text:'Entendo a situacao. A gente sabe que quem ta negativado geralmente ta apertado financeiramente.\n\nPor isso temos a opcao de 3x de R$240. A primeira parcela ja inicia o processo.\n\nE pensa: quanto antes resolver, antes para de perder dinheiro com juros altos e credito negado.\n\nQuer que eu reserve uma vaga e a gente combina a melhor data pro primeiro pagamento?'}
+    ]
+  },
+  posFechamento:{
+    title:'Pos-Fechamento',
+    variants:[
+      {label:'Coleta de dados',text:'Perfeito! Pra iniciar o processo, preciso dos seguintes dados:\n\n1. Nome completo (como no RG)\n2. CPF\n3. Data de nascimento\n4. Endereco completo (com CEP)\n5. Telefone (com DDD)\n6. Email\n7. Nome da mae\n8. Print do Serasa/SPC (se tiver)\n\nPode ir mandando um por um, sem pressa.\n\nAssim que tiver tudo, ja encaminho pra equipe juridica e em ate 48h voce recebe o retorno da analise inicial.'}
+    ]
+  },
+  reativacao:{
+    title:'Reativacao',
+    variants:[
+      {label:'Dia 1 - Follow-up',text:'Oi! Tudo bem? A gente conversou ontem sobre a limpeza de nome.\n\nFicou alguma duvida? To aqui pra esclarecer qualquer coisa.\n\nLembra: a equipe juridica tem vagas limitadas por semana.'},
+      {label:'Dia 3 - Valor',text:'Oi! Passando pra compartilhar: essa semana ja tivemos 3 casos aprovados pra retirada de negativacao.\n\nSeu caso tem um perfil parecido. Quer que a gente retome a conversa?'},
+      {label:'Dia 7 - Urgencia suave',text:'Oi! Faz uma semana que conversamos. Sei que a rotina e corrida.\n\nSo queria te lembrar: cada semana negativado sao oportunidades perdidas.\n\nSe quiser retomar, e so me chamar. As condicoes que te passei ainda estao validas.'},
+      {label:'Dia 15 - Ultima tentativa',text:'Oi! Ultima mensagem sobre isso, prometo. Nao quero ser inconveniente.\n\nSe a situacao financeira melhorou ou se mudou de ideia, to aqui.\n\nSe nao, sem problema nenhum. Te desejo tudo de bom!\n\nSe um dia precisar, pode me chamar.'}
+    ]
+  }
+};
+
+/* ==================== SIDEBAR ==================== */
+var pages=[
+  {id:'missoes',icon:'\uD83C\uDFAF',label:'Missoes'},
+  {id:'perfis',icon:'\uD83D\uDC64',label:'Perfis'},
+  {id:'grupos',icon:'\uD83D\uDCCB',label:'Grupos'},
+  {id:'scripts',icon:'\uD83D\uDCAC',label:'Scripts WhatsApp'},
+  {id:'gerador',icon:'\u270F\uFE0F',label:'Gerador'},
+  {id:'config',icon:'\u2699\uFE0F',label:'Config'},
+  {id:'metricas',icon:'\uD83D\uDCCA',label:'Metricas'}
+];
+
+function buildSidebar(){
+  var nav=document.getElementById('sideNav');
+  var html='';
+  pages.forEach(function(p){
+    html+='<button data-page="'+p.id+'" onclick="goTo(\''+p.id+'\')">';
+    html+='<span class="icon">'+p.icon+'</span><span>'+p.label+'</span></button>';
+  });
+  nav.innerHTML=html;
+}
+
+function goTo(id){
+  document.querySelectorAll('.page').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('pg-'+id).classList.add('active');
+  document.querySelectorAll('#sideNav button').forEach(function(b){
+    b.classList.toggle('active',b.dataset.page===id);
+  });
+  if(window.innerWidth<=768){var sb=document.getElementById('sidebar');sb.classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+  if(id==='missoes')renderMissoes();
+  if(id==='perfis')renderPerfis();
+  if(id==='grupos')renderGrupos();
+  if(id==='scripts')renderScripts();
+  if(id==='config')renderConfig();
+  if(id==='metricas')renderMetricas();
+}
+
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+}
+
+/* ==================== PERFIS ==================== */
+function renderPerfis(){
+  var el=document.getElementById('perfilList');
+  if(!perfis.length){el.innerHTML='<p style="color:#999;text-align:center;padding:20px">Nenhum perfil cadastrado. Clique em "+ Novo Perfil" para comecar.</p>';return;}
+  var html='';
+  perfis.forEach(function(p){
+    html+='<div class="list-item">';
+    html+='<div><span class="color-dot" style="background:'+p.cor+'"></span>';
+    html+='<strong>'+esc(p.nome)+'</strong>';
+    if(p.apelido)html+=' <span style="color:#888">('+esc(p.apelido)+')</span>';
+    html+='<br><small style="color:#999">Max '+p.maxGrupos+' grupos/dia</small>';
+    if(p.notas)html+='<br><small style="color:#aaa">'+esc(p.notas)+'</small>';
+    html+='</div><div>';
+    html+='<button class="btn btn-secondary btn-sm" onclick="editPerfil(\''+p.id+'\')">Editar</button> ';
+    html+='<button class="btn btn-danger btn-sm" onclick="deletePerfil(\''+p.id+'\')">Excluir</button>';
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+}
+
+function openPerfilModal(id){
+  document.getElementById('pf_id').value='';
+  document.getElementById('pf_nome').value='';
+  document.getElementById('pf_apelido').value='';
+  document.getElementById('pf_cor').value='#1a237e';
+  document.getElementById('pf_max').value='5';
+  document.getElementById('pf_notas').value='';
+  document.getElementById('perfilModalTitle').textContent='Novo Perfil';
+  document.getElementById('modalPerfil').classList.add('show');
+}
+
+function editPerfil(id){
+  var p=perfis.find(function(x){return x.id===id;});
+  if(!p)return;
+  document.getElementById('pf_id').value=p.id;
+  document.getElementById('pf_nome').value=p.nome;
+  document.getElementById('pf_apelido').value=p.apelido||'';
+  document.getElementById('pf_cor').value=p.cor;
+  document.getElementById('pf_max').value=p.maxGrupos;
+  document.getElementById('pf_notas').value=p.notas||'';
+  document.getElementById('perfilModalTitle').textContent='Editar Perfil';
+  document.getElementById('modalPerfil').classList.add('show');
+}
+
+function salvarPerfil(){
+  var id=document.getElementById('pf_id').value;
+  var nome=document.getElementById('pf_nome').value.trim();
+  if(!nome){toast('Nome e obrigatorio');return;}
+  var obj={
+    id:id||uid(),
+    nome:nome,
+    apelido:document.getElementById('pf_apelido').value.trim(),
+    cor:document.getElementById('pf_cor').value,
+    maxGrupos:parseInt(document.getElementById('pf_max').value)||5,
+    notas:document.getElementById('pf_notas').value.trim()
+  };
+  if(id){var idx=perfis.findIndex(function(x){return x.id===id;});if(idx>-1)perfis[idx]=obj;}
+  else{perfis.push(obj);}
+  save('nle_pf',perfis);
+  closeModal('modalPerfil');
+  renderPerfis();
+  toast('Perfil salvo!');
+}
+
+function deletePerfil(id){
+  if(!confirm('Excluir este perfil?'))return;
+  perfis=perfis.filter(function(x){return x.id!==id;});
+  save('nle_pf',perfis);
+  renderPerfis();
+  toast('Perfil excluido.');
+}
+
+/* ==================== GRUPOS ==================== */
+var catColors={negativados:'#c62828',credito:'#1565c0',mei:'#6a1b9a',financas:'#2e7d32',imoveis:'#ef6c00',emprego:'#00838f',geral:'#546e7a'};
+
+function renderGrupos(){
+  var el=document.getElementById('grupoList');
+  if(!grupos.length){el.innerHTML='<p style="color:#999;text-align:center;padding:20px">Nenhum grupo cadastrado.</p>';return;}
+  var html='';
+  grupos.forEach(function(g){
+    html+='<div class="list-item">';
+    html+='<div>';
+    html+='<strong>'+esc(g.nome)+'</strong> ';
+    html+='<span class="badge" style="background:'+(catColors[g.categoria]||'#888')+'">'+esc(g.categoria)+'</span>';
+    html+='<br><small style="color:#888">'+(g.membros?g.membros.toLocaleString('pt-BR')+' membros':'')+'</small>';
+    if(g.moderacao)html+=' <small style="color:#aaa">| Moderacao: '+esc(g.moderacao)+'</small>';
+    if(g.permiteLinks==='nao')html+=' <small style="color:#c62828">| Sem links</small>';
+    html+='</div><div>';
+    html+='<button class="btn btn-secondary btn-sm" onclick="editGrupo(\''+g.id+'\')">Editar</button> ';
+    html+='<button class="btn btn-danger btn-sm" onclick="deleteGrupo(\''+g.id+'\')">Excluir</button>';
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+}
+
+function openGrupoModal(){
+  document.getElementById('gr_id').value='';
+  document.getElementById('gr_nome').value='';
+  document.getElementById('gr_membros').value='';
+  document.getElementById('gr_categoria').value='negativados';
+  document.getElementById('gr_link').value='';
+  document.getElementById('gr_permiteLinks').value='sim';
+  document.getElementById('gr_moderacao').value='baixa';
+  document.getElementById('gr_regras').value='';
+  document.getElementById('grupoModalTitle').textContent='Novo Grupo';
+  document.getElementById('modalGrupo').classList.add('show');
+}
+
+function editGrupo(id){
+  var g=grupos.find(function(x){return x.id===id;});
+  if(!g)return;
+  document.getElementById('gr_id').value=g.id;
+  document.getElementById('gr_nome').value=g.nome;
+  document.getElementById('gr_membros').value=g.membros||'';
+  document.getElementById('gr_categoria').value=g.categoria||'geral';
+  document.getElementById('gr_link').value=g.link||'';
+  document.getElementById('gr_permiteLinks').value=g.permiteLinks||'sim';
+  document.getElementById('gr_moderacao').value=g.moderacao||'baixa';
+  document.getElementById('gr_regras').value=g.regras||'';
+  document.getElementById('grupoModalTitle').textContent='Editar Grupo';
+  document.getElementById('modalGrupo').classList.add('show');
+}
+
+function salvarGrupo(){
+  var id=document.getElementById('gr_id').value;
+  var nome=document.getElementById('gr_nome').value.trim();
+  if(!nome){toast('Nome e obrigatorio');return;}
+  var obj={
+    id:id||uid(),
+    nome:nome,
+    membros:parseInt(document.getElementById('gr_membros').value)||0,
+    categoria:document.getElementById('gr_categoria').value,
+    link:document.getElementById('gr_link').value.trim(),
+    permiteLinks:document.getElementById('gr_permiteLinks').value,
+    moderacao:document.getElementById('gr_moderacao').value,
+    regras:document.getElementById('gr_regras').value.trim()
+  };
+  if(id){var idx=grupos.findIndex(function(x){return x.id===id;});if(idx>-1)grupos[idx]=obj;}
+  else{grupos.push(obj);}
+  save('nle_gr',grupos);
+  closeModal('modalGrupo');
+  renderGrupos();
+  toast('Grupo salvo!');
+}
+
+function deleteGrupo(id){
+  if(!confirm('Excluir este grupo?'))return;
+  grupos=grupos.filter(function(x){return x.id!==id;});
+  save('nle_gr',grupos);
+  renderGrupos();
+  toast('Grupo excluido.');
+}
+
+function openImportModal(){document.getElementById('importText').value='';document.getElementById('modalImport').classList.add('show');}
+
+function importarGrupos(){
+  var txt=document.getElementById('importText').value.trim();
+  if(!txt){toast('Cole os dados no campo');return;}
+  var lines=txt.split('\n');
+  var count=0;
+  lines.forEach(function(line){
+    var parts=line.split('|');
+    if(parts.length>=3){
+      grupos.push({id:uid(),nome:parts[0].trim(),membros:parseInt(parts[1])||0,categoria:parts[2].trim()||'geral',link:parts[3]?parts[3].trim():'',permiteLinks:'sim',moderacao:'baixa',regras:''});
+      count++;
+    }
+  });
+  save('nle_gr',grupos);
+  closeModal('modalImport');
+  renderGrupos();
+  toast(count+' grupo(s) importado(s)!');
+}
+
+/* ==================== DISTRIBUTION ALGORITHM ==================== */
+function distribuirGrupos(){
+  dist=[];
+  if(!perfis.length||!grupos.length)return dist;
+  var shuffled=shuffle(grupos);
+  var assignments={};
+  perfis.forEach(function(p){assignments[p.id]=0;});
+  var profileQueue=perfis.slice();
+  var pi=0;
+  shuffled.forEach(function(g){
+    var attempts=0;
+    while(attempts<profileQueue.length){
+      var profile=profileQueue[pi%profileQueue.length];
+      if(assignments[profile.id]<profile.maxGrupos){
+        dist.push({perfilId:profile.id,grupoId:g.id});
+        assignments[profile.id]++;
+        pi++;
+        break;
+      }
+      pi++;
+      attempts++;
+    }
+  });
+  save('nle_dist',dist);
+  return dist;
+}
+
+/* ==================== MISSOES ==================== */
+function gerarMissoes(){
+  if(!perfis.length){toast('Cadastre pelo menos 1 perfil primeiro');return;}
+  if(!grupos.length){toast('Cadastre pelo menos 1 grupo primeiro');return;}
+  distribuirGrupos();
+  var wave=config.wave||1;
+  missoes=[];
+  dist.forEach(function(d){
+    var grupo=grupos.find(function(g){return g.id===d.grupoId;});
+    var tipo=pick(['educativo','mito','pergunta','custo','historia','conversao']);
+    var allowLink=grupo?grupo.permiteLinks:'sim';
+    var result=genContent(tipo,allowLink,wave);
+    missoes.push({
+      id:uid(),
+      perfilId:d.perfilId,
+      grupoId:d.grupoId,
+      tipo:tipo,
+      conteudo:result.text,
+      dna:result.dna,
+      done:false,
+      createdAt:new Date().toISOString()
+    });
+  });
+  save('nle_ms',missoes);
+  renderMissoes();
+  toast(missoes.length+' missoes geradas!');
+}
+
+function renderMissoes(){
+  var total=missoes.length;
+  var done=missoes.filter(function(m){return m.done;}).length;
+  var pending=total-done;
+  var activePerfis=[];
+  var activeGrupos=[];
+  var reach=0;
+  missoes.forEach(function(m){
+    if(activePerfis.indexOf(m.perfilId)===-1)activePerfis.push(m.perfilId);
+    if(activeGrupos.indexOf(m.grupoId)===-1)activeGrupos.push(m.grupoId);
+    var g=grupos.find(function(x){return x.id===m.grupoId;});
+    if(g)reach+=g.membros||0;
+  });
+
+  document.getElementById('missionStats').innerHTML=
+    '<div class="stat-card"><div class="val">'+total+'</div><div class="lbl">Total</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:var(--green)">'+done+'</div><div class="lbl">Concluidas</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:#ef6c00">'+pending+'</div><div class="lbl">Pendentes</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:#1565c0">'+activePerfis.length+'</div><div class="lbl">Perfis Ativos</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:#6a1b9a">'+activeGrupos.length+'</div><div class="lbl">Grupos</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:#c62828">'+(reach>=1000?(reach/1000).toFixed(1)+'k':reach)+'</div><div class="lbl">Alcance Est.</div></div>';
+
+  var pct=total?Math.round((done/total)*100):0;
+  document.getElementById('overallProgress').style.width=pct+'%';
+
+  var byProfile={};
+  missoes.forEach(function(m){
+    if(!byProfile[m.perfilId])byProfile[m.perfilId]=[];
+    byProfile[m.perfilId].push(m);
+  });
+
+  var html='';
+  Object.keys(byProfile).forEach(function(pid){
+    var profile=perfis.find(function(x){return x.id===pid;});
+    var pMissoes=byProfile[pid];
+    var pDone=pMissoes.filter(function(m){return m.done;}).length;
+    var pPct=Math.round((pDone/pMissoes.length)*100);
+    html+='<div class="card" style="border-left:4px solid '+(profile?profile.cor:'#ccc')+'">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+    html+='<h3 style="font-size:1rem">'+(profile?esc(profile.nome):'Perfil desconhecido')+' '+(profile&&profile.apelido?'<span style="color:#888;font-weight:400">('+esc(profile.apelido)+')</span>':'')+'</h3>';
+    html+='<span style="font-size:.8rem;color:#888">'+pDone+'/'+pMissoes.length+' ('+pPct+'%)</span></div>';
+    html+='<div class="progress-bar"><div class="fill" style="width:'+pPct+'%"></div></div>';
+
+    pMissoes.forEach(function(m,mi){
+      var grupo=grupos.find(function(x){return x.id===m.grupoId;});
+      var mIdx=missoes.findIndex(function(x){return x.id===m.id;});
+      html+='<div class="card mission-card'+(m.done?' done':'')+'" style="margin-top:12px">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
+      html+='<div><label style="cursor:pointer"><input type="checkbox" onchange="toggleMission('+mIdx+')" '+(m.done?'checked':'')+' style="margin-right:6px">'+
+        (grupo?esc(grupo.nome):'Grupo desconhecido')+'</label>';
+      if(grupo)html+=' <span class="badge" style="background:'+(catColors[grupo.categoria]||'#888')+'">'+esc(grupo.categoria)+'</span>';
+      html+='</div>';
+      html+='<span class="chip" style="background:'+(m.done?'var(--green)':'#ef6c00')+'">'+(m.done?'Concluida':'Pendente')+'</span></div>';
+
+      var tabId='mt_'+mIdx;
+      html+='<div class="tabs">';
+      html+='<button class="active" onclick="switchMTab(\''+tabId+'\',0,this)">Conteudo</button>';
+      html+='<button onclick="switchMTab(\''+tabId+'\',1,this)">Regras</button>';
+      html+='<button onclick="switchMTab(\''+tabId+'\',2,this)">WhatsApp</button>';
+      html+='</div>';
+
+      html+='<div id="'+tabId+'_0" class="tab-content active">';
+      html+='<div class="script-box">'+esc(m.conteudo)+'</div>';
+      html+='<button class="btn btn-secondary btn-sm" onclick="copyText(missoes['+mIdx+'].conteudo)">Copiar</button> ';
+      html+='<button class="btn btn-secondary btn-sm" onclick="regenMission('+mIdx+')">Regenerar</button>';
+      html+='</div>';
+
+      html+='<div id="'+tabId+'_1" class="tab-content">';
+      if(grupo){
+        html+='<p><strong>Permite links:</strong> '+(grupo.permiteLinks==='sim'?'Sim':'Nao')+'</p>';
+        html+='<p><strong>Moderacao:</strong> '+esc(grupo.moderacao||'N/A')+'</p>';
+        html+='<p><strong>Regras:</strong></p><div class="script-box">'+(grupo.regras?esc(grupo.regras):'Sem regras cadastradas')+'</div>';
+      }else{html+='<p style="color:#999">Grupo nao encontrado</p>';}
+      html+='</div>';
+
+      html+='<div id="'+tabId+'_2" class="tab-content">';
+      var whatsScript='Oi! Vi seu comentario no grupo '+(grupo?'"'+grupo.nome+'"':'')+'.\n\nVoce mencionou que esta com o nome negativado. Sabia que existe uma forma legal de resolver isso?\n\nPosso te explicar rapidinho como funciona?';
+      html+='<div class="script-box">'+esc(whatsScript)+'</div>';
+      html+='<button class="btn btn-secondary btn-sm" onclick="copyText(\''+escJs(whatsScript)+'\')">Copiar</button>';
+      html+='</div>';
+
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+
+  if(!missoes.length)html='<div class="card" style="text-align:center;padding:40px;color:#999"><p>Nenhuma missao gerada.</p><p style="margin-top:8px">Cadastre perfis e grupos, depois clique em "Gerar Missoes".</p></div>';
+  document.getElementById('missionList').innerHTML=html;
+}
+
+function switchMTab(prefix,idx,btn){
+  for(var i=0;i<3;i++){
+    var el=document.getElementById(prefix+'_'+i);
+    if(el)el.classList.toggle('active',i===idx);
+  }
+  var tabs=btn.parentElement.querySelectorAll('button');
+  tabs.forEach(function(t,ti){t.classList.toggle('active',ti===idx);});
+}
+
+function toggleMission(idx){
+  missoes[idx].done=!missoes[idx].done;
+  save('nle_ms',missoes);
+  saveToHistory();
+  renderMissoes();
+}
+
+function regenMission(idx){
+  var m=missoes[idx];
+  var grupo=grupos.find(function(x){return x.id===m.grupoId;});
+  var allowLink=grupo?grupo.permiteLinks:'sim';
+  var result=genContent(m.tipo,allowLink,config.wave||1);
+  missoes[idx].conteudo=result.text;
+  missoes[idx].dna=result.dna;
+  save('nle_ms',missoes);
+  renderMissoes();
+  toast('Conteudo regenerado!');
+}
+
+/* ==================== SCRIPTS WHATSAPP ==================== */
+function renderScripts(){
+  var keys=Object.keys(SCRIPTS);
+  var tabsHtml='';
+  var contentHtml='';
+  keys.forEach(function(key,ki){
+    var s=SCRIPTS[key];
+    tabsHtml+='<button class="'+(ki===0?'active':'')+'" onclick="switchScriptTab('+ki+',this)">'+s.title+'</button>';
+    contentHtml+='<div id="script_'+ki+'" class="tab-content'+(ki===0?' active':'')+'">';
+    s.variants.forEach(function(v){
+      contentHtml+='<div class="card"><h4 style="font-size:.9rem;margin-bottom:8px">'+esc(v.label)+'</h4>';
+      contentHtml+='<div class="script-box">'+esc(v.text)+'</div>';
+      contentHtml+='<button class="btn btn-secondary btn-sm" onclick="copyText(\''+escJs(v.text)+'\')">Copiar</button>';
+      contentHtml+='</div>';
+    });
+    contentHtml+='</div>';
+  });
+  document.getElementById('scriptTabs').innerHTML=tabsHtml;
+  document.getElementById('scriptContent').innerHTML=contentHtml;
+}
+
+function switchScriptTab(idx,btn){
+  var keys=Object.keys(SCRIPTS);
+  keys.forEach(function(_,i){
+    var el=document.getElementById('script_'+i);
+    if(el)el.classList.toggle('active',i===idx);
+  });
+  btn.parentElement.querySelectorAll('button').forEach(function(b,bi){b.classList.toggle('active',bi===idx);});
+}
+
+/* ==================== GERADOR ==================== */
+var lastGenResult=null;
+function gerarConteudo(){
+  var type=document.getElementById('genType').value;
+  var wave=parseInt(document.getElementById('genWave').value);
+  var noLink=document.getElementById('genNoLink').checked;
+  var allowLink=noLink?'nao':'sim';
+  lastGenResult=genContent(type,allowLink,wave);
+  document.getElementById('genOutput').textContent=lastGenResult.text;
+  var d=lastGenResult.dna;
+  document.getElementById('genDna').style.display='block';
+  document.getElementById('genDna').innerHTML='<strong>DNA do Conteudo:</strong> Tipo='+d.type+' | Onda='+d.wave+' | Links='+d.allowLink+' | Abertura #'+d.openingIdx+' | Corpo #'+d.body1Idx+'+#'+d.body2Idx+' | Fechamento #'+d.closingIdx;
+}
+function copiarGen(){
+  if(!lastGenResult){toast('Gere um conteudo primeiro');return;}
+  copyText(lastGenResult.text);
+}
+
+/* ==================== CONFIG ==================== */
+function renderConfig(){
+  document.getElementById('cfgWhats').value=config.whatsapp||'5511999999999';
+  document.getElementById('cfgWave').value=config.wave||1;
+  document.getElementById('cfgDay').value=config.day||1;
+}
+
+function salvarConfig(){
+  config.whatsapp=document.getElementById('cfgWhats').value.trim()||'5511999999999';
+  config.wave=parseInt(document.getElementById('cfgWave').value)||1;
+  config.day=parseInt(document.getElementById('cfgDay').value)||1;
+  save('nle_cfg',config);
+  toast('Configuracoes salvas!');
+}
+
+function exportData(){
+  var data={perfis:perfis,grupos:grupos,missoes:missoes,dist:dist,config:config,historico:historico};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='nle_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  toast('Dados exportados!');
+}
+
+function importData(event){
+  var file=event.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(data.perfis)perfis=data.perfis;
+      if(data.grupos)grupos=data.grupos;
+      if(data.missoes)missoes=data.missoes;
+      if(data.dist)dist=data.dist;
+      if(data.config)config=data.config;
+      if(data.historico)historico=data.historico;
+      save('nle_pf',perfis);save('nle_gr',grupos);save('nle_ms',missoes);
+      save('nle_dist',dist);save('nle_cfg',config);save('nle_hist',historico);
+      toast('Dados importados com sucesso!');
+      goTo('config');
+    }catch(err){toast('Erro ao importar: arquivo invalido');}
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+function resetData(){
+  if(!confirm('ATENCAO: Isso vai apagar TODOS os dados. Tem certeza?'))return;
+  if(!confirm('Ultima chance: realmente deseja resetar tudo?'))return;
+  perfis=[];grupos=[];missoes=[];dist=[];historico=[];
+  config={whatsapp:'5511999999999',wave:1,day:1};
+  save('nle_pf',perfis);save('nle_gr',grupos);save('nle_ms',missoes);
+  save('nle_dist',dist);save('nle_cfg',config);save('nle_hist',historico);
+  toast('Todos os dados foram resetados.');
+  goTo('config');
+}
+
+/* ==================== METRICAS ==================== */
+function saveToHistory(){
+  var today=new Date().toISOString().slice(0,10);
+  var total=missoes.length;
+  var done=missoes.filter(function(m){return m.done;}).length;
+  var existing=historico.findIndex(function(h){return h.date===today;});
+  var entry={date:today,total:total,done:done,rate:total?Math.round((done/total)*100):0};
+  if(existing>-1){historico[existing]=entry;}else{historico.push(entry);}
+  save('nle_hist',historico);
+}
+
+function renderMetricas(){
+  var totalPosts=0,totalDays=historico.length,totalRate=0;
+  historico.forEach(function(h){totalPosts+=h.done;totalRate+=h.rate;});
+  var avgRate=totalDays?Math.round(totalRate/totalDays):0;
+
+  document.getElementById('metricStats').innerHTML=
+    '<div class="stat-card"><div class="val">'+totalPosts+'</div><div class="lbl">Total Posts</div></div>'+
+    '<div class="stat-card"><div class="val">'+totalDays+'</div><div class="lbl">Dias Ativos</div></div>'+
+    '<div class="stat-card"><div class="val">'+avgRate+'%</div><div class="lbl">Taxa Media</div></div>';
+
+  var last14=historico.slice(-14);
+  var maxVal=1;
+  last14.forEach(function(h){if(h.done>maxVal)maxVal=h.done;});
+  var chartHtml='';
+  if(last14.length){
+    last14.forEach(function(h){
+      var height=Math.max(4,Math.round((h.done/maxVal)*120));
+      chartHtml+='<div class="bar" style="height:'+height+'px" title="'+h.date+': '+h.done+' posts"><span>'+h.date.slice(5)+'</span></div>';
+    });
+  }else{
+    chartHtml='<p style="color:#999;width:100%;text-align:center;align-self:center">Sem dados ainda. Complete missoes para gerar metricas.</p>';
+  }
+  document.getElementById('metricChart').innerHTML=chartHtml;
+
+  var logHtml='';
+  var reversed=historico.slice().reverse();
+  if(reversed.length){
+    reversed.forEach(function(h){
+      logHtml+='<div class="list-item"><div><strong>'+h.date+'</strong></div><div>'+h.done+'/'+h.total+' ('+h.rate+'%)</div></div>';
+    });
+  }else{
+    logHtml='<p style="color:#999;text-align:center;padding:16px">Nenhum registro no historico.</p>';
+  }
+  document.getElementById('metricLog').innerHTML=logHtml;
+}
+
+/* ==================== HELPERS ==================== */
+function esc(s){if(!s)return'';var d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
+function escJs(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+/* ==================== INIT ==================== */
+buildSidebar();
+goTo('missoes');
+</script>
+</body>
+</html>

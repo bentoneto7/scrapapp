@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nome Limpo Express — Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;color:#333;min-height:100vh;}
+header{background:#1a237e;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+header h1{font-size:20px;font-weight:700;letter-spacing:.5px;}
+header span{font-size:12px;opacity:.7;}
+nav.tabs{background:#fff;display:flex;flex-wrap:wrap;border-bottom:2px solid #e0e0e0;padding:0 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+nav.tabs button{background:none;border:none;padding:12px 18px;font-size:14px;font-weight:600;color:#666;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;}
+nav.tabs button:hover{color:#1a237e;background:#f5f5ff;}
+nav.tabs button.active{color:#1a237e;border-bottom-color:#1a237e;}
+.container{max-width:1200px;margin:0 auto;padding:20px;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-left:4px solid #1a237e;}
+.stat-card.green{border-left-color:#2e7d32;}
+.stat-card.orange{border-left-color:#e65100;}
+.stat-card.purple{border-left-color:#6a1b9a;}
+.stat-card h3{font-size:13px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.stat-card .value{font-size:28px;font-weight:700;color:#1a237e;}
+.stat-card.green .value{color:#2e7d32;}
+.stat-card.orange .value{color:#e65100;}
+.stat-card.purple .value{color:#6a1b9a;}
+.card{background:#fff;border-radius:10px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:20px;}
+.card h2{font-size:18px;color:#1a237e;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #eee;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+table th{background:#f5f5ff;color:#1a237e;padding:10px 12px;text-align:left;font-weight:600;border-bottom:2px solid #e0e0e0;white-space:nowrap;}
+table td{padding:10px 12px;border-bottom:1px solid #f0f0f0;}
+table tr:hover{background:#fafafa;}
+table th.sortable{cursor:pointer;}
+table th.sortable:hover{background:#e8e8ff;}
+.btn{padding:8px 18px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:#1a237e;color:#fff;}
+.btn-primary:hover{background:#283593;}
+.btn-green{background:#2e7d32;color:#fff;}
+.btn-green:hover{background:#388e3c;}
+.btn-danger{background:#c62828;color:#fff;}
+.btn-danger:hover{background:#d32f2f;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-outline{background:transparent;border:1.5px solid #1a237e;color:#1a237e;}
+.btn-outline:hover{background:#f5f5ff;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit;transition:border .2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#1a237e;outline:none;box-shadow:0 0 0 3px rgba(26,35,126,.1);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-check{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.form-check input[type="checkbox"]{width:18px;height:18px;accent-color:#1a237e;}
+.sub-tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap;}
+.sub-tabs button{padding:8px 16px;border:1.5px solid #ddd;border-radius:20px;background:#fff;font-size:13px;font-weight:600;color:#666;cursor:pointer;transition:all .2s;}
+.sub-tabs button.active{background:#1a237e;color:#fff;border-color:#1a237e;}
+.sub-tabs button:hover:not(.active){background:#f5f5ff;border-color:#1a237e;color:#1a237e;}
+.sub-content{display:none;}
+.sub-content.active{display:block;}
+.generated-content{background:#f8f9fa;border:1.5px solid #e0e0e0;border-radius:8px;padding:16px;margin:14px 0;min-height:80px;white-space:pre-wrap;font-size:14px;line-height:1.6;}
+.gen-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.copy-toast{position:fixed;bottom:24px;right:24px;background:#2e7d32;color:#fff;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2);}
+.utm-result{background:#e8f5e9;border:2px solid #2e7d32;border-radius:8px;padding:16px;margin:14px 0;word-break:break-all;font-size:14px;font-family:monospace;}
+.filter-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;}
+.filter-row .form-group{margin-bottom:0;min-width:180px;}
+.filter-row input,.filter-row select{padding:8px 10px;font-size:13px;}
+.script-block{background:#f8f9fa;border-radius:8px;padding:18px;margin-bottom:16px;border-left:4px solid #1a237e;position:relative;}
+.script-block h4{color:#1a237e;margin-bottom:8px;font-size:15px;}
+.script-block pre{white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.6;color:#444;}
+.script-block .btn{position:absolute;top:12px;right:12px;}
+.empty-msg{text-align:center;padding:40px;color:#999;font-size:15px;}
+.actions-cell{display:flex;gap:6px;}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;}
+.badge-novo{background:#e3f2fd;color:#1565c0;}
+.badge-contato{background:#fff3e0;color:#e65100;}
+.badge-qualificado{background:#f3e5f5;color:#6a1b9a;}
+.badge-proposta{background:#e8f5e9;color:#2e7d32;}
+.badge-fechado{background:#2e7d32;color:#fff;}
+.badge-perdido{background:#ffebee;color:#c62828;}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:28px;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.modal h2{font-size:18px;color:#1a237e;margin-bottom:18px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+@media(max-width:768px){
+  header h1{font-size:16px;}
+  nav.tabs button{padding:10px 12px;font-size:12px;}
+  .container{padding:12px;}
+  .form-row{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  table{font-size:12px;}
+  table th,table td{padding:8px 6px;}
+  .filter-row{flex-direction:column;}
+  .filter-row .form-group{min-width:100%;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr;}
+  nav.tabs{justify-content:center;}
+  .sub-tabs{justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Nome Limpo Express &mdash; Dashboard</h1>
+  <span>Painel de Gerenciamento</span>
+</header>
+
+<nav class="tabs" id="mainTabs">
+  <button class="active" data-tab="dashboard">Dashboard</button>
+  <button data-tab="grupos">Grupos</button>
+  <button data-tab="gerador">Gerador</button>
+  <button data-tab="links">Links UTM</button>
+  <button data-tab="leads">Leads / CRM</button>
+  <button data-tab="scripts">Scripts</button>
+</nav>
+
+<div class="container">
+
+  <!-- ===================== TAB 1: DASHBOARD ===================== -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats-row" id="dashStats"></div>
+    <div class="card">
+      <h2>Leads Recentes (ultimos 10)</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Nome</th><th>WhatsApp</th><th>Situacao</th><th>Data</th><th>UTM Source</th></tr></thead>
+          <tbody id="dashLeadsBody"></tbody>
+        </table>
+      </div>
+      <div id="dashLeadsEmpty" class="empty-msg" style="display:none;">Nenhum lead registrado ainda.</div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB 2: GRUPOS ===================== -->
+  <div class="tab-content" id="tab-grupos">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="margin-bottom:0;border-bottom:none;padding-bottom:0;">Grupos do Facebook</h2>
+        <button class="btn btn-primary" onclick="openGroupModal()">+ Novo Grupo</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="groupsTable">
+          <thead><tr><th>Nome</th><th class="sortable" onclick="sortGroups()">Membros &#x25B2;&#x25BC;</th><th>Categoria</th><th>Link</th><th>Links?</th><th>Notas</th><th>Acoes</th></tr></thead>
+          <tbody id="groupsBody"></tbody>
+        </table>
+      </div>
+      <div id="groupsEmpty" class="empty-msg" style="display:none;">Nenhum grupo cadastrado ainda.</div>
+    </div>
+  </div>
+
+  <!-- MODAL: GRUPO -->
+  <div class="modal-overlay" id="groupModal">
+    <div class="modal">
+      <h2 id="groupModalTitle">Novo Grupo</h2>
+      <input type="hidden" id="groupEditId">
+      <div class="form-row">
+        <div class="form-group"><label>Nome do Grupo</label><input type="text" id="gNome" placeholder="Ex: Negativados Brasil"></div>
+        <div class="form-group"><label>Membros</label><input type="number" id="gMembros" placeholder="Ex: 50000"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Categoria</label>
+          <select id="gCategoria"><option value="negativados">Negativados</option><option value="credito">Credito</option><option value="mei">MEI</option><option value="financas">Financas</option><option value="imoveis">Imoveis</option><option value="emprego">Emprego</option><option value="geral">Geral</option></select>
+        </div>
+        <div class="form-group"><label>Link</label><input type="url" id="gLink" placeholder="https://facebook.com/groups/..."></div>
+      </div>
+      <div class="form-check"><input type="checkbox" id="gPermiteLinks"><label for="gPermiteLinks">Permite links nos posts</label></div>
+      <div class="form-group"><label>Notas</label><textarea id="gNotas" rows="3" placeholder="Observacoes sobre o grupo..."></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeGroupModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveGroup()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB 3: GERADOR ===================== -->
+  <div class="tab-content" id="tab-gerador">
+    <div class="sub-tabs" id="geradorSubTabs">
+      <button class="active" data-sub="genPosts">Posts</button>
+      <button data-sub="genComentarios">Comentarios</button>
+      <button data-sub="genInbox">Inbox</button>
+      <button data-sub="genObjecoes">Objecoes</button>
+    </div>
+
+    <!-- SUB: Posts -->
+    <div class="sub-content active" id="sub-genPosts">
+      <div class="card">
+        <h2>Gerador de Posts</h2>
+        <div class="gen-controls">
+          <div class="form-group" style="margin-bottom:0;min-width:160px;">
+            <label>Tipo</label>
+            <select id="postType"><option value="educativo">Educativo</option><option value="mito">Mito vs Verdade</option><option value="pergunta">Pergunta</option><option value="custo">Custo do Nome Sujo</option><option value="historia">Historia Real</option><option value="conversao">Conversao</option></select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;min-width:160px;">
+            <label>Tom</label>
+            <select id="postTone"><option value="informativo">Informativo</option><option value="empatico">Empatico</option><option value="direto">Direto</option><option value="provocativo">Provocativo</option></select>
+          </div>
+          <div style="display:flex;gap:8px;align-self:flex-end;">
+            <button class="btn btn-primary" onclick="generatePost()">Gerar Post</button>
+            <button class="btn btn-green" onclick="copyContent('postOutput')">Copiar</button>
+          </div>
+        </div>
+        <div class="generated-content" id="postOutput">Clique em "Gerar Post" para criar conteudo.</div>
+      </div>
+    </div>
+
+    <!-- SUB: Comentarios -->
+    <div class="sub-content" id="sub-genComentarios">
+      <div class="card">
+        <h2>Gerador de Comentarios</h2>
+        <div class="gen-controls">
+          <div class="form-group" style="margin-bottom:0;min-width:250px;">
+            <label>Contexto</label>
+            <select id="commentContext">
+              <option value="0">Alguem perguntando sobre divida</option>
+              <option value="1">Alguem reclamando do Serasa</option>
+              <option value="2">Alguem perguntando se servicos funcionam</option>
+              <option value="3">Discussao financeira geral</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-self:flex-end;">
+            <button class="btn btn-primary" onclick="generateComment()">Gerar Comentario</button>
+            <button class="btn btn-green" onclick="copyContent('commentOutput')">Copiar</button>
+          </div>
+        </div>
+        <div class="generated-content" id="commentOutput">Clique em "Gerar Comentario" para criar conteudo.</div>
+      </div>
+    </div>
+
+    <!-- SUB: Inbox -->
+    <div class="sub-content" id="sub-genInbox">
+      <div class="card">
+        <h2>Gerador de Mensagens (Inbox)</h2>
+        <div class="gen-controls">
+          <div class="form-group" style="margin-bottom:0;min-width:250px;">
+            <label>Estagio do Funil</label>
+            <select id="inboxStage">
+              <option value="0">Primeiro Contato</option>
+              <option value="1">Apos Interesse Demonstrado</option>
+              <option value="2">Apos Qualificacao</option>
+              <option value="3">Proposta</option>
+              <option value="4">Follow-up</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-self:flex-end;">
+            <button class="btn btn-primary" onclick="generateInbox()">Gerar Mensagem</button>
+            <button class="btn btn-green" onclick="copyContent('inboxOutput')">Copiar</button>
+          </div>
+        </div>
+        <div class="generated-content" id="inboxOutput">Clique em "Gerar Mensagem" para criar conteudo.</div>
+      </div>
+    </div>
+
+    <!-- SUB: Objecoes -->
+    <div class="sub-content" id="sub-genObjecoes">
+      <div class="card">
+        <h2>Respostas a Objecoes</h2>
+        <div class="gen-controls">
+          <div class="form-group" style="margin-bottom:0;min-width:250px;">
+            <label>Tipo de Objecao</label>
+            <select id="objectionType">
+              <option value="0">E caro / muito dinheiro</option>
+              <option value="1">Vou pensar / deixa eu ver</option>
+              <option value="2">Sera que funciona?</option>
+              <option value="3">Isso e golpe / fraude</option>
+              <option value="4">Ja tentei antes e nao deu</option>
+              <option value="5">Preciso consultar meu conjuge</option>
+              <option value="6">Nao tenho dinheiro agora</option>
+              <option value="7">Achei mais barato em outro lugar</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-self:flex-end;">
+            <button class="btn btn-primary" onclick="generateObjection()">Gerar Resposta</button>
+            <button class="btn btn-green" onclick="copyContent('objectionOutput')">Copiar</button>
+          </div>
+        </div>
+        <div class="generated-content" id="objectionOutput">Clique em "Gerar Resposta" para criar conteudo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB 4: LINKS UTM ===================== -->
+  <div class="tab-content" id="tab-links">
+    <div class="card">
+      <h2>Construtor de Links UTM</h2>
+      <div class="form-row">
+        <div class="form-group"><label>URL Base</label><input type="url" id="utmBase" value="https://seusite.com/nome-limpo"></div>
+        <div class="form-group"><label>utm_source</label><input type="text" id="utmSource" placeholder="Ex: facebook_grupo_negativados"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>utm_medium</label>
+          <select id="utmMedium"><option value="facebook">Facebook</option><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option><option value="organic">Organic</option></select>
+        </div>
+        <div class="form-group"><label>utm_campaign</label><input type="text" id="utmCampaign" placeholder="Ex: lancamento_fev"></div>
+      </div>
+      <div class="form-group"><label>utm_group (opcional)</label><input type="text" id="utmGroup" placeholder="Ex: negativados_brasil_50k"></div>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn btn-primary" onclick="generateUTM()">Gerar Link</button>
+        <button class="btn btn-green" onclick="copyUTM()">Copiar Link</button>
+      </div>
+      <div class="utm-result" id="utmResult" style="display:none;"></div>
+    </div>
+    <div class="card">
+      <h2>Historico de Links</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Link Gerado</th><th>Source</th><th>Medium</th><th>Campaign</th><th>Data</th><th>Acoes</th></tr></thead>
+          <tbody id="linksBody"></tbody>
+        </table>
+      </div>
+      <div id="linksEmpty" class="empty-msg" style="display:none;">Nenhum link gerado ainda.</div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB 5: LEADS / CRM ===================== -->
+  <div class="tab-content" id="tab-leads">
+    <div class="stats-row" id="leadsStats"></div>
+    <div class="card">
+      <h2>Gerenciamento de Leads</h2>
+      <div class="filter-row">
+        <div class="form-group"><label>Buscar por Nome</label><input type="text" id="leadSearch" placeholder="Digite o nome..." oninput="renderLeads()"></div>
+        <div class="form-group"><label>Filtrar Situacao</label>
+          <select id="leadFilterSit" onchange="renderLeads()"><option value="">Todas</option><option value="novo">Novo</option><option value="contato">Contato</option><option value="qualificado">Qualificado</option><option value="proposta">Proposta</option><option value="fechado">Fechado</option><option value="perdido">Perdido</option></select>
+        </div>
+        <div class="form-group"><label>Filtrar Necessidade</label>
+          <select id="leadFilterNec" onchange="renderLeads()"><option value="">Todas</option><option value="limpeza_nome">Limpeza de Nome</option><option value="rating_bancario">Rating Bancario</option><option value="bacen_scr">BACEN/SCR</option><option value="consultoria">Consultoria</option></select>
+        </div>
+        <button class="btn btn-green" onclick="exportCSV()" style="align-self:flex-end;">Exportar CSV</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Nome</th><th>WhatsApp</th><th>Situacao</th><th>Necessidade</th><th>UTM Source</th><th>UTM Campaign</th><th>Data</th></tr></thead>
+          <tbody id="leadsBody"></tbody>
+        </table>
+      </div>
+      <div id="leadsEmpty" class="empty-msg" style="display:none;">Nenhum lead encontrado.</div>
+    </div>
+  </div>
+
+  <!-- ===================== TAB 6: SCRIPTS ===================== -->
+  <div class="tab-content" id="tab-scripts">
+    <div class="sub-tabs" id="scriptsSubTabs">
+      <button class="active" data-sub="scrAbordagem">Abordagem</button>
+      <button data-sub="scrQualificacao">Qualificacao</button>
+      <button data-sub="scrFechamento">Fechamento</button>
+      <button data-sub="scrUpsell">Upsell</button>
+    </div>
+
+    <!-- SUB: Abordagem -->
+    <div class="sub-content active" id="sub-scrAbordagem">
+      <div class="card">
+        <h2>Scripts de Abordagem (Primeiro Contato)</h2>
+        <div class="script-block" id="scrAb1">
+          <h4>Variante 1 — Abordagem Consultiva</h4>
+          <button class="btn btn-sm btn-green" onclick="copyScript('scrAb1')">Copiar</button>
+          <pre>Oi [NOME], tudo bem? Vi que voce demonstrou interesse em regularizar sua situacao financeira.
+
+Eu trabalho com analise de negativacoes e ja ajudei muita gente a resolver isso de forma legal.
+
+Posso te fazer algumas perguntas rapidas pra entender seu caso? Sem compromisso nenhum.
+
+Muitas vezes a pessoa tem direitos que nem sabe.</pre>
+        </div>
+        <div class="script-block" id="scrAb2">
+          <h4>Variante 2 — Abordagem Direta</h4>
+          <button class="btn btn-sm btn-green" onclick="copyScript('scrAb2')">Copiar</button>
+          <pre>Oi [NOME]! Vi seu comentario sobre nome negativado.
+
+Sabia que em muitos casos a negativacao pode ser irregular? A lei exige notificacao previa, e quando isso nao acontece, o consumidor tem direitos.
+
+Quer que eu faca uma analise gratuita do seu caso? E rapido e sem compromisso.</pre>
+        </div>
+        <div class="script-block" id="scrAb3">
+          <h4>Variante 3 — Abordagem Empatica</h4>
+          <button class="btn btn-sm btn-green" onclick="copyScript('scrAb3')">Copiar</button>
+          <pre>Oi [NOME], tudo bem?
+
+Sei como e dificil estar com o nome negativado. Alem do constrangimento, fecha muitas portas ne?
+
+Trabalho ajudando pessoas nessa situacao e queria te mostrar que existem caminhos legais pra resolver isso.
+
+Posso te explicar como funciona? Sem custo nenhum pra essa primeira conversa.</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB: Qualificacao -->
+    <div class="sub-content" id="sub-scrQualificacao">
+      <div class="card">
+        <h2>Script de Qualificacao</h2>
+        <div class="script-block" id="scrQual">
+          <h4>6 Perguntas de Qualificacao</h4>
+          <button class="btn btn-sm btn-green" onclick="copyScript('scrQual')">Copiar</button>
+          <pre>QUALIFICACAO — Perguntas e Orientacao
+
+1. Ha quanto tempo voce esta negativado(a)?
+   [Se mais de 5 anos: verificar prescricao — forte argumento]
+   [Se recente: verificar notificacao previa]
+
+2. Voce sabe quais empresas te negativaram?
+   [Anotar todas. Verificar se sao dividas reais ou fraude]
+
+3. Voce foi notificado(a) por carta antes da negativacao?
+   [Se nao: irregularidade clara — base legal forte]
+
+4. Ja tentou resolver diretamente com a empresa?
+   [Se sim e nao resolveu: demonstra boa-fe do consumidor]
+
+5. O que a negativacao esta te impedindo de fazer hoje?
+   [Identificar dor principal: credito, aluguel, emprego, etc.]
+   [Usar essa dor na argumentacao de valor]
+
+6. Se existisse uma forma legal de resolver isso, com garantia, voce teria interesse?
+   [Pergunta de fechamento — mede o nivel de interesse]
+   [Se sim: encaminhar para proposta]
+   [Se hesitar: trabalhar objecoes]</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB: Fechamento -->
+    <div class="sub-content" id="sub-scrFechamento">
+      <div class="card">
+        <h2>Script de Fechamento</h2>
+        <div class="script-block" id="scrFech">
+          <h4>Fechamento com Ancoragem de Valor</h4>
+          <button class="btn btn-sm btn-green" onclick="copyScript('scrFech')">Copiar</button>
+          <pre>FECHAMENTO — Ancoragem de Valor
+
+[NOME], vou te resumir o que encontramos:
+
+Analisando seu caso, identificamos [X] negativacoes que apresentam irregularidades. Isso significa que voce tem base legal forte pra contestar.
+
+Vou te dar uma perspectiva de valor:
+
+Um advogado especializado cobra entre R$2.000 e R$5.000 por caso.
+Renegociar direto com o credor pode custar R$X.XXX (o valor da divida).
+Ficar negativado te custa em media R$300-500/mes em juros maiores, credito negado, oportunidades perdidas.
+
+Nosso servico de Limpeza de Nome custa R$650.
+
+Formas de pagamento:
+- A vista: R$650 (via PIX com 5% de desconto = R$617,50)
+- 2x de R$325
+- 3x de R$217
+- Cartao de credito: ate 6x de R$108,33
+
+Isso inclui:
+- Analise completa de todas as negativacoes
+- Contestacao administrativa e juridica
+- Acompanhamento ate a resolucao
+- Suporte via WhatsApp durante todo o processo
+
+A gente so trabalha com casos que tem base legal. Se na analise a gente vir que nao tem fundamento, eu te falo com transparencia.
+
+Quer seguir com a regularizacao?</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB: Upsell -->
+    <div class="sub-content" id="sub-scrUpsell">
+      <div class="card">
+        <h2>Scripts de Upsell</h2>
+        <div class="script-block" id="scrUp1">
+          <h4>Upsell: Rating Bancario — R$1.400</h4>
+          <button class="btn btn-sm btn-green" onclick="copyScript('scrUp1')">Copiar</button>
+          <pre>UPSELL — Rating Bancario (R$1.400)
+
+[NOME], agora que estamos resolvendo sua negativacao, quero te falar de algo que faz toda a diferenca.
+
+Limpar o nome no Serasa e o primeiro passo. Mas voce sabia que os bancos usam um sistema interno de classificacao?
+
+E o Rating Bancario — vai de AA (melhor) a H (pior). E isso que determina:
+- Se voce consegue credito
+- Qual limite recebe
+- Qual taxa de juros paga
+
+Mesmo com nome limpo, se seu rating estiver baixo, voce continua com credito restrito ou juros altissimos.
+
+Nosso servico de Rating Bancario inclui:
+- Analise do seu rating atual em todos os bancos
+- Estrategia personalizada pra melhorar sua classificacao
+- Orientacao sobre movimentacoes que aumentam seu score interno
+- Acompanhamento por 90 dias
+
+Investimento: R$1.400 (pode parcelar em ate 6x de R$233)
+
+Combinando com a Limpeza: R$650 + R$1.400 = R$2.050
+Pacote especial: R$1.800 (economia de R$250)
+
+E a diferenca entre ter nome limpo e realmente ter credito aprovado.</pre>
+        </div>
+        <div class="script-block" id="scrUp2">
+          <h4>Upsell: BACEN/SCR — R$8.000</h4>
+          <button class="btn btn-sm btn-green" onclick="copyScript('scrUp2')">Copiar</button>
+          <pre>UPSELL — BACEN/SCR (R$8.000)
+
+[NOME], pra quem precisa de um reset completo no sistema financeiro, existe um servico premium.
+
+O SCR (Sistema de Informacoes de Credito) do Banco Central registra TODAS as suas operacoes de credito. E o raio-X financeiro que os bancos consultam.
+
+Se voce tem historico de inadimplencia no SCR, mesmo com nome limpo e rating melhorado, bancos maiores vao restringir credito.
+
+O servico BACEN/SCR inclui:
+- Levantamento completo do seu historico no SCR
+- Identificacao de registros indevidos ou desatualizados
+- Contestacao formal junto ao Banco Central
+- Regularizacao de pendencias no Registrato
+- Estrategia juridica completa
+- Acompanhamento por 6 meses
+
+Investimento: R$8.000 (ate 12x de R$666,67)
+
+Esse e o servico mais completo que oferecemos. Indicado pra quem:
+- Precisa de credito alto (financiamento, capital de giro)
+- Tem historico complexo no sistema financeiro
+- Quer recomecar com ficha realmente limpa
+
+Pacote Completo (Limpeza + Rating + BACEN):
+De R$10.050 por R$8.500 (economia de R$1.550)
+
+Quer que eu analise se o seu caso precisa desse nivel de intervencao?</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="copy-toast" id="copyToast">Copiado com sucesso!</div>
+
+<script>
+/* ============================================================
+   CONTENT ENGINE (CE)
+   ============================================================ */
+var CE = {
+  openings: {
+    educativo: ['Informacao que pode mudar sua situacao financeira:', 'Pouca gente sabe disso, mas a lei te protege:', 'Voce sabia que existe um caminho legal?', '3 fatos que todo negativado precisa saber:', 'Importante pra quem ta com nome restrito:', 'Seu direito como consumidor:', 'Atencao pra essa informacao:', 'O que ninguem te conta sobre negativacao:', 'Fato pouco conhecido sobre o Serasa:', 'Uma informacao que vale ouro:'],
+    mito: ['MITO: "So pagando a divida o nome sai"', 'MITO: "Nome sujo e pra sempre"', 'MITO: "Quem deve nao tem direito"', 'MITO: "O Serasa decide quem fica negativado"', 'MITO: "Depois de 5 anos a divida some"', 'MITO: "Renegociar e a unica opcao"'],
+    pergunta: ['Pergunta pra quem ta com nome sujo:', 'Voce ja parou pra pensar nisso?', 'Me responde uma coisa:', 'Enquete rapida pra quem esta negativado:', 'Ja se perguntou por que seu credito e negado?', 'Teste rapido: voce sabe seus direitos?'],
+    custo: ['Ja calculou quanto o nome sujo te custa por mes?', 'O imposto invisivel de estar negativado:', 'A conta que ninguem faz:', 'Cada dia negativado custa dinheiro. Quanto?', 'A matematica cruel de estar com nome sujo:'],
+    historia: ['Caso real (anonimizado):', 'Isso aconteceu essa semana:', 'Historia que a gente ve todo dia:', 'Mais um caso resolvido:', 'Situacao que se repete muito:'],
+    conversao: ['Resultado da semana:', 'Pra quem quer resolver de verdade:', 'Oportunidade pra quem ta negativado:', 'Analise gratuita disponivel:', 'Ultimas vagas dessa semana:'],
+    comentario: ['Isso tem solucao legal.', 'Muita gente nao sabe, mas:', 'Pela minha experiencia:', 'So pra complementar:', 'Boa pergunta. O que eu sei e:']
+  },
+  bodies: [
+    'O Codigo de Defesa do Consumidor (art. 43) exige que voce seja NOTIFICADO antes de qualquer negativacao. Se nao foi, a inclusao pode ser irregular.',
+    'Nenhuma negativacao pode permanecer nos orgaos de protecao por mais de 5 anos. Se a sua tem mais que isso, ela esta la de forma ilegal.',
+    'A LGPD (art. 18) te da direito de corrigir dados incorretos em qualquer cadastro financeiro, incluindo Serasa, SPC e Boa Vista.',
+    'A Sumula 548 do STJ e clara: se voce pagou e o credor nao retirou em 5 dias, cabe indenizacao por dano moral.',
+    'Dever nao anula seus direitos. O credor tem obrigacoes legais no processo de negativacao. Quando nao cumpre, o consumidor pode contestar.',
+    'Muita gente confunde renegociar com limpar nome. Sao coisas diferentes. Limpar e verificar se a negativacao seguiu a lei.',
+    'Os bancos classificam voce internamente de AA a H. Nome limpo no Serasa NAO garante bom rating bancario.',
+    'O SCR do Banco Central registra TODAS as operacoes de credito. E la que os bancos realmente olham antes de aprovar.',
+    'A prescricao da divida (5 anos, art. 206 CC) impede cobranca judicial. Mas a negativacao tem prazo proprio no art. 43 CDC.',
+    'Consulte o Registrato (registrato.bcb.gov.br) gratuitamente. La voce ve tudo vinculado ao seu CPF no sistema financeiro.',
+    'Negativacao sem notificacao previa e irregular. E a base de milhares de decisoes judiciais favoraveis ao consumidor.',
+    'Pra MEI e empreendedores: o banco olha o CPF do titular, nao o CNPJ. Regularizar o CPF e investir no negocio.'
+  ],
+  closings: ['Conheca seus direitos.', 'Compartilha com quem precisa.', 'Guarda essa informacao.', 'Quem mais nao sabia disso?', 'A lei existe pra proteger voce.', 'Se serviu, passa pra frente.', 'Conhecimento e poder.', 'Qualquer duvida, comenta.', 'Informacao acessivel pra todos.'],
+  ctaSemLink: ['Se quiser entender seu caso, me chama no inbox.', 'Duvida? Me manda mensagem.', 'Quer saber se o seu caso tem solucao? Inbox aberto.', 'Me chama que te explico.'],
+  ctaComLink: ['Analise gratuita: me chama no WhatsApp (link na bio).', 'Quer resolver? Link do WhatsApp na bio.', 'Me chama no inbox ou no WhatsApp pra analise gratis.'],
+  connectors: ['\n\n', '\n\nOu seja: ', '\n\nNa pratica: ', '\n\nResumo: ', '\n\nIsso significa que: ', '\n\n']
+};
+
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+
+/* ============================================================
+   STORAGE HELPERS
+   ============================================================ */
+function getStore(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e) { return []; }
+}
+function setStore(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+/* ============================================================
+   TAB NAVIGATION
+   ============================================================ */
+document.querySelectorAll('#mainTabs button').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#mainTabs button').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'dashboard') refreshDashboard();
+    if (btn.dataset.tab === 'grupos') renderGroups();
+    if (btn.dataset.tab === 'links') renderLinks();
+    if (btn.dataset.tab === 'leads') refreshLeadsTab();
+  });
+});
+
+function initSubTabs(containerId) {
+  var container = document.getElementById(containerId);
+  container.querySelectorAll('button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      container.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+      var parent = container.parentElement;
+      parent.querySelectorAll('.sub-content').forEach(function(s) { s.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('sub-' + btn.dataset.sub).classList.add('active');
+    });
+  });
+}
+initSubTabs('geradorSubTabs');
+initSubTabs('scriptsSubTabs');
+
+/* ============================================================
+   CLIPBOARD
+   ============================================================ */
+function showToast(msg) {
+  var t = document.getElementById('copyToast');
+  t.textContent = msg || 'Copiado com sucesso!';
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 2000);
+}
+
+function copyContent(elId) {
+  var el = document.getElementById(elId);
+  var text = el.textContent || el.innerText;
+  if (text && text !== 'Clique em' && text.indexOf('Clique em') !== 0) {
+    navigator.clipboard.writeText(text).then(function() { showToast(); }).catch(function() {
+      fallbackCopy(text);
+    });
+  }
+}
+
+function copyUTM() {
+  var el = document.getElementById('utmResult');
+  if (el.style.display !== 'none') {
+    navigator.clipboard.writeText(el.textContent).then(function() { showToast(); }).catch(function() {
+      fallbackCopy(el.textContent);
+    });
+  }
+}
+
+function copyScript(blockId) {
+  var block = document.getElementById(blockId);
+  var pre = block.querySelector('pre');
+  if (pre) {
+    navigator.clipboard.writeText(pre.textContent).then(function() { showToast(); }).catch(function() {
+      fallbackCopy(pre.textContent);
+    });
+  }
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast(); } catch(e) { showToast('Erro ao copiar.'); }
+  document.body.removeChild(ta);
+}
+
+/* ============================================================
+   TAB 1: DASHBOARD
+   ============================================================ */
+function refreshDashboard() {
+  var leads = getStore('nle_leads');
+  var groups = getStore('nle_groups');
+  var now = new Date();
+  var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  var leadsThisWeek = leads.filter(function(l) { return new Date(l.data) >= weekAgo; }).length;
+  var postsGenerated = parseInt(localStorage.getItem('nle_posts_count') || '0');
+
+  document.getElementById('dashStats').innerHTML =
+    '<div class="stat-card"><h3>Total de Leads</h3><div class="value">' + leads.length + '</div></div>' +
+    '<div class="stat-card green"><h3>Leads Esta Semana</h3><div class="value">' + leadsThisWeek + '</div></div>' +
+    '<div class="stat-card orange"><h3>Total de Grupos</h3><div class="value">' + groups.length + '</div></div>' +
+    '<div class="stat-card purple"><h3>Posts Gerados</h3><div class="value">' + postsGenerated + '</div></div>';
+
+  var tbody = document.getElementById('dashLeadsBody');
+  var empty = document.getElementById('dashLeadsEmpty');
+  tbody.innerHTML = '';
+
+  if (leads.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  var recent = leads.slice().sort(function(a, b) { return new Date(b.data) - new Date(a.data); }).slice(0, 10);
+  recent.forEach(function(l) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + esc(l.nome) + '</td><td>' + esc(l.whatsapp) + '</td><td><span class="badge badge-' + (l.situacao || 'novo') + '">' + esc(l.situacao || 'novo') + '</span></td><td>' + formatDate(l.data) + '</td><td>' + esc(l.utm_source || '-') + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+/* ============================================================
+   TAB 2: GRUPOS (CRUD)
+   ============================================================ */
+var groupSortAsc = true;
+
+function renderGroups() {
+  var groups = getStore('nle_groups');
+  var tbody = document.getElementById('groupsBody');
+  var empty = document.getElementById('groupsEmpty');
+  tbody.innerHTML = '';
+
+  if (groups.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  groups.sort(function(a, b) {
+    return groupSortAsc ? (b.membros - a.membros) : (a.membros - b.membros);
+  });
+
+  groups.forEach(function(g, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + esc(g.nome) + '</td>' +
+      '<td>' + formatNum(g.membros) + '</td>' +
+      '<td>' + esc(g.categoria) + '</td>' +
+      '<td>' + (g.link ? '<a href="' + esc(g.link) + '" target="_blank" style="color:#1a237e;">Abrir</a>' : '-') + '</td>' +
+      '<td>' + (g.permiteLinks ? 'Sim' : 'Nao') + '</td>' +
+      '<td>' + esc(g.notas || '-') + '</td>' +
+      '<td><div class="actions-cell">' +
+        '<button class="btn btn-sm btn-outline" onclick="editGroup(' + i + ')">Editar</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteGroup(' + i + ')">Excluir</button>' +
+      '</div></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function sortGroups() {
+  groupSortAsc = !groupSortAsc;
+  renderGroups();
+}
+
+function openGroupModal(idx) {
+  document.getElementById('groupModal').classList.add('show');
+  document.getElementById('groupModalTitle').textContent = idx !== undefined ? 'Editar Grupo' : 'Novo Grupo';
+  document.getElementById('groupEditId').value = idx !== undefined ? idx : '';
+  if (idx !== undefined) {
+    var g = getStore('nle_groups')[idx];
+    document.getElementById('gNome').value = g.nome || '';
+    document.getElementById('gMembros').value = g.membros || '';
+    document.getElementById('gCategoria').value = g.categoria || 'geral';
+    document.getElementById('gLink').value = g.link || '';
+    document.getElementById('gPermiteLinks').checked = !!g.permiteLinks;
+    document.getElementById('gNotas').value = g.notas || '';
+  } else {
+    document.getElementById('gNome').value = '';
+    document.getElementById('gMembros').value = '';
+    document.getElementById('gCategoria').value = 'negativados';
+    document.getElementById('gLink').value = '';
+    document.getElementById('gPermiteLinks').checked = false;
+    document.getElementById('gNotas').value = '';
+  }
+}
+
+function closeGroupModal() {
+  document.getElementById('groupModal').classList.remove('show');
+}
+
+function saveGroup() {
+  var nome = document.getElementById('gNome').value.trim();
+  var membros = parseInt(document.getElementById('gMembros').value) || 0;
+  var categoria = document.getElementById('gCategoria').value;
+  var link = document.getElementById('gLink').value.trim();
+  var permiteLinks = document.getElementById('gPermiteLinks').checked;
+  var notas = document.getElementById('gNotas').value.trim();
+  if (!nome) { alert('Preencha o nome do grupo.'); return; }
+  var groups = getStore('nle_groups');
+  var editId = document.getElementById('groupEditId').value;
+  var obj = { nome: nome, membros: membros, categoria: categoria, link: link, permiteLinks: permiteLinks, notas: notas };
+  if (editId !== '') {
+    groups[parseInt(editId)] = obj;
+  } else {
+    groups.push(obj);
+  }
+  setStore('nle_groups', groups);
+  closeGroupModal();
+  renderGroups();
+}
+
+function editGroup(idx) {
+  openGroupModal(idx);
+}
+
+function deleteGroup(idx) {
+  if (confirm('Tem certeza que deseja excluir este grupo?')) {
+    var groups = getStore('nle_groups');
+    groups.splice(idx, 1);
+    setStore('nle_groups', groups);
+    renderGroups();
+  }
+}
+
+/* ============================================================
+   TAB 3: GERADOR — Posts
+   ============================================================ */
+var toneModifiers = {
+  informativo: { prefix: '', suffix: '' },
+  empatico: { prefix: 'Eu sei como e dificil essa situacao. Mas quero te mostrar algo:\n\n', suffix: '\n\nVoce nao esta sozinho(a) nessa.' },
+  direto: { prefix: 'Direto ao ponto:\n\n', suffix: '\n\nE isso. Sem enrolacao.' },
+  provocativo: { prefix: 'Voce precisa ler isso:\n\n', suffix: '\n\nVai continuar sem saber dos seus direitos?' }
+};
+
+function generatePost() {
+  var type = document.getElementById('postType').value;
+  var tone = document.getElementById('postTone').value;
+  var mod = toneModifiers[tone];
+  var opening = pick(CE.openings[type]);
+  var body = pick(CE.bodies);
+  var connector = pick(CE.connectors);
+  var closing = pick(CE.closings);
+  var cta = pick(CE.ctaSemLink);
+  var post = mod.prefix + opening + connector + body + '\n\n' + closing + '\n\n' + cta + mod.suffix;
+  document.getElementById('postOutput').textContent = post;
+  var count = parseInt(localStorage.getItem('nle_posts_count') || '0');
+  localStorage.setItem('nle_posts_count', count + 1);
+}
+
+/* ============================================================
+   TAB 3: GERADOR — Comentarios
+   ============================================================ */
+var commentContexts = [
+  { prefix: 'Sobre sua divida: ', extra: 'Ja verificou se a negativacao foi feita dentro da lei? Muita gente nao sabe, mas existe um processo legal que deve ser seguido.' },
+  { prefix: 'Sobre o Serasa: ', extra: 'O Serasa nao decide sozinho quem fica negativado. Quem solicita e a empresa credora, e ela tem obrigacoes legais nesse processo.' },
+  { prefix: 'Sobre servicos de limpeza de nome: ', extra: 'Existem sim servicos serios que analisam a legalidade da negativacao. Nao e magica, e analise juridica dos seus direitos como consumidor.' },
+  { prefix: '', extra: 'Complementando a discussao com um ponto importante que muita gente desconhece:' }
+];
+
+function generateComment() {
+  var ctx = parseInt(document.getElementById('commentContext').value);
+  var cc = commentContexts[ctx];
+  var opening = pick(CE.openings.comentario);
+  var body = pick(CE.bodies);
+  var cta = pick(CE.ctaSemLink);
+  var comment = opening + ' ' + cc.extra + '\n\n' + body + '\n\n' + cta;
+  document.getElementById('commentOutput').textContent = comment;
+}
+
+/* ============================================================
+   TAB 3: GERADOR — Inbox
+   ============================================================ */
+var inboxStages = [
+  function() {
+    return 'Oi! Vi que voce tem interesse em resolver sua situacao financeira.\n\n' +
+      pick(CE.bodies) + '\n\n' +
+      'Posso te ajudar a entender se o seu caso tem solucao. Quer me contar um pouco da sua situacao?';
+  },
+  function() {
+    return 'Que bom que voce tem interesse em resolver isso! Vou te explicar como funciona:\n\n' +
+      'A gente faz uma analise completa das suas negativacoes pra verificar se foram feitas dentro da lei.\n\n' +
+      pick(CE.bodies) + '\n\n' +
+      'Pra eu entender melhor seu caso, posso te fazer algumas perguntas rapidas?';
+  },
+  function() {
+    return 'Com base no que voce me contou, seu caso tem boas chances de resolucao.\n\n' +
+      'Identificamos pontos que indicam irregularidade na negativacao. ' + pick(CE.bodies) + '\n\n' +
+      'Quer que eu te apresente como podemos resolver isso de forma concreta?';
+  },
+  function() {
+    return 'Vou te apresentar nossa proposta:\n\n' +
+      'Servico: Limpeza de Nome (analise + contestacao juridica)\n' +
+      'Investimento: R$650\n' +
+      'Parcelamento: ate 6x de R$108,33\n' +
+      'A vista (PIX): R$617,50\n\n' +
+      'Inclui analise completa, contestacao e acompanhamento.\n\n' +
+      'A gente so segue com casos que tem base legal. Transparencia total.\n\n' +
+      'Quer seguir?';
+  },
+  function() {
+    return 'Oi! Passando pra saber se voce conseguiu pensar sobre a regularizacao do seu nome.\n\n' +
+      pick(CE.bodies) + '\n\n' +
+      'Cada dia negativado e mais oportunidades perdidas. A analise inicial e gratuita e rapida.\n\n' +
+      'Posso te ajudar com alguma duvida?';
+  }
+];
+
+function generateInbox() {
+  var stage = parseInt(document.getElementById('inboxStage').value);
+  document.getElementById('inboxOutput').textContent = inboxStages[stage]();
+}
+
+/* ============================================================
+   TAB 3: GERADOR — Objecoes
+   ============================================================ */
+var objections = [
+  function() {
+    return 'Entendo que R$650 parece muito. Mas vamos fazer uma conta rapida:\n\n' +
+      'Quanto voce perde por mes por estar negativado? Juros maiores no cartao, credito negado, aluguel que nao consegue...\n\n' +
+      'Em media, quem esta negativado perde R$300-500 por mes. Em 2 meses, ja gastou mais do que o servico custa.\n\n' +
+      'Alem disso, um advogado especializado cobra de R$2.000 a R$5.000 pelo mesmo trabalho.\n\n' +
+      'E a gente parcela em ate 6x. Quer que eu te mostre as opcoes?';
+  },
+  function() {
+    return 'Claro, sem problema! E uma decisao importante mesmo.\n\n' +
+      'So quero te deixar uma informacao: ' + pick(CE.bodies) + '\n\n' +
+      'Cada dia que passa negativado e dinheiro perdido. Mas entendo que voce precisa do seu tempo.\n\n' +
+      'Posso te mandar um resumo da analise por escrito pra voce avaliar com calma?';
+  },
+  function() {
+    return 'Pergunta justa! Vou te explicar:\n\n' +
+      'Nosso trabalho e baseado em leis reais: CDC (art. 43), LGPD (art. 18), Sumula 548 do STJ.\n\n' +
+      'A gente analisa se a negativacao seguiu o processo legal. Quando nao seguiu — e isso acontece em muitos casos — o consumidor tem direito a contestar.\n\n' +
+      'Nao e promessa magica. E analise juridica. Se o caso nao tiver base, a gente fala com transparencia.\n\n' +
+      'Quer que eu analise o seu caso sem compromisso?';
+  },
+  function() {
+    return 'Entendo a desconfianca. Infelizmente tem muita gente desonesta no mercado.\n\n' +
+      'Mas nosso trabalho e 100% baseado na legislacao brasileira. Posso te mostrar:\n\n' +
+      '- Codigo de Defesa do Consumidor (art. 43)\n- LGPD (art. 18)\n- Sumula 548 do STJ\n\n' +
+      'Sao leis publicas que qualquer pessoa pode consultar. O que a gente faz e aplicar esses direitos ao seu caso.\n\n' +
+      'A analise inicial e gratuita. Voce nao paga nada pra saber se tem direito. So segue quem quiser. Justo?';
+  },
+  function() {
+    return 'Entendo. E frustrante tentar e nao conseguir.\n\n' +
+      'Me conta: o que voce tentou antes? Renegociacao? Acordo direto?\n\n' +
+      'Renegociar e diferente de contestar a legalidade da negativacao. Muita gente tenta pagar ou negociar, mas nao verifica se a negativacao foi feita corretamente.\n\n' +
+      pick(CE.bodies) + '\n\n' +
+      'Pode ser que seu caso tenha uma saida que ainda nao foi explorada. Quer que eu verifique?';
+  },
+  function() {
+    return 'Claro! E importante que a decisao seja em conjunto.\n\n' +
+      'Pra facilitar, posso te mandar um resumo completo por escrito com:\n\n' +
+      '- O que encontramos na analise do seu caso\n- Como funciona o processo\n- Valores e formas de pagamento\n- Base legal que sustenta o trabalho\n\n' +
+      'Assim voce e seu(sua) conjuge podem avaliar juntos com todas as informacoes.\n\n' +
+      'Quer que eu prepare esse material?';
+  },
+  function() {
+    return 'Entendo a situacao. E justamente por isso que a gente oferece parcelamento:\n\n' +
+      '- 6x de R$108,33 no cartao\n- 3x de R$217\n- 2x de R$325\n\n' +
+      'Pensa assim: enquanto o nome ta sujo, voce paga mais caro em tudo. Juros maiores, credito negado, oportunidades perdidas.\n\n' +
+      'O investimento se paga rapido quando voce recupera o acesso ao credito.\n\n' +
+      'Alguma dessas opcoes funciona pra voce?';
+  },
+  function() {
+    return 'Legal que voce esta pesquisando! Isso e importante.\n\n' +
+      'Algumas perguntas pra voce avaliar o outro servico:\n\n' +
+      '1. Eles explicaram qual base legal usam?\n2. Fizeram uma analise do SEU caso especifico?\n3. O que esta incluso no valor? (analise, contestacao, acompanhamento?)\n4. Tem suporte durante o processo?\n\n' +
+      'As vezes o mais barato sai caro. O importante e que seja um servico serio, com base juridica.\n\n' +
+      'Se quiser, posso te explicar exatamente o que esta incluso no nosso servico pra voce comparar de forma justa.';
+  }
+];
+
+function generateObjection() {
+  var type = parseInt(document.getElementById('objectionType').value);
+  document.getElementById('objectionOutput').textContent = objections[type]();
+}
+
+/* ============================================================
+   TAB 4: LINKS UTM
+   ============================================================ */
+function generateUTM() {
+  var base = document.getElementById('utmBase').value.trim();
+  var source = document.getElementById('utmSource').value.trim();
+  var medium = document.getElementById('utmMedium').value;
+  var campaign = document.getElementById('utmCampaign').value.trim();
+  var group = document.getElementById('utmGroup').value.trim();
+
+  if (!base) { alert('Preencha a URL base.'); return; }
+  if (!source) { alert('Preencha o utm_source.'); return; }
+
+  var sep = base.indexOf('?') === -1 ? '?' : '&';
+  var url = base + sep + 'utm_source=' + encodeURIComponent(source) +
+    '&utm_medium=' + encodeURIComponent(medium);
+  if (campaign) url += '&utm_campaign=' + encodeURIComponent(campaign);
+  if (group) url += '&utm_group=' + encodeURIComponent(group);
+
+  document.getElementById('utmResult').textContent = url;
+  document.getElementById('utmResult').style.display = 'block';
+
+  var links = getStore('nle_links');
+  links.push({
+    url: url,
+    source: source,
+    medium: medium,
+    campaign: campaign || '-',
+    data: new Date().toISOString()
+  });
+  setStore('nle_links', links);
+  renderLinks();
+}
+
+function renderLinks() {
+  var links = getStore('nle_links');
+  var tbody = document.getElementById('linksBody');
+  var empty = document.getElementById('linksEmpty');
+  tbody.innerHTML = '';
+
+  if (links.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  links.slice().reverse().forEach(function(l, i) {
+    var tr = document.createElement('tr');
+    var idx = links.length - 1 - i;
+    tr.innerHTML =
+      '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:12px;" title="' + esc(l.url) + '">' + esc(l.url) + '</td>' +
+      '<td>' + esc(l.source) + '</td>' +
+      '<td>' + esc(l.medium) + '</td>' +
+      '<td>' + esc(l.campaign) + '</td>' +
+      '<td>' + formatDate(l.data) + '</td>' +
+      '<td><div class="actions-cell">' +
+        '<button class="btn btn-sm btn-green" onclick="copyLinkByIdx(' + idx + ')">Copiar</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteLink(' + idx + ')">Excluir</button>' +
+      '</div></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function copyLinkByIdx(idx) {
+  var links = getStore('nle_links');
+  if (links[idx]) {
+    navigator.clipboard.writeText(links[idx].url).then(function() { showToast(); }).catch(function() {
+      fallbackCopy(links[idx].url);
+    });
+  }
+}
+
+function deleteLink(idx) {
+  if (confirm('Excluir este link do historico?')) {
+    var links = getStore('nle_links');
+    links.splice(idx, 1);
+    setStore('nle_links', links);
+    renderLinks();
+  }
+}
+
+/* ============================================================
+   TAB 5: LEADS / CRM
+   ============================================================ */
+function refreshLeadsTab() {
+  renderLeadStats();
+  renderLeads();
+}
+
+function renderLeadStats() {
+  var leads = getStore('nle_leads');
+  var sitCounts = {};
+  var necCounts = {};
+  leads.forEach(function(l) {
+    var s = l.situacao || 'novo';
+    var n = l.necessidade || 'nao_informado';
+    sitCounts[s] = (sitCounts[s] || 0) + 1;
+    necCounts[n] = (necCounts[n] || 0) + 1;
+  });
+
+  var html = '<div class="stat-card"><h3>Total de Leads</h3><div class="value">' + leads.length + '</div></div>';
+  var sitLabels = { novo: 'Novos', contato: 'Em Contato', qualificado: 'Qualificados', proposta: 'Proposta', fechado: 'Fechados', perdido: 'Perdidos' };
+  var sitColors = ['', 'green', 'purple', 'orange', 'green', ''];
+  var sitKeys = ['novo', 'contato', 'qualificado', 'proposta', 'fechado', 'perdido'];
+  sitKeys.forEach(function(k, i) {
+    if (sitCounts[k]) {
+      html += '<div class="stat-card ' + sitColors[i] + '"><h3>' + sitLabels[k] + '</h3><div class="value">' + sitCounts[k] + '</div></div>';
+    }
+  });
+
+  var necLabels = { limpeza_nome: 'Limpeza de Nome', rating_bancario: 'Rating Bancario', bacen_scr: 'BACEN/SCR', consultoria: 'Consultoria' };
+  for (var nk in necLabels) {
+    if (necCounts[nk]) {
+      html += '<div class="stat-card purple"><h3>' + necLabels[nk] + '</h3><div class="value">' + necCounts[nk] + '</div></div>';
+    }
+  }
+  document.getElementById('leadsStats').innerHTML = html;
+}
+
+function renderLeads() {
+  var leads = getStore('nle_leads');
+  var search = (document.getElementById('leadSearch').value || '').toLowerCase();
+  var filterSit = document.getElementById('leadFilterSit').value;
+  var filterNec = document.getElementById('leadFilterNec').value;
+  var tbody = document.getElementById('leadsBody');
+  var empty = document.getElementById('leadsEmpty');
+  tbody.innerHTML = '';
+
+  var filtered = leads.filter(function(l) {
+    if (search && (l.nome || '').toLowerCase().indexOf(search) === -1) return false;
+    if (filterSit && (l.situacao || 'novo') !== filterSit) return false;
+    if (filterNec && (l.necessidade || '') !== filterNec) return false;
+    return true;
+  });
+
+  filtered.sort(function(a, b) { return new Date(b.data) - new Date(a.data); });
+
+  if (filtered.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  filtered.forEach(function(l) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + esc(l.nome) + '</td>' +
+      '<td>' + esc(l.whatsapp) + '</td>' +
+      '<td><span class="badge badge-' + (l.situacao || 'novo') + '">' + esc(l.situacao || 'novo') + '</span></td>' +
+      '<td>' + esc(l.necessidade || '-') + '</td>' +
+      '<td>' + esc(l.utm_source || '-') + '</td>' +
+      '<td>' + esc(l.utm_campaign || '-') + '</td>' +
+      '<td>' + formatDate(l.data) + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  renderLeadStats();
+}
+
+function exportCSV() {
+  var leads = getStore('nle_leads');
+  if (leads.length === 0) { alert('Nenhum lead para exportar.'); return; }
+  var headers = ['Nome', 'WhatsApp', 'Situacao', 'Necessidade', 'UTM Source', 'UTM Campaign', 'Data'];
+  var rows = [headers.join(';')];
+  leads.forEach(function(l) {
+    rows.push([
+      csvEsc(l.nome), csvEsc(l.whatsapp), csvEsc(l.situacao || 'novo'),
+      csvEsc(l.necessidade || ''), csvEsc(l.utm_source || ''), csvEsc(l.utm_campaign || ''),
+      csvEsc(formatDate(l.data))
+    ].join(';'));
+  });
+  var blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nle_leads_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('CSV exportado!');
+}
+
+function csvEsc(val) {
+  val = (val || '').toString();
+  if (val.indexOf(';') !== -1 || val.indexOf('"') !== -1 || val.indexOf('\n') !== -1) {
+    return '"' + val.replace(/"/g, '""') + '"';
+  }
+  return val;
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function esc(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(d) {
+  if (!d) return '-';
+  try {
+    var dt = new Date(d);
+    var day = ('0' + dt.getDate()).slice(-2);
+    var mon = ('0' + (dt.getMonth() + 1)).slice(-2);
+    var yr = dt.getFullYear();
+    var hr = ('0' + dt.getHours()).slice(-2);
+    var mn = ('0' + dt.getMinutes()).slice(-2);
+    return day + '/' + mon + '/' + yr + ' ' + hr + ':' + mn;
+  } catch(e) { return d; }
+}
+
+function formatNum(n) {
+  if (!n && n !== 0) return '-';
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+refreshDashboard();
+</script>
+</body>
+</html>
