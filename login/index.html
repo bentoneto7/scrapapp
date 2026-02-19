@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Login - NLE 2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-container{width:90%;max-width:400px}
+.login-box{background:#161b22;border:1px solid #30363d;border-radius:16px;padding:2.5rem 2rem;text-align:center}
+.logo{font-size:2rem;margin-bottom:.3rem;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
+.sub{color:#8b949e;font-size:.9rem;margin-bottom:2rem}
+.form-group{margin-bottom:1.2rem;text-align:left}
+.form-group label{display:block;font-size:.82rem;color:#8b949e;margin-bottom:.4rem;font-weight:500}
+.form-group input{width:100%;padding:.7rem .9rem;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:.95rem;outline:none;transition:border .2s}
+.form-group input:focus{border-color:#ffd740}
+.form-group input::placeholder{color:#484f58}
+.btn-login{width:100%;padding:.8rem;background:linear-gradient(135deg,#ffd740,#ff6d00);border:none;border-radius:8px;color:#000;font-weight:700;font-size:1rem;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
+.btn-login:hover{opacity:.9}
+.btn-login:disabled{opacity:.5;cursor:not-allowed}
+.error-msg{background:#f8514920;border:1px solid #f85149;color:#f85149;padding:.5rem .8rem;border-radius:6px;font-size:.82rem;margin-bottom:1rem;display:none}
+.info-box{margin-top:1.5rem;background:#1c2333;border:1px solid #30363d;border-radius:8px;padding:.8rem;font-size:.78rem;color:#8b949e;line-height:1.5}
+.info-box strong{color:#ffd740}
+.show-pass{display:flex;align-items:center;gap:.4rem;margin-top:.4rem;cursor:pointer;font-size:.78rem;color:#8b949e;user-select:none}
+.show-pass input{width:auto;margin:0}
+</style>
+</head>
+<body>
+<div class="login-container">
+  <div class="login-box">
+    <div class="logo">Nome Limpo Express</div>
+    <p class="sub">Acesse sua conta</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Login</label>
+        <input type="text" id="loginInput" placeholder="Seu login" autocomplete="username" required autofocus>
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="senhaInput" placeholder="Sua senha" autocomplete="current-password" required>
+        <label class="show-pass">
+          <input type="checkbox" id="showPass"> Mostrar senha
+        </label>
+      </div>
+      <button type="submit" class="btn-login" id="btnLogin">Entrar</button>
+    </form>
+
+    <div class="info-box">
+      <strong>Primeiro acesso?</strong><br>
+      Login: <strong>admin</strong> | Senha: <strong>admin123</strong><br>
+      Troque a senha no painel de administracao.
+    </div>
+  </div>
+</div>
+
+<script src="/shared/auth.js"></script>
+<script>
+// If already logged in, redirect
+if (NLE_AUTH.isLoggedIn()) {
+  window.location.href = '/';
+}
+
+const form = document.getElementById('loginForm');
+const errorMsg = document.getElementById('errorMsg');
+const showPass = document.getElementById('showPass');
+const senhaInput = document.getElementById('senhaInput');
+
+showPass.addEventListener('change', () => {
+  senhaInput.type = showPass.checked ? 'text' : 'password';
+});
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  errorMsg.style.display = 'none';
+
+  const login = document.getElementById('loginInput').value;
+  const senha = senhaInput.value;
+
+  if (!login || !senha) {
+    errorMsg.textContent = 'Preencha todos os campos';
+    errorMsg.style.display = 'block';
+    return;
+  }
+
+  const result = NLE_AUTH.login(login, senha);
+  if (result.ok) {
+    window.location.href = '/';
+  } else {
+    errorMsg.textContent = result.msg;
+    errorMsg.style.display = 'block';
+    senhaInput.value = '';
+    senhaInput.focus();
+  }
+});
+</script>
+</body>
+</html>

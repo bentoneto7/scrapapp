@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin - Gerenciar Usuarios - NLE 2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+.header a{color:#8b949e;text-decoration:none;font-size:.9rem}
+.header a:hover{color:#ffd740}
+.header h1{font-size:1.3rem;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.content{max-width:900px;margin:0 auto;padding:1.5rem}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+@media(max-width:600px){.stats-row{grid-template-columns:1fr}}
+.stat-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem;text-align:center}
+.stat-card .num{font-size:1.8rem;font-weight:700;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-card .label{font-size:.78rem;color:#8b949e;margin-top:.2rem}
+
+.section-title{font-size:1.2rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.btn{padding:.5rem 1rem;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,#ffd740,#ff6d00);color:#000}
+.btn-primary:hover{opacity:.9}
+.btn-danger{background:#f8514920;color:#f85149;border:1px solid #f85149}
+.btn-danger:hover{background:#f8514940}
+.btn-sm{padding:.3rem .7rem;font-size:.78rem}
+.btn-secondary{background:#30363d;color:#e6edf3}
+.btn-secondary:hover{background:#484f58}
+
+.user-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem}
+.user-table th{text-align:left;padding:.6rem .8rem;font-size:.78rem;color:#8b949e;border-bottom:1px solid #30363d;text-transform:uppercase;letter-spacing:.5px}
+.user-table td{padding:.7rem .8rem;border-bottom:1px solid #21262d;font-size:.88rem;vertical-align:middle}
+.user-table tr:hover td{background:#161b2280}
+
+.badge{padding:.15rem .5rem;border-radius:10px;font-size:.72rem;font-weight:600}
+.badge-admin{background:#1c2333;color:#58a6ff}
+.badge-vendedor{background:#1c3320;color:#2ea043}
+.badge-inativo{background:#3d1a1a;color:#f85149}
+.badge-ativo{background:#1c3320;color:#2ea043}
+
+.actions{display:flex;gap:.3rem}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:1.5rem;width:90%;max-width:450px}
+.modal h2{font-size:1.1rem;margin-bottom:1.2rem}
+.modal .form-group{margin-bottom:1rem}
+.modal label{display:block;font-size:.82rem;color:#8b949e;margin-bottom:.3rem;font-weight:500}
+.modal input,.modal select{width:100%;padding:.6rem .8rem;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:.9rem;outline:none}
+.modal input:focus,.modal select:focus{border-color:#ffd740}
+.modal-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.2rem}
+.modal .error{color:#f85149;font-size:.82rem;margin-top:.5rem;display:none}
+
+/* Leads overview */
+.leads-overview{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.2rem;margin-top:1.5rem}
+.leads-overview h3{font-size:1rem;margin-bottom:1rem}
+.lead-row{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #21262d;font-size:.85rem}
+.lead-row:last-child{border-bottom:none}
+.lead-bar{height:8px;background:#30363d;border-radius:4px;flex:1;margin:0 1rem;max-width:200px}
+.lead-bar-fill{height:100%;background:linear-gradient(90deg,#ffd740,#ff6d00);border-radius:4px;transition:width .3s}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/">← Voltar</a>
+  <h1>Gerenciar Usuarios</h1>
+</div>
+
+<div class="content">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="num" id="statTotal">0</div>
+      <div class="label">Usuarios</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="statAtivos">0</div>
+      <div class="label">Ativos</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="statLeads">0</div>
+      <div class="label">Total Leads</div>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span>Usuarios</span>
+    <button class="btn btn-primary" onclick="openModal()">+ Novo Usuario</button>
+  </div>
+
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Login</th>
+        <th>Cargo</th>
+        <th>Status</th>
+        <th>Leads</th>
+        <th>Criado em</th>
+        <th>Acoes</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody"></tbody>
+  </table>
+
+  <div class="leads-overview" id="leadsOverview">
+    <h3>Leads por Vendedor</h3>
+    <div id="leadsChart"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modalTitle">Novo Usuario</h2>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label>Nome completo</label>
+      <input type="text" id="mNome" placeholder="Ex: Joao Silva">
+    </div>
+    <div class="form-group">
+      <label>Login</label>
+      <input type="text" id="mLogin" placeholder="Ex: joao">
+    </div>
+    <div class="form-group">
+      <label id="mSenhaLabel">Senha</label>
+      <input type="password" id="mSenha" placeholder="Minimo 4 caracteres">
+    </div>
+    <div class="form-group">
+      <label>Cargo</label>
+      <select id="mRole">
+        <option value="vendedor">Vendedor</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <div class="error" id="modalError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnSave" onclick="saveUser()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<script src="/shared/auth.js"></script>
+<script>
+if (!NLE_AUTH.requireAdmin()) throw new Error('Not admin');
+
+function render() {
+  const users = NLE_AUTH.getUsers();
+  const session = NLE_AUTH.getSession();
+  const tbody = document.getElementById('userTableBody');
+  let totalLeads = 0;
+  const leadsPerUser = {};
+
+  users.forEach(u => {
+    const leads = NLE_AUTH.getDataForUser('nle_leads', u.id) || [];
+    leadsPerUser[u.id] = leads.length;
+    totalLeads += leads.length;
+  });
+
+  document.getElementById('statTotal').textContent = users.length;
+  document.getElementById('statAtivos').textContent = users.filter(u => u.ativo).length;
+  document.getElementById('statLeads').textContent = totalLeads;
+
+  tbody.innerHTML = users.map(u => {
+    const isMe = u.id === session.userId;
+    const dt = new Date(u.criadoEm).toLocaleDateString('pt-BR');
+    return `<tr>
+      <td>${u.nome}${isMe ? ' (voce)' : ''}</td>
+      <td>${u.login}</td>
+      <td><span class="badge badge-${u.role}">${u.role}</span></td>
+      <td><span class="badge badge-${u.ativo ? 'ativo' : 'inativo'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
+      <td>${leadsPerUser[u.id] || 0}</td>
+      <td>${dt}</td>
+      <td class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editUser('${u.id}')">Editar</button>
+        ${!isMe ? `<button class="btn btn-sm" style="background:none;color:${u.ativo ? '#f85149' : '#2ea043'};border:1px solid ${u.ativo ? '#f85149' : '#2ea043'};padding:.2rem .5rem" onclick="toggleActive('${u.id}',${!u.ativo})">${u.ativo ? 'Desativar' : 'Ativar'}</button>` : ''}
+        ${!isMe ? `<button class="btn btn-danger btn-sm" onclick="removeUser('${u.id}','${u.nome}')">Excluir</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Leads chart
+  const maxLeads = Math.max(1, ...Object.values(leadsPerUser));
+  const chart = document.getElementById('leadsChart');
+  chart.innerHTML = users.filter(u => u.ativo).map(u => `
+    <div class="lead-row">
+      <span>${u.nome}</span>
+      <div class="lead-bar"><div class="lead-bar-fill" style="width:${(leadsPerUser[u.id] || 0) / maxLeads * 100}%"></div></div>
+      <span>${leadsPerUser[u.id] || 0}</span>
+    </div>
+  `).join('');
+}
+
+function openModal(editing) {
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('modalError').style.display = 'none';
+  if (!editing) {
+    document.getElementById('modalTitle').textContent = 'Novo Usuario';
+    document.getElementById('btnSave').textContent = 'Criar';
+    document.getElementById('editId').value = '';
+    document.getElementById('mNome').value = '';
+    document.getElementById('mLogin').value = '';
+    document.getElementById('mSenha').value = '';
+    document.getElementById('mSenhaLabel').textContent = 'Senha';
+    document.getElementById('mRole').value = 'vendedor';
+    document.getElementById('mNome').focus();
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+function editUser(id) {
+  const user = NLE_AUTH.getUsers().find(u => u.id === id);
+  if (!user) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('modalTitle').textContent = 'Editar: ' + user.nome;
+  document.getElementById('btnSave').textContent = 'Salvar';
+  document.getElementById('mNome').value = user.nome;
+  document.getElementById('mLogin').value = user.login;
+  document.getElementById('mSenha').value = '';
+  document.getElementById('mSenhaLabel').textContent = 'Nova senha (deixe vazio pra manter)';
+  document.getElementById('mRole').value = user.role;
+  openModal(true);
+}
+
+function saveUser() {
+  const errEl = document.getElementById('modalError');
+  errEl.style.display = 'none';
+  const id = document.getElementById('editId').value;
+  const nome = document.getElementById('mNome').value.trim();
+  const login = document.getElementById('mLogin').value.trim();
+  const senha = document.getElementById('mSenha').value;
+  const role = document.getElementById('mRole').value;
+
+  if (!nome || !login) {
+    errEl.textContent = 'Nome e login sao obrigatorios';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  let result;
+  if (id) {
+    result = NLE_AUTH.updateUser(id, { nome, login, senha: senha || undefined, role });
+  } else {
+    if (!senha || senha.length < 4) {
+      errEl.textContent = 'Senha deve ter no minimo 4 caracteres';
+      errEl.style.display = 'block';
+      return;
+    }
+    result = NLE_AUTH.createUser(nome, login, senha, role);
+  }
+
+  if (!result.ok) {
+    errEl.textContent = result.msg;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  closeModal();
+  render();
+}
+
+function toggleActive(id, ativo) {
+  NLE_AUTH.updateUser(id, { ativo });
+  render();
+}
+
+function removeUser(id, nome) {
+  if (!confirm('Tem certeza que deseja excluir "' + nome + '"? Todos os dados desse usuario serao apagados.')) return;
+  const result = NLE_AUTH.deleteUser(id);
+  if (!result.ok) {
+    alert(result.msg);
+    return;
+  }
+  render();
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal') closeModal();
+});
+
+NLE_AUTH.renderUserBar();
+render();
+</script>
+</body>
+</html>

@@ -78,6 +78,8 @@ h2{font-size:1.4rem;margin-bottom:18px;color:#1a237e}
 </style>
 </head>
 <body>
+<script src="/shared/auth.js"></script>
+<script>NLE_AUTH.requireAuth();NLE_AUTH.renderUserBar();</script>
 <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 <aside class="sidebar" id="sidebar">

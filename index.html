@@ -20,6 +20,8 @@ h1{font-size:2.2rem;margin-bottom:.3rem;background:linear-gradient(135deg,#ffd74
 </style>
 </head>
 <body>
+<script src="/shared/auth.js"></script>
+<script>NLE_AUTH.requireAuth();NLE_AUTH.renderUserBar();</script>
 <div class="container">
   <h1>Nome Limpo Express 2.0</h1>
   <p class="sub">Sistema Completo de Captura de Leads</p>
@@ -59,7 +61,13 @@ h1{font-size:2.2rem;margin-bottom:.3rem;background:linear-gradient(135deg,#ffd74
       <h2>Plano de Captacao</h2>
       <p>Desafio 5 dias, mapa de leads e plano de acao completo</p>
     </a>
+    <a class="card" href="/admin/" id="adminCard" style="display:none">
+      <span class="emoji">👥</span>
+      <h2>Gerenciar Usuarios</h2>
+      <p>Criar e gerenciar vendedores e acessos</p>
+    </a>
   </div>
+<script>if(NLE_AUTH.isAdmin())document.getElementById('adminCard').style.display='';</script>
 </div>
 </body>
 </html>
