@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Links WhatsApp - NLE 2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+.header a{color:#8b949e;text-decoration:none;font-size:.9rem}
+.header a:hover{color:#ffd740}
+.header h1{font-size:1.3rem;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+.tabs{display:flex;gap:0;background:#161b22;border-bottom:1px solid #30363d;overflow-x:auto;padding:0 1rem}
+.tab{padding:.8rem 1.2rem;cursor:pointer;color:#8b949e;border-bottom:2px solid transparent;white-space:nowrap;font-size:.9rem;transition:all .2s}
+.tab:hover{color:#e6edf3}
+.tab.active{color:#ffd740;border-bottom-color:#ffd740}
+
+.content{max-width:960px;margin:0 auto;padding:1.5rem}
+.panel{display:none}
+.panel.active{display:block}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+@media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem;text-align:center}
+.stat-card .num{font-size:1.8rem;font-weight:700;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-card .label{font-size:.75rem;color:#8b949e;margin-top:.2rem}
+
+/* Form */
+.form-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.form-card h2{font-size:1.1rem;margin-bottom:1rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+.form-group{margin-bottom:.8rem}
+.form-group label{display:block;font-size:.82rem;color:#8b949e;margin-bottom:.3rem;font-weight:500}
+.form-group input,.form-group textarea{width:100%;padding:.6rem .8rem;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:.9rem;outline:none;font-family:inherit}
+.form-group input:focus,.form-group textarea:focus{border-color:#ffd740}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-group small{color:#484f58;font-size:.75rem}
+
+.btn{padding:.5rem 1rem;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,#ffd740,#ff6d00);color:#000}
+.btn-primary:hover{opacity:.9}
+.btn-danger{background:none;color:#f85149;border:1px solid #f85149}
+.btn-danger:hover{background:#f8514920}
+.btn-sm{padding:.3rem .6rem;font-size:.78rem}
+.btn-copy{background:#30363d;color:#e6edf3}
+.btn-copy:hover{background:#484f58}
+.btn-copy.copied{background:#2ea043;color:#fff}
+
+/* Link result */
+.link-result{display:none;background:#0d1117;border:1px solid #2ea043;border-radius:8px;padding:1rem;margin-top:1rem}
+.link-result.show{display:block}
+.link-url{background:#161b22;padding:.5rem .8rem;border-radius:6px;font-family:monospace;font-size:.88rem;color:#58a6ff;word-break:break-all;margin:.5rem 0;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+
+/* Table */
+.links-table{width:100%;border-collapse:collapse}
+.links-table th{text-align:left;padding:.6rem .8rem;font-size:.75rem;color:#8b949e;border-bottom:1px solid #30363d;text-transform:uppercase;letter-spacing:.5px}
+.links-table td{padding:.6rem .8rem;border-bottom:1px solid #21262d;font-size:.85rem;vertical-align:middle}
+.links-table tr:hover td{background:#161b2280}
+.desc-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.clicks-num{font-weight:700;font-size:1.1rem}
+.clicks-num.hot{color:#ffd740}
+
+/* Ranking */
+.ranking-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.ranking-card h3{font-size:1rem;margin-bottom:1rem}
+.rank-item{display:flex;align-items:center;gap:.8rem;padding:.5rem 0;border-bottom:1px solid #21262d}
+.rank-item:last-child{border-bottom:none}
+.rank-pos{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+.rank-pos.gold{background:#ffd740;color:#000}
+.rank-pos.silver{background:#8b949e;color:#000}
+.rank-pos.bronze{background:#cd7f32;color:#000}
+.rank-pos.normal{background:#30363d;color:#8b949e}
+.rank-desc{flex:1;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-bar{flex:1;max-width:200px;height:8px;background:#30363d;border-radius:4px;overflow:hidden}
+.rank-bar-fill{height:100%;background:linear-gradient(90deg,#ffd740,#ff6d00);border-radius:4px;transition:width .5s}
+.rank-clicks{font-weight:700;font-size:.95rem;min-width:40px;text-align:right}
+.rank-seller{font-size:.72rem;color:#8b949e}
+
+/* Chart */
+.chart-container{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.chart-container h3{font-size:1rem;margin-bottom:1rem}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:160px;padding-top:10px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bar{width:100%;background:linear-gradient(180deg,#ffd740,#ff6d00);border-radius:4px 4px 0 0;min-height:2px;transition:height .5s}
+.bar-label{font-size:.6rem;color:#8b949e;margin-top:4px;writing-mode:vertical-rl;transform:rotate(180deg);max-height:40px;overflow:hidden}
+.bar-value{font-size:.65rem;color:#e6edf3;margin-bottom:2px}
+
+.empty-state{text-align:center;padding:3rem;color:#484f58;font-size:.95rem}
+</style>
+</head>
+<body>
+<script src="/shared/auth.js"></script>
+<script>NLE_AUTH.requireAuth();NLE_AUTH.renderUserBar();</script>
+
+<div class="header">
+  <a href="/">← Voltar</a>
+  <h1>Links WhatsApp</h1>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="gerar">Gerar Link</div>
+  <div class="tab" data-tab="meus">Meus Links</div>
+  <div class="tab" data-tab="ranking">Ranking</div>
+  <div class="tab" data-tab="relatorio">Relatorio</div>
+</div>
+
+<div class="content">
+
+<!-- ============ TAB 1: GERAR ============ -->
+<div class="panel active" id="gerar">
+  <div class="stats-row" id="topStats"></div>
+
+  <div class="form-card">
+    <h2>Gerar Link Rastreavel</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Descricao (nome do grupo/comunidade)</label>
+        <input type="text" id="fDesc" placeholder="Ex: Grupo Negativados SP - 85k membros">
+      </div>
+      <div class="form-group">
+        <label>Mensagem automatica (opcional)</label>
+        <input type="text" id="fMsg" placeholder="Ex: Oi! Vi seu post sobre limpeza de nome">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>WhatsApp de destino</label>
+      <input type="text" id="fWhatsapp" readonly>
+      <small>Usando o WhatsApp do seu perfil. Altere no painel admin.</small>
+    </div>
+    <button class="btn btn-primary" onclick="criarLink()">Gerar Link Rastreavel</button>
+
+    <div class="link-result" id="linkResult">
+      <strong style="color:#2ea043">Link criado!</strong>
+      <div class="link-url">
+        <span id="linkUrl"></span>
+        <button class="btn btn-copy btn-sm" onclick="copyLink()">Copiar</button>
+      </div>
+      <small style="color:#8b949e">Use este link nos posts do Facebook. Cada clique sera contado automaticamente.</small>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 2: MEUS LINKS ============ -->
+<div class="panel" id="meus">
+  <div class="form-card">
+    <h2>Meus Links</h2>
+    <div id="meusLinksContent"></div>
+  </div>
+</div>
+
+<!-- ============ TAB 3: RANKING ============ -->
+<div class="panel" id="ranking">
+  <div class="ranking-card">
+    <h3>Ranking por Comunidade/Grupo (mais cliques)</h3>
+    <div id="rankingContent"></div>
+  </div>
+
+  <div class="ranking-card" id="rankingSellers" style="display:none">
+    <h3>Ranking por Vendedor</h3>
+    <div id="rankingSellersContent"></div>
+  </div>
+</div>
+
+<!-- ============ TAB 4: RELATORIO ============ -->
+<div class="panel" id="relatorio">
+  <div class="stats-row" id="reportStats"></div>
+
+  <div class="chart-container">
+    <h3>Cliques por Dia (ultimos 14 dias)</h3>
+    <div class="bar-chart" id="dailyChart"></div>
+  </div>
+
+  <div class="ranking-card">
+    <h3>Detalhamento por Link</h3>
+    <table class="links-table">
+      <thead>
+        <tr>
+          <th>Descricao</th>
+          <th>Vendedor</th>
+          <th>Hoje</th>
+          <th>7 dias</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="reportTable"></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<script>
+const session = NLE_AUTH.getSession();
+
+// Set WhatsApp field
+document.getElementById('fWhatsapp').value = session.whatsapp || '';
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+    loadData();
+  });
+});
+
+// API helpers
+async function api(path, method, body) {
+  const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+// Create link
+async function criarLink() {
+  const descricao = document.getElementById('fDesc').value.trim();
+  const mensagem = document.getElementById('fMsg').value.trim();
+  const whatsapp = document.getElementById('fWhatsapp').value.trim();
+
+  if (!descricao) { alert('Preencha a descricao'); return; }
+  if (!whatsapp) { alert('WhatsApp nao configurado. Peca ao admin pra atualizar seu perfil.'); return; }
+
+  const link = await api('/api/links', 'POST', {
+    descricao,
+    whatsapp,
+    mensagem,
+    vendedorId: session.userId,
+    vendedorNome: session.nome,
+  });
+
+  const baseUrl = window.location.origin;
+  const fullUrl = baseUrl + '/go/' + link.id;
+  document.getElementById('linkUrl').textContent = fullUrl;
+  document.getElementById('linkResult').classList.add('show');
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fMsg').value = '';
+  loadData();
+}
+
+function copyLink() {
+  const url = document.getElementById('linkUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('#linkResult .btn-copy');
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// Load all data
+async function loadData() {
+  const [links, stats] = await Promise.all([api('/api/links'), api('/api/stats')]);
+
+  renderTopStats(stats);
+  renderMeusLinks(links);
+  renderRanking(stats);
+  renderReport(stats);
+}
+
+function renderTopStats(s) {
+  const html = `
+    <div class="stat-card"><div class="num">${s.totalLinks}</div><div class="label">Links Criados</div></div>
+    <div class="stat-card"><div class="num">${s.totalClicks}</div><div class="label">Total Cliques</div></div>
+    <div class="stat-card"><div class="num">${s.clicksHoje}</div><div class="label">Cliques Hoje</div></div>
+    <div class="stat-card"><div class="num">${s.clicks7dias}</div><div class="label">Ultimos 7 Dias</div></div>
+  `;
+  document.getElementById('topStats').innerHTML = html;
+  document.getElementById('reportStats').innerHTML = html;
+}
+
+function renderMeusLinks(links) {
+  // Filter by current user (admin sees all)
+  const mine = NLE_AUTH.isAdmin() ? links : links.filter(l => l.vendedorId === session.userId);
+  const container = document.getElementById('meusLinksContent');
+  if (mine.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nenhum link criado ainda. Va na aba "Gerar Link" pra criar o primeiro.</div>';
+    return;
+  }
+  const baseUrl = window.location.origin;
+  container.innerHTML = `<table class="links-table">
+    <thead><tr><th>Descricao</th>${NLE_AUTH.isAdmin() ? '<th>Vendedor</th>' : ''}<th>Cliques</th><th>Link</th><th></th></tr></thead>
+    <tbody>${mine.map(l => `<tr>
+      <td class="desc-cell" title="${l.descricao}">${l.descricao}</td>
+      ${NLE_AUTH.isAdmin() ? `<td>${l.vendedorNome || '-'}</td>` : ''}
+      <td><span class="clicks-num${l.clicks > 5 ? ' hot' : ''}">${l.clicks}</span></td>
+      <td><span style="font-size:.75rem;color:#58a6ff;cursor:pointer" onclick="copyText('${baseUrl}/go/${l.id}')">${baseUrl}/go/${l.id}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteLink('${l.id}')">X</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function renderRanking(stats) {
+  const container = document.getElementById('rankingContent');
+  const perLink = stats.perLink;
+  if (perLink.length === 0) {
+    container.innerHTML = '<div class="empty-state">Sem dados ainda. Crie links e compartilhe nos grupos.</div>';
+    return;
+  }
+  const maxClicks = Math.max(1, perLink[0]?.total || 1);
+  container.innerHTML = perLink.map((l, i) => {
+    const posClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+    return `<div class="rank-item">
+      <div class="rank-pos ${posClass}">${i + 1}</div>
+      <div class="rank-desc" title="${l.descricao}">${l.descricao}</div>
+      <div class="rank-bar"><div class="rank-bar-fill" style="width:${l.total / maxClicks * 100}%"></div></div>
+      <div class="rank-clicks">${l.total}</div>
+      <div class="rank-seller">${l.vendedorNome || ''}</div>
+    </div>`;
+  }).join('');
+
+  // Seller ranking
+  if (stats.perSeller.length > 1) {
+    document.getElementById('rankingSellers').style.display = '';
+    const maxS = Math.max(1, stats.perSeller[0]?.total || 1);
+    document.getElementById('rankingSellersContent').innerHTML = stats.perSeller.map((s, i) => {
+      const posClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+      return `<div class="rank-item">
+        <div class="rank-pos ${posClass}">${i + 1}</div>
+        <div class="rank-desc">${s.nome || 'Desconhecido'}</div>
+        <div class="rank-bar"><div class="rank-bar-fill" style="width:${s.total / maxS * 100}%"></div></div>
+        <div class="rank-clicks">${s.total}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderReport(stats) {
+  // Daily chart
+  const chart = document.getElementById('dailyChart');
+  const maxDay = Math.max(1, ...stats.perDay.map(d => d.clicks));
+  chart.innerHTML = stats.perDay.map(d => {
+    const pct = d.clicks / maxDay * 100;
+    const label = d.data.slice(5);
+    return `<div class="bar-col">
+      <div class="bar-value">${d.clicks || ''}</div>
+      <div class="bar" style="height:${Math.max(2, pct)}%"></div>
+      <div class="bar-label">${label}</div>
+    </div>`;
+  }).join('');
+
+  // Detail table
+  const table = document.getElementById('reportTable');
+  if (stats.perLink.length === 0) {
+    table.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#484f58;padding:2rem">Sem dados</td></tr>';
+    return;
+  }
+  table.innerHTML = stats.perLink.map(l => `<tr>
+    <td class="desc-cell" title="${l.descricao}">${l.descricao}</td>
+    <td>${l.vendedorNome || '-'}</td>
+    <td>${l.hoje}</td>
+    <td>${l.ultimos7dias}</td>
+    <td><span class="clicks-num${l.total > 5 ? ' hot' : ''}">${l.total}</span></td>
+  </tr>`).join('');
+}
+
+async function deleteLink(id) {
+  if (!confirm('Excluir este link? Os cliques serao perdidos.')) return;
+  await api('/api/links/' + id, 'DELETE');
+  loadData();
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const el = event.target;
+    const orig = el.textContent;
+    el.textContent = 'Copiado!';
+    el.style.color = '#2ea043';
+    setTimeout(() => { el.textContent = orig; el.style.color = '#58a6ff'; }, 1500);
+  });
+}
+
+// Initial load
+loadData();
+</script>
+</body>
+</html>
