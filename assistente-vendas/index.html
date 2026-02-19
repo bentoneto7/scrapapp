@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Assistente de Vendas — Nome Limpo Express</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+header{background:linear-gradient(135deg,#1a237e,#283593);padding:18px 24px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+header h1{font-size:1.4rem;font-weight:700;letter-spacing:.5px}
+header h1 span{color:#ffd740;font-weight:400}
+header p{color:#c5cae9;font-size:.82rem;margin-top:4px}
+.top-nav{background:#161b22;border-bottom:1px solid #30363d;display:flex;gap:0;overflow-x:auto;padding:0 16px}
+.top-nav button{background:none;border:none;border-bottom:3px solid transparent;color:#8b949e;padding:12px 18px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+.top-nav button:hover{color:#e6edf3;background:#1c2333}
+.top-nav button.active{color:#ffd740;border-bottom-color:#ffd740}
+.container{max-width:1100px;margin:0 auto;padding:20px}
+.section{display:none}.section.active{display:block}
+
+/* Cards */
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{font-size:1.1rem;color:#ffd740;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h3{font-size:.95rem;color:#58a6ff;margin-bottom:10px}
+
+/* Objection Cards */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.obj-card{background:#1c2333;border:1px solid #30363d;border-radius:10px;padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.obj-card:hover{border-color:#ffd740;transform:translateY(-2px);box-shadow:0 4px 16px rgba(255,215,64,.1)}
+.obj-card .obj-trigger{font-size:.95rem;font-weight:700;color:#f85149;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.obj-card .obj-trigger::before{content:"";display:inline-block;width:8px;height:8px;background:#f85149;border-radius:50%;flex-shrink:0}
+.obj-card .obj-preview{font-size:.82rem;color:#8b949e;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.obj-card.expanded .obj-preview{display:none}
+.obj-detail{display:none;margin-top:12px}
+.obj-card.expanded .obj-detail{display:block}
+.obj-detail .response-block{background:#0d1117;border-radius:8px;padding:14px;margin-bottom:10px;border-left:3px solid #2ea043;font-size:.88rem;line-height:1.7;color:#c9d1d9}
+.obj-detail .response-label{font-size:.72rem;text-transform:uppercase;color:#2ea043;font-weight:700;letter-spacing:.5px;margin-bottom:6px}
+.obj-detail .tip{font-size:.78rem;color:#d29922;background:#d2992220;padding:8px 12px;border-radius:6px;margin-top:8px;line-height:1.5}
+
+/* Quick Replies */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.quick-card{background:#1c2333;border:1px solid #30363d;border-radius:10px;padding:16px;position:relative}
+.quick-card .quick-label{font-size:.78rem;text-transform:uppercase;color:#58a6ff;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.quick-card .quick-text{font-size:.88rem;color:#c9d1d9;line-height:1.6;white-space:pre-wrap;background:#0d1117;padding:12px;border-radius:6px;margin-bottom:10px}
+.btn-copy{padding:6px 14px;background:#2ea043;border:none;border-radius:6px;color:#fff;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-copy:hover{background:#3fb950}
+.btn-copy.copied{background:#1a237e}
+
+/* Script Builder */
+.script-builder{display:grid;grid-template-columns:280px 1fr;gap:20px}
+.script-options{display:flex;flex-direction:column;gap:10px}
+.script-opt{background:#1c2333;border:1px solid #30363d;border-radius:8px;padding:12px;cursor:pointer;transition:all .2s}
+.script-opt:hover{border-color:#58a6ff}
+.script-opt.active{border-color:#ffd740;background:#ffd74010}
+.script-opt .opt-title{font-size:.88rem;font-weight:600;color:#e6edf3;margin-bottom:4px}
+.script-opt .opt-desc{font-size:.75rem;color:#8b949e}
+.script-output{background:#0d1117;border:1px solid #30363d;border-radius:10px;padding:20px;min-height:300px}
+.script-output .script-text{font-size:.92rem;line-height:1.8;color:#c9d1d9;white-space:pre-wrap}
+.script-output .script-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.script-output .script-header h3{margin-bottom:0}
+
+/* Calculator */
+.calc-container{max-width:500px}
+.calc-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.calc-row label{flex-shrink:0;width:160px;font-size:.85rem;color:#8b949e}
+.calc-row input,.calc-row select{flex:1;padding:8px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:.9rem}
+.calc-row input:focus,.calc-row select:focus{border-color:#ffd740;outline:none}
+.calc-result{background:#2ea04320;border:2px solid #2ea043;border-radius:10px;padding:20px;margin-top:18px;text-align:center}
+.calc-result .big-number{font-size:2.2rem;font-weight:800;color:#2ea043}
+.calc-result .calc-label{font-size:.82rem;color:#8b949e;margin-top:4px}
+.calc-comparison{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.calc-comp-card{background:#1c2333;border-radius:8px;padding:14px;text-align:center}
+.calc-comp-card .comp-value{font-size:1.4rem;font-weight:700;color:#f85149}
+.calc-comp-card .comp-label{font-size:.78rem;color:#8b949e;margin-top:4px}
+
+/* Checklist */
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:flex-start;gap:10px;background:#1c2333;border:1px solid #30363d;border-radius:8px;padding:12px;cursor:pointer;transition:all .2s}
+.check-item:hover{border-color:#58a6ff}
+.check-item.done{opacity:.6;border-color:#2ea043}
+.check-item .check-box{width:22px;height:22px;border:2px solid #30363d;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .2s}
+.check-item.done .check-box{background:#2ea043;border-color:#2ea043;color:#fff}
+.check-item .check-text{font-size:.88rem;line-height:1.5}
+.check-item .check-text strong{color:#ffd740}
+
+/* Search */
+.search-bar{position:relative;margin-bottom:20px}
+.search-bar input{width:100%;padding:12px 16px 12px 42px;background:#1c2333;border:1px solid #30363d;border-radius:10px;color:#e6edf3;font-size:.95rem}
+.search-bar input:focus{border-color:#ffd740;outline:none}
+.search-bar input::placeholder{color:#484f58}
+.search-bar .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#484f58;font-size:1.1rem}
+
+/* Toast */
+.toast{position:fixed;bottom:60px;right:20px;background:#2ea043;color:#fff;padding:12px 24px;border-radius:10px;font-weight:600;font-size:.88rem;z-index:9999;display:none;box-shadow:0 4px 16px rgba(0,0,0,.3);animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Responsive */
+@media(max-width:768px){
+  .script-builder{grid-template-columns:1fr}
+  .obj-grid{grid-template-columns:1fr}
+  .quick-grid{grid-template-columns:1fr}
+  .calc-row{flex-direction:column;align-items:stretch}
+  .calc-row label{width:auto}
+  .calc-comparison{grid-template-columns:1fr}
+  .top-nav button{padding:10px 14px;font-size:.8rem}
+  header h1{font-size:1.2rem}
+}
+@media(max-width:480px){
+  .container{padding:12px}
+  .card{padding:14px}
+}
+</style>
+</head>
+<body>
+<script src="/shared/auth.js"></script>
+<script>NLE_AUTH.requireAuth();NLE_AUTH.renderUserBar();</script>
+
+<header>
+  <h1>Assistente de Vendas <span>— Nome Limpo Express</span></h1>
+  <p>Seu copiloto para fechar mais vendas</p>
+</header>
+
+<div class="top-nav" id="topNav">
+  <button class="active" data-sec="objections">Quebra de Objecoes</button>
+  <button data-sec="quick">Respostas Rapidas</button>
+  <button data-sec="scripts">Scripts de Venda</button>
+  <button data-sec="calculator">Calculadora de Valor</button>
+  <button data-sec="checklist">Checklist de Venda</button>
+  <button data-sec="laws">Base Legal</button>
+</div>
+
+<div class="container">
+
+  <!-- ========== SECTION 1: OBJECTION HANDLER ========== -->
+  <div class="section active" id="sec-objections">
+    <div class="search-bar">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="objSearch" placeholder="Buscar objecao... ex: caro, golpe, pensar...">
+    </div>
+    <div class="obj-grid" id="objGrid"></div>
+  </div>
+
+  <!-- ========== SECTION 2: QUICK REPLIES ========== -->
+  <div class="section" id="sec-quick">
+    <div class="card">
+      <h2>Respostas Rapidas para WhatsApp</h2>
+      <p style="color:#8b949e;font-size:.85rem;margin-bottom:16px;">Clique em "Copiar" para usar direto no WhatsApp. Personalize com o nome do lead.</p>
+      <div class="form-group" style="margin-bottom:16px;">
+        <input type="text" id="leadName" placeholder="Nome do lead (opcional)" style="padding:10px 14px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:.9rem;width:100%;max-width:300px">
+      </div>
+    </div>
+    <div class="quick-grid" id="quickGrid"></div>
+  </div>
+
+  <!-- ========== SECTION 3: SCRIPTS ========== -->
+  <div class="section" id="sec-scripts">
+    <div class="card">
+      <h2>Scripts de Venda Completos</h2>
+      <p style="color:#8b949e;font-size:.85rem;margin-bottom:4px;">Selecione o cenario e use o script pronto.</p>
+    </div>
+    <div class="script-builder">
+      <div class="script-options" id="scriptOptions"></div>
+      <div class="script-output">
+        <div class="script-header">
+          <h3 id="scriptTitle" style="color:#58a6ff">Selecione um cenario</h3>
+          <button class="btn-copy" onclick="copyScript()">Copiar Script</button>
+        </div>
+        <div class="script-text" id="scriptText">Escolha um cenario ao lado para ver o script completo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 4: VALUE CALCULATOR ========== -->
+  <div class="section" id="sec-calculator">
+    <div class="card">
+      <h2>Calculadora de Valor — Mostre ao Lead Quanto Ele Perde</h2>
+      <p style="color:#8b949e;font-size:.85rem;margin-bottom:18px;">Use durante a conversa para mostrar o custo real de ficar negativado.</p>
+      <div class="calc-container">
+        <div class="calc-row">
+          <label>Servico:</label>
+          <select id="calcServico">
+            <option value="650">Limpeza de Nome — R$650</option>
+            <option value="1400">Rating Bancario — R$1.400</option>
+            <option value="1800">Limpeza + Rating — R$1.800</option>
+            <option value="8000">BACEN/SCR — R$8.000</option>
+            <option value="8500">Pacote Completo — R$8.500</option>
+          </select>
+        </div>
+        <div class="calc-row">
+          <label>Meses negativado:</label>
+          <input type="number" id="calcMeses" value="6" min="1" max="120">
+        </div>
+        <div class="calc-row">
+          <label>Juros extras/mes (R$):</label>
+          <input type="number" id="calcJuros" value="350" min="0" step="50">
+        </div>
+        <div class="calc-row">
+          <label>Oportunidades perdidas (R$):</label>
+          <input type="number" id="calcOport" value="500" min="0" step="100">
+        </div>
+        <button class="btn-copy" style="padding:10px 24px;font-size:.9rem;width:100%" onclick="calcular()">Calcular Prejuizo</button>
+
+        <div class="calc-result" id="calcResult" style="display:none">
+          <div class="calc-label">Prejuizo estimado ficando negativado</div>
+          <div class="big-number" id="calcTotal">R$ 0</div>
+          <div class="calc-comparison">
+            <div class="calc-comp-card">
+              <div class="comp-value" id="calcPrejuizo">R$ 0</div>
+              <div class="comp-label">Custo de NAO resolver</div>
+            </div>
+            <div class="calc-comp-card" style="border:1px solid #2ea043">
+              <div class="comp-value" style="color:#2ea043" id="calcInvest">R$ 0</div>
+              <div class="comp-label">Investimento no servico</div>
+            </div>
+          </div>
+          <p style="color:#ffd740;font-size:.88rem;margin-top:14px;font-weight:600" id="calcMsg"></p>
+          <button class="btn-copy" style="margin-top:12px" onclick="copyCalcResult()">Copiar Resultado para WhatsApp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 5: SALES CHECKLIST ========== -->
+  <div class="section" id="sec-checklist">
+    <div class="card">
+      <h2>Checklist de Venda</h2>
+      <p style="color:#8b949e;font-size:.85rem;margin-bottom:16px;">Siga cada passo para nao perder nenhuma venda. Marque conforme avanca.</p>
+      <div class="check-list" id="checkList"></div>
+      <div style="margin-top:16px;display:flex;gap:10px">
+        <button class="btn-copy" onclick="resetChecklist()">Reiniciar Checklist</button>
+        <span id="checkProgress" style="color:#8b949e;font-size:.82rem;display:flex;align-items:center"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 6: LEGAL BASE ========== -->
+  <div class="section" id="sec-laws">
+    <div class="search-bar">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="lawSearch" placeholder="Buscar base legal... ex: prazo, LGPD, prescricao...">
+    </div>
+    <div id="lawGrid"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Copiado!</div>
+
+<script>
+// ==================== NAV ====================
+document.querySelectorAll('.top-nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.top-nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sec-' + btn.dataset.sec).classList.add('active');
+  });
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg || 'Copiado!';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2000);
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast());
+}
+
+// ==================== OBJECTIONS ====================
+const OBJECTIONS = [
+  {
+    trigger: '"Ta muito caro"',
+    preview: 'Compare o investimento com o prejuizo diario...',
+    responses: [
+      {
+        label: 'Resposta Principal',
+        text: 'Entendo sua preocupacao com o valor. Deixa eu te mostrar uma conta rapida:\n\nFicando negativado voce paga em media R$300 a R$500 A MAIS por mes em juros abusivos, perde oportunidades de credito e ate de emprego.\n\nEm 6 meses negativado, voce ja perdeu entre R$1.800 e R$3.000.\n\nNosso servico custa R$650 — e voce pode parcelar em ate 6x de R$108.\n\nOu seja: em MENOS de 1 mes com o nome limpo, voce ja recuperou o investimento.'
+      },
+      {
+        label: 'Comparacao com Advogado',
+        text: 'So pra voce ter uma referencia: um advogado particular cobra entre R$2.000 e R$5.000 pelo mesmo servico.\n\nNos fazemos o mesmo trabalho juridico — analise, contestacao formal, acompanhamento — por R$650.\n\nE ainda parcelamos em ate 6x no cartao.'
+      }
+    ],
+    tip: 'Use a Calculadora de Valor (aba ao lado) para mostrar numeros personalizados para o caso do lead.'
+  },
+  {
+    trigger: '"Vou pensar"',
+    preview: 'Crie urgencia sem pressionar...',
+    responses: [
+      {
+        label: 'Resposta Empatica',
+        text: 'Claro, faz total sentido pensar antes de decidir. E uma decisao importante mesmo.\n\nSo quero te lembrar de uma coisa: cada dia que passa com o nome sujo, voce continua pagando juros mais altos e perdendo oportunidades.\n\nPosso te mandar um resumo por escrito com tudo que conversamos, pra voce analisar com calma?'
+      },
+      {
+        label: 'Resposta com Urgencia',
+        text: 'Entendo perfeitamente. Mas me permite fazer uma pergunta?\n\nVoce ja sabe ha quanto tempo esta negativado. Cada mes que passa sao mais R$300-500 em juros extras.\n\nO que mudaria nos proximos dias que nao mudou ate agora?\n\nA diferenca e que agora voce tem a informacao e a oportunidade. A analise e gratuita — posso fazer agora e voce decide depois.'
+      }
+    ],
+    tip: 'NUNCA pressione. Oferecer mandar um resumo por escrito e a melhor forma de manter o lead quente.'
+  },
+  {
+    trigger: '"Sera que funciona mesmo?"',
+    preview: 'Use base legal e prova social...',
+    responses: [
+      {
+        label: 'Resposta com Base Legal',
+        text: 'Entendo a duvida. Vou te explicar exatamente como funciona:\n\nNos nao fazemos "magica". Nos verificamos se cada negativacao no seu CPF segue a LEI.\n\nPelo CDC (artigo 43), antes de negativar, a empresa PRECISA te notificar. Se nao notificou = negativacao IRREGULAR = tem que remover.\n\nA LGPD (artigo 18) te da direito de corrigir dados incorretos.\n\nE a Sumula 548 do STJ obriga a remocao em 5 dias uteis.\n\nOu seja: nao e promessa — e LEI. E a analise inicial e de graca. Posso verificar seu caso agora?'
+      },
+      {
+        label: 'Resposta Curta',
+        text: 'Funciona porque e baseado em lei, nao em promessa.\n\nCDC, LGPD e jurisprudencia do STJ.\n\nFazemos a analise gratuita — se nao tiver base legal, a gente fala na hora. Sem custo nenhum.\n\nPosso puxar seu caso agora?'
+      }
+    ],
+    tip: 'Sempre oferecer a analise gratuita. Isso remove a barreira de risco.'
+  },
+  {
+    trigger: '"Isso e golpe / nao confio"',
+    preview: 'Transparencia total com base legal verificavel...',
+    responses: [
+      {
+        label: 'Resposta Transparente',
+        text: 'Eu entendo completamente sua desconfianca. Tem muito golpe por ai mesmo.\n\nPor isso quero ser 100% transparente:\n\n1) Tudo que fazemos e baseado em leis PUBLICAS que voce pode verificar: CDC art. 43, LGPD art. 18, Sumula 548 do STJ\n\n2) A analise inicial e totalmente GRATUITA — nao pedimos cartao, nao pedimos PIX adiantado\n\n3) So procedemos se encontrarmos irregularidade REAL no seu caso\n\n4) Voce recebe tudo documentado\n\nNao e minha palavra — sao leis federais. Quer que eu faca a analise gratuita pra voce ver com seus proprios olhos?'
+      }
+    ],
+    tip: 'Com leads desconfiados, NUNCA fique na defensiva. Valide a desconfianca ("tem muito golpe mesmo") e use fatos verificaveis.'
+  },
+  {
+    trigger: '"Ja tentei antes e nao deu certo"',
+    preview: 'Diferencie renegociacao de limpeza juridica...',
+    responses: [
+      {
+        label: 'Resposta Educativa',
+        text: 'Entendo. E muito comum as pessoas confundirem duas coisas diferentes:\n\nRENEGOCIACAO = voce paga a divida (geralmente com desconto) e espera a empresa tirar seu nome. As vezes demora, as vezes nao tiram.\n\nLIMPEZA JURIDICA = nos verificamos se a negativacao foi feita DENTRO DA LEI. Se nao foi, a empresa e OBRIGADA a remover, independente de voce pagar ou nao.\n\nSao processos completamente diferentes. O que voce tentou antes foi renegociacao?\n\nPosso fazer a analise gratuita e te mostrar se existem irregularidades no seu caso.'
+      }
+    ],
+    tip: 'A maioria que "tentou antes" fez renegociacao (Serasa Limpa Nome, etc). Explique a diferenca.'
+  },
+  {
+    trigger: '"Nao tenho dinheiro agora"',
+    preview: 'Mostre opcoes de parcelamento e ROI...',
+    responses: [
+      {
+        label: 'Resposta com Opcoes',
+        text: 'Entendo que o momento financeiro ta apertado. E justamente por estar negativado que fica mais dificil, ne?\n\nOlha as opcoes que temos:\n\n- PIX a vista: R$617,50 (5% desconto)\n- 2x de R$325\n- 3x de R$217\n- 6x de R$108,33 no cartao\n\nR$108 por mes e menos do que voce paga A MAIS de juros por estar negativado.\n\nOu seja: o servico se paga sozinho ja no primeiro mes.\n\nPosso fazer a analise gratuita enquanto isso? Ai voce ja sabe exatamente o que tem no seu CPF.'
+      }
+    ],
+    tip: 'Sempre ancore: "R$108/mes e menos do que voce perde por estar negativado". E oferecer a analise gratuita mantem o lead no funil.'
+  },
+  {
+    trigger: '"Preciso falar com meu marido/esposa"',
+    preview: 'Facilite a conversa com material escrito...',
+    responses: [
+      {
+        label: 'Resposta Facilitadora',
+        text: 'Claro! Decisao financeira em casal e super importante mesmo.\n\nPosso te mandar um resumo completo por escrito pra voce mostrar? Assim fica mais facil de explicar.\n\nVou incluir:\n- O que e o servico\n- Base legal (leis que amparam)\n- Valores e formas de pagamento\n- O que foi encontrado na analise\n\nAssim voces decidem juntos com todas as informacoes. Posso mandar?'
+      }
+    ],
+    tip: 'Mandar material escrito SEMPRE. Isso mostra profissionalismo e mantem o lead engajado.'
+  },
+  {
+    trigger: '"Achei mais barato em outro lugar"',
+    preview: 'Questione o que esta incluso no servico...',
+    responses: [
+      {
+        label: 'Resposta Investigativa',
+        text: 'Legal que voce esta pesquisando. Isso mostra que voce leva a serio.\n\nSo me tira uma duvida: o que exatamente esta incluso nesse valor? Porque nem todo servico e igual.\n\nVerifica pra mim:\n\n1) Eles fazem analise com base no CDC, LGPD e STJ?\n2) Tem contestacao formal documentada?\n3) Oferecem acompanhamento ate a resolucao?\n4) Tem suporte por WhatsApp durante o processo?\n5) Trabalham com rating bancario tambem?\n\nAs vezes o "mais barato" faz so metade do trabalho. Nosso servico e completo: analise + contestacao + acompanhamento + suporte.'
+      }
+    ],
+    tip: 'Nunca fale mal do concorrente. Faca perguntas que levem o lead a perceber a diferenca sozinho.'
+  }
+];
+
+function renderObjections(filter) {
+  const grid = document.getElementById('objGrid');
+  const term = (filter || '').toLowerCase();
+  const filtered = OBJECTIONS.filter(o =>
+    !term || o.trigger.toLowerCase().includes(term) || o.preview.toLowerCase().includes(term) ||
+    o.responses.some(r => r.text.toLowerCase().includes(term))
+  );
+  grid.innerHTML = filtered.map((o, i) => `
+    <div class="obj-card" onclick="toggleObj(this)">
+      <div class="obj-trigger">${o.trigger}</div>
+      <div class="obj-preview">${o.preview}</div>
+      <div class="obj-detail">
+        ${o.responses.map(r => `
+          <div class="response-label">${r.label}</div>
+          <div class="response-block">${r.text}</div>
+          <button class="btn-copy" onclick="event.stopPropagation();copyText(\`${r.text.replace(/`/g, "'")}\`)">Copiar Resposta</button>
+          <br><br>
+        `).join('')}
+        <div class="tip">${o.tip}</div>
+      </div>
+    </div>
+  `).join('');
+  if (!filtered.length) grid.innerHTML = '<p style="color:#8b949e;text-align:center;padding:40px">Nenhuma objecao encontrada para essa busca.</p>';
+}
+
+function toggleObj(el) { el.classList.toggle('expanded'); }
+
+document.getElementById('objSearch').addEventListener('input', e => renderObjections(e.target.value));
+renderObjections();
+
+// ==================== QUICK REPLIES ====================
+const QUICK_REPLIES = [
+  { label: 'Primeiro Contato', text: 'Oi {NOME}! Tudo bem?\n\nVi que voce tem interesse em limpar o nome. Posso te ajudar com isso!\n\nNos fazemos uma analise GRATUITA do seu CPF pra verificar se as negativacoes foram feitas dentro da lei.\n\nSe tiver irregularidade, a empresa e obrigada a remover.\n\nPosso fazer sua analise agora? Preciso so do seu CPF completo.' },
+  { label: 'Follow-up (1 dia)', text: 'Oi {NOME}! Tudo certo?\n\nPassando aqui pra saber se conseguiu pensar sobre a limpeza do nome.\n\nLembra que a analise e gratuita e sem compromisso. Se quiser, posso fazer agora rapidinho.' },
+  { label: 'Follow-up (3 dias)', text: 'Oi {NOME}! Como voce esta?\n\nSei que a correria do dia a dia e grande, mas queria te lembrar: cada dia negativado sao juros mais altos e oportunidades perdidas.\n\nA analise gratuita leva poucos minutos. Quer que eu faca agora?' },
+  { label: 'Pos-Analise (tem irregularidade)', text: 'Oi {NOME}! Finalizei a analise do seu CPF.\n\nEncontrei irregularidades que podem ser contestadas com base no CDC e na LGPD.\n\nIsso significa que voce tem direito a remocao dessas negativacoes.\n\nPosso te explicar em detalhes o que encontrei e como funciona o processo?' },
+  { label: 'Pos-Analise (sem irregularidade)', text: 'Oi {NOME}! Finalizei a analise do seu CPF.\n\nInfelizmente as negativacoes estao dentro da lei nesse momento. Nao seria honesto da minha parte seguir com o servico.\n\nMas fica de olho: se completar 5 anos, a negativacao PRECISA ser removida por lei (CDC art. 43).\n\nQualquer mudanca, me procura que te ajudo!' },
+  { label: 'Envio de Proposta', text: 'Oi {NOME}! Segue o resumo do que encontramos:\n\nServico: Limpeza de Nome (contestacao juridica)\nBase legal: CDC art. 43 + LGPD art. 18 + Sumula 548 STJ\n\nInvestimento: R$650\n- PIX a vista: R$617,50 (5% desc)\n- 2x de R$325\n- 3x de R$217\n- 6x de R$108,33\n\nO que esta incluso:\n- Analise completa do CPF\n- Contestacao formal com base legal\n- Acompanhamento ate resolucao\n- Suporte por WhatsApp\n\nQuer seguir em frente?' },
+  { label: 'Fechamento', text: 'Perfeito {NOME}! Vamos resolver isso de uma vez.\n\nQual forma de pagamento fica melhor pra voce?\n\n1) PIX a vista: R$617,50\n2) 2x de R$325\n3) 3x de R$217\n4) 6x de R$108,33 (cartao)\n\nAssim que confirmar, ja inicio o processo!' },
+  { label: 'Reativacao (lead frio)', text: 'Oi {NOME}! Tudo bem com voce?\n\nFaz um tempo que conversamos sobre a limpeza do nome. Queria saber: ja conseguiu resolver a situacao?\n\nSe ainda nao, continuo a disposicao. A lei nao mudou — se tiver irregularidade, voce tem direito a remocao.\n\nPosso refazer sua analise gratuitamente. O que acha?' }
+];
+
+function renderQuickReplies() {
+  const name = document.getElementById('leadName').value.trim() || '[Nome]';
+  const grid = document.getElementById('quickGrid');
+  grid.innerHTML = QUICK_REPLIES.map(q => {
+    const text = q.text.replace(/\{NOME\}/g, name);
+    return `
+      <div class="quick-card">
+        <div class="quick-label">${q.label}</div>
+        <div class="quick-text">${text}</div>
+        <button class="btn-copy" onclick="copyText(\`${text.replace(/`/g, "'")}\`)">Copiar</button>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('leadName').addEventListener('input', renderQuickReplies);
+renderQuickReplies();
+
+// ==================== SCRIPTS ====================
+const SCRIPTS = [
+  {
+    title: 'Abordagem Inicial (Lead Frio)',
+    desc: 'Quando o lead chega pelo grupo ou anuncio',
+    text: `VOCE: Oi [NOME]! Vi seu comentario sobre [situacao]. Posso te ajudar com isso!
+
+[Esperar resposta]
+
+VOCE: Antes de tudo, quero entender melhor seu caso. Ha quanto tempo voce esta com o nome negativado?
+
+[Esperar resposta]
+
+VOCE: Entendi. E voce sabe quantas negativacoes tem no CPF?
+
+[Esperar resposta]
+
+VOCE: Certo. Olha, existe uma coisa que pouca gente sabe: nem toda negativacao e legal. A empresa PRECISA seguir regras antes de colocar seu nome no SPC/Serasa.
+
+Se nao seguiu = negativacao irregular = tem que remover.
+
+Posso fazer uma ANALISE GRATUITA do seu CPF pra verificar isso. Sem custo, sem compromisso.
+
+Preciso so do CPF completo. Quer que eu verifique?`
+  },
+  {
+    title: 'Apresentacao do Servico',
+    desc: 'Apos a analise gratuita, quando ha irregularidade',
+    text: `VOCE: [NOME], terminei a analise do seu CPF. Achei algumas coisas importantes.
+
+Voce tem [X] negativacoes, e [Y] delas apresentam irregularidades que podem ser contestadas judicialmente.
+
+Isso significa que a empresa NAO seguiu o que manda a lei antes de negativar voce.
+
+[Esperar reacao]
+
+VOCE: O que fazemos e o seguinte:
+
+1) Preparamos uma contestacao FORMAL com base no CDC, LGPD e jurisprudencia do STJ
+2) Notificamos os orgaos (Serasa, SPC, Boa Vista)
+3) Acompanhamos todo o processo ate a resolucao
+4) Voce recebe suporte por WhatsApp durante todo o processo
+
+O investimento e de R$650, que pode ser parcelado em ate 6x de R$108,33.
+
+So pra comparar: um advogado particular cobra entre R$2.000 e R$5.000 pelo mesmo servico.
+
+[Esperar reacao]
+
+VOCE: Quer que eu explique mais alguma coisa ou podemos seguir em frente?`
+  },
+  {
+    title: 'Fechamento com Urgencia',
+    desc: 'Lead interessado mas indeciso',
+    text: `VOCE: [NOME], entendo que e uma decisao importante. Mas me permite te mostrar uma conta rapida?
+
+Voce esta negativado ha [X] meses. Nesse periodo, voce pagou em media R$[Y] a mais em juros e perdeu oportunidades que somam facilmente R$[Z].
+
+Total estimado de prejuizo: R$[TOTAL]
+
+Nosso servico custa R$650 (ou 6x de R$108).
+
+Ou seja: em MENOS de 1 mes com o nome limpo, voce ja recuperou o investimento inteiro.
+
+A cada dia que passa, o prejuizo so aumenta. O momento de resolver e agora.
+
+Qual forma de pagamento fica melhor pra voce?
+
+1) PIX: R$617,50 (com 5% de desconto)
+2) 2x de R$325
+3) 3x de R$217
+4) 6x de R$108,33 no cartao`
+  },
+  {
+    title: 'Upsell: Rating Bancario',
+    desc: 'Apos fechar limpeza, oferecer rating',
+    text: `VOCE: [NOME], agora que estamos resolvendo a limpeza do nome, quero te falar de algo que 99% das pessoas NAO sabem.
+
+Limpar o nome no Serasa/SPC e so a primeira camada.
+
+Os bancos usam um sistema INTERNO chamado Rating Bancario — uma nota de AA ate H.
+
+Mesmo com o nome limpo, se seu rating estiver ruim, o banco continua negando credito ou cobrando juros altos.
+
+[Esperar reacao]
+
+VOCE: Nos temos um servico especifico pra isso: analise e melhoria do Rating Bancario.
+
+Separado custa R$1.400. Mas como voce ja esta fazendo a limpeza com a gente, consigo o combo por R$1.800 — voce economiza R$250.
+
+Quer incluir o rating no seu pacote?`
+  },
+  {
+    title: 'Recuperacao de Lead Perdido',
+    desc: 'Lead que sumiu ou disse nao',
+    text: `VOCE: Oi [NOME]! Tudo bem com voce?
+
+Faz um tempo que conversamos sobre a situacao do seu nome. Queria saber como voce esta.
+
+[Esperar resposta]
+
+VOCE: Entendo. Olha, nao vou tomar seu tempo. So queria te atualizar sobre uma coisa:
+
+A lei nao mudou — se as negativacoes no seu CPF foram feitas de forma irregular, voce continua tendo direito a remocao.
+
+E a cada mes que passa negativado, sao mais juros, mais oportunidades perdidas.
+
+Se quiser, posso refazer sua analise gratuitamente pra ver se algo mudou. Sem compromisso nenhum.
+
+O que acha?`
+  }
+];
+
+function renderScripts() {
+  const opts = document.getElementById('scriptOptions');
+  opts.innerHTML = SCRIPTS.map((s, i) => `
+    <div class="script-opt" onclick="selectScript(${i}, this)">
+      <div class="opt-title">${s.title}</div>
+      <div class="opt-desc">${s.desc}</div>
+    </div>
+  `).join('');
+}
+
+function selectScript(idx, el) {
+  document.querySelectorAll('.script-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('scriptTitle').textContent = SCRIPTS[idx].title;
+  document.getElementById('scriptText').textContent = SCRIPTS[idx].text;
+}
+
+function copyScript() {
+  const text = document.getElementById('scriptText').textContent;
+  if (text && !text.startsWith('Escolha')) copyText(text);
+}
+
+renderScripts();
+
+// ==================== CALCULATOR ====================
+function calcular() {
+  const servico = parseInt(document.getElementById('calcServico').value);
+  const meses = parseInt(document.getElementById('calcMeses').value) || 6;
+  const juros = parseInt(document.getElementById('calcJuros').value) || 350;
+  const oport = parseInt(document.getElementById('calcOport').value) || 500;
+  const prejuizo = (juros + oport) * meses;
+  const roi = ((prejuizo - servico) / servico * 100).toFixed(0);
+
+  document.getElementById('calcTotal').textContent = 'R$ ' + prejuizo.toLocaleString('pt-BR');
+  document.getElementById('calcPrejuizo').textContent = 'R$ ' + prejuizo.toLocaleString('pt-BR');
+  document.getElementById('calcInvest').textContent = 'R$ ' + servico.toLocaleString('pt-BR');
+  document.getElementById('calcMsg').textContent = `Voce perde ${Math.round(prejuizo/servico)}x mais ficando negativado do que investindo na limpeza. ROI de ${roi}%.`;
+  document.getElementById('calcResult').style.display = 'block';
+}
+
+function copyCalcResult() {
+  const servico = document.getElementById('calcServico').value;
+  const meses = document.getElementById('calcMeses').value;
+  const total = document.getElementById('calcTotal').textContent;
+  const invest = document.getElementById('calcInvest').textContent;
+  const msg = document.getElementById('calcMsg').textContent;
+
+  const text = `Olha essa conta:\n\nVoce esta negativado ha ${meses} meses.\nPrejuizo estimado: ${total}\nInvestimento no servico: ${invest}\n\n${msg}\n\nOu seja: o servico se paga sozinho. Quer resolver isso?`;
+  copyText(text);
+}
+
+// ==================== CHECKLIST ====================
+const CHECKLIST_KEY = 'nle_sales_checklist';
+const CHECKLIST_ITEMS = [
+  { text: '<strong>Qualificar o lead:</strong> Descobrir ha quanto tempo esta negativado e quantas negativacoes tem' },
+  { text: '<strong>Criar rapport:</strong> Demonstrar empatia com a situacao do lead' },
+  { text: '<strong>Educar:</strong> Explicar a diferenca entre renegociacao e limpeza juridica' },
+  { text: '<strong>Base legal:</strong> Mencionar CDC art. 43, LGPD art. 18 e Sumula 548 do STJ' },
+  { text: '<strong>Oferecer analise gratuita:</strong> Pedir CPF para analise sem compromisso' },
+  { text: '<strong>Apresentar resultado:</strong> Mostrar irregularidades encontradas' },
+  { text: '<strong>Ancorar valor:</strong> Comparar com custo de advogado (R$2.000-5.000) e prejuizo mensal' },
+  { text: '<strong>Apresentar opcoes:</strong> Mostrar formas de pagamento (PIX com desc, 2x, 3x, 6x)' },
+  { text: '<strong>Tratar objecoes:</strong> Usar as respostas da aba "Quebra de Objecoes"' },
+  { text: '<strong>Fechamento:</strong> Perguntar "Qual forma de pagamento fica melhor?"' },
+  { text: '<strong>Pos-venda:</strong> Confirmar dados, explicar proximos passos e prazo' },
+  { text: '<strong>Upsell:</strong> Oferecer Rating Bancario ou pacote completo' }
+];
+
+function getCheckState() {
+  try { return JSON.parse(localStorage.getItem(NLE_AUTH.userKey(CHECKLIST_KEY))) || []; }
+  catch(e) { return []; }
+}
+
+function saveCheckState(state) {
+  localStorage.setItem(NLE_AUTH.userKey(CHECKLIST_KEY), JSON.stringify(state));
+}
+
+function renderChecklist() {
+  const state = getCheckState();
+  const list = document.getElementById('checkList');
+  list.innerHTML = CHECKLIST_ITEMS.map((item, i) => {
+    const done = state.includes(i);
+    return `<div class="check-item ${done ? 'done' : ''}" onclick="toggleCheck(${i})">
+      <div class="check-box">${done ? '&#10003;' : ''}</div>
+      <div class="check-text">${item.text}</div>
+    </div>`;
+  }).join('');
+  const completed = state.length;
+  document.getElementById('checkProgress').textContent = `${completed}/${CHECKLIST_ITEMS.length} concluidos`;
+}
+
+function toggleCheck(idx) {
+  let state = getCheckState();
+  if (state.includes(idx)) state = state.filter(i => i !== idx);
+  else state.push(idx);
+  saveCheckState(state);
+  renderChecklist();
+}
+
+function resetChecklist() {
+  saveCheckState([]);
+  renderChecklist();
+}
+
+renderChecklist();
+
+// ==================== LEGAL BASE ====================
+const LAWS = [
+  {
+    title: 'CDC — Art. 43 (Notificacao Previa)',
+    category: 'CDC',
+    text: 'O consumidor DEVE ser notificado POR ESCRITO antes de qualquer inclusao em cadastro de inadimplentes (SPC, Serasa, etc).\n\nSe a empresa negativou sem notificar = negativacao IRREGULAR = deve ser removida.\n\nFundamento: Codigo de Defesa do Consumidor, Art. 43, paragrafo 2o.',
+    usage: 'Use quando: o lead diz que foi negativado sem receber nenhum aviso.'
+  },
+  {
+    title: 'CDC — Art. 43 (Prazo Maximo de 5 Anos)',
+    category: 'CDC',
+    text: 'Nenhuma negativacao pode permanecer por mais de 5 ANOS nos cadastros de protecao ao credito.\n\nMesmo que a divida nao tenha sido paga, apos 5 anos a negativacao PRECISA ser removida.\n\nFundamento: Codigo de Defesa do Consumidor, Art. 43, paragrafo 1o.',
+    usage: 'Use quando: o lead tem dividas antigas (mais de 5 anos). Verifique a data da negativacao.'
+  },
+  {
+    title: 'LGPD — Art. 18 (Correcao de Dados)',
+    category: 'LGPD',
+    text: 'O titular dos dados tem direito a correcao de dados INCOMPLETOS, INEXATOS ou DESATUALIZADOS.\n\nSe a negativacao contem informacoes incorretas (valor errado, dados desatualizados), o titular pode exigir a correcao.\n\nFundamento: Lei Geral de Protecao de Dados, Art. 18, inciso III.',
+    usage: 'Use quando: o lead identifica valores incorretos ou dados desatualizados na negativacao.'
+  },
+  {
+    title: 'Sumula 548 — STJ (Remocao em 5 Dias)',
+    category: 'STJ',
+    text: 'Apos o pagamento da divida ou acordo, a empresa tem o prazo de 5 DIAS UTEIS para remover a negativacao.\n\nSe nao removeu no prazo = pode gerar dano moral.\n\nFundamento: Sumula 548 do Superior Tribunal de Justica.',
+    usage: 'Use quando: o lead pagou a divida e o nome continua sujo. Isso e uma das irregularidades mais comuns.'
+  },
+  {
+    title: 'Prescricao de Divida (5 Anos)',
+    category: 'Civil',
+    text: 'Dividas prescrevem em 5 anos (Art. 206, paragrafo 5o do Codigo Civil).\n\nApos a prescricao, a divida NAO pode mais ser cobrada judicialmente.\n\nATENCAO: Prescricao da divida e diferente de prazo da negativacao. Ambos sao 5 anos, mas contam de formas diferentes.',
+    usage: 'Use para educar o lead sobre seus direitos em dividas antigas.'
+  },
+  {
+    title: 'Cobranca Abusiva (CDC Art. 42)',
+    category: 'CDC',
+    text: 'O consumidor NAO pode ser exposto a ridiculo, constrangimento ou ameaca durante a cobranca.\n\nLigacoes excessivas, cobrar no trabalho, falar com terceiros sobre a divida = COBRANCA ABUSIVA.\n\nFundamento: CDC Art. 42.',
+    usage: 'Use quando: o lead relata ligacoes excessivas, ameacas ou constrangimento por parte de cobradores.'
+  },
+  {
+    title: 'Rating Bancario (BACEN)',
+    category: 'BACEN',
+    text: 'Os bancos classificam clientes em uma escala de AA (melhor) ate H (pior) no SCR (Sistema de Informacoes de Credito).\n\nMesmo com nome limpo no Serasa, se o rating no SCR estiver ruim, o banco pode negar credito.\n\nEssa classificacao e consultada por TODOS os bancos — e o "historico real" do sistema financeiro.',
+    usage: 'Use para fazer upsell do servico de Rating Bancario. Explique que limpar o Serasa e so a primeira camada.'
+  },
+  {
+    title: 'Negativacao em Duplicidade',
+    category: 'CDC',
+    text: 'A mesma divida NAO pode gerar mais de uma negativacao nos orgaos de protecao.\n\nSe o mesmo debito aparece 2+ vezes (ex: Serasa e SPC com valores diferentes), isso e IRREGULAR.\n\nFundamento: CDC + principio da boa-fe.',
+    usage: 'Use quando: na analise aparecem negativacoes duplicadas para o mesmo debito.'
+  }
+];
+
+function renderLaws(filter) {
+  const grid = document.getElementById('lawGrid');
+  const term = (filter || '').toLowerCase();
+  const filtered = LAWS.filter(l =>
+    !term || l.title.toLowerCase().includes(term) || l.text.toLowerCase().includes(term) ||
+    l.usage.toLowerCase().includes(term) || l.category.toLowerCase().includes(term)
+  );
+  grid.innerHTML = filtered.map(l => `
+    <div class="card" style="border-left:3px solid ${l.category === 'CDC' ? '#58a6ff' : l.category === 'LGPD' ? '#a371f7' : l.category === 'STJ' ? '#ffd740' : l.category === 'BACEN' ? '#f78166' : '#2ea043'}">
+      <h3 style="display:flex;align-items:center;gap:8px">
+        <span style="background:${l.category === 'CDC' ? '#58a6ff20' : l.category === 'LGPD' ? '#a371f720' : l.category === 'STJ' ? '#ffd74020' : l.category === 'BACEN' ? '#f7816620' : '#2ea04320'};color:${l.category === 'CDC' ? '#58a6ff' : l.category === 'LGPD' ? '#a371f7' : l.category === 'STJ' ? '#ffd740' : l.category === 'BACEN' ? '#f78166' : '#2ea043'};padding:3px 10px;border-radius:10px;font-size:.72rem;font-weight:700">${l.category}</span>
+        ${l.title}
+      </h3>
+      <div style="white-space:pre-wrap;font-size:.88rem;line-height:1.7;color:#c9d1d9;margin:12px 0">${l.text}</div>
+      <div style="background:#1c2333;padding:10px 14px;border-radius:6px;font-size:.82rem;color:#d29922;line-height:1.5">${l.usage}</div>
+      <button class="btn-copy" style="margin-top:10px" onclick="copyText(\`${l.text.replace(/`/g, "'")}\`)">Copiar Texto</button>
+    </div>
+  `).join('');
+  if (!filtered.length) grid.innerHTML = '<p style="color:#8b949e;text-align:center;padding:40px">Nenhuma base legal encontrada para essa busca.</p>';
+}
+
+document.getElementById('lawSearch').addEventListener('input', e => renderLaws(e.target.value));
+renderLaws();
+</script>
+</body>
+</html>

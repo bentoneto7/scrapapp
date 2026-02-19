@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cadastro de Vendedor - NLE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.register-container{width:90%;max-width:460px}
+.register-box{background:#161b22;border:1px solid #30363d;border-radius:16px;padding:2.5rem 2rem}
+.logo{font-size:1.8rem;text-align:center;margin-bottom:.3rem;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
+.sub{color:#8b949e;font-size:.88rem;margin-bottom:2rem;text-align:center}
+.form-group{margin-bottom:1.1rem}
+.form-group label{display:block;font-size:.82rem;color:#8b949e;margin-bottom:.4rem;font-weight:500}
+.form-group input{width:100%;padding:.7rem .9rem;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:.95rem;outline:none;transition:border .2s}
+.form-group input:focus{border-color:#ffd740}
+.form-group input::placeholder{color:#484f58}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-register{width:100%;padding:.85rem;background:linear-gradient(135deg,#ffd740,#ff6d00);border:none;border-radius:8px;color:#000;font-weight:700;font-size:1rem;cursor:pointer;transition:opacity .2s;margin-top:.8rem}
+.btn-register:hover{opacity:.9}
+.btn-register:disabled{opacity:.5;cursor:not-allowed}
+.error-msg{background:#f8514920;border:1px solid #f85149;color:#f85149;padding:.5rem .8rem;border-radius:6px;font-size:.82rem;margin-bottom:1rem;display:none}
+.success-msg{background:#2ea04320;border:1px solid #2ea043;color:#2ea043;padding:.8rem;border-radius:6px;font-size:.88rem;text-align:center;display:none}
+.success-msg a{color:#ffd740;font-weight:600;text-decoration:none}
+.success-msg a:hover{text-decoration:underline}
+.password-rules{font-size:.75rem;color:#484f58;margin-top:.3rem;line-height:1.4}
+.strength-bar{height:4px;border-radius:2px;background:#30363d;margin-top:.4rem;overflow:hidden}
+.strength-bar .fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+.link-login{text-align:center;margin-top:1.2rem;font-size:.85rem}
+.link-login a{color:#58a6ff;text-decoration:none}
+.link-login a:hover{text-decoration:underline}
+.show-pass{display:flex;align-items:center;gap:.4rem;margin-top:.4rem;cursor:pointer;font-size:.78rem;color:#8b949e;user-select:none}
+.show-pass input{width:auto;margin:0}
+@media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="register-container">
+  <div class="register-box">
+    <div class="logo">Nome Limpo Express</div>
+    <p class="sub">Cadastro de Novo Vendedor</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg">
+      Cadastro realizado com sucesso!<br>
+      <a href="/login/">Clique aqui para fazer login</a>
+    </div>
+
+    <form id="registerForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome Completo *</label>
+          <input type="text" id="nomeInput" placeholder="Seu nome completo" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>E-mail *</label>
+          <input type="email" id="emailInput" placeholder="seu@email.com" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>WhatsApp (com DDD) *</label>
+        <input type="tel" id="whatsappInput" placeholder="(11) 99999-9999" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Login de Acesso *</label>
+          <input type="text" id="loginInput" placeholder="Escolha um login" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label>Senha *</label>
+          <input type="password" id="senhaInput" placeholder="Minimo 6 caracteres" autocomplete="new-password" required>
+          <div class="strength-bar"><div class="fill" id="strengthFill"></div></div>
+          <div class="password-rules">Min 6 caracteres</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Confirmar Senha *</label>
+        <input type="password" id="senha2Input" placeholder="Repita a senha" autocomplete="new-password" required>
+        <label class="show-pass">
+          <input type="checkbox" id="showPass"> Mostrar senhas
+        </label>
+      </div>
+
+      <button type="submit" class="btn-register" id="btnRegister">Criar Minha Conta</button>
+    </form>
+
+    <div class="link-login">
+      Ja tem conta? <a href="/login/">Fazer login</a>
+    </div>
+  </div>
+</div>
+
+<script src="/shared/auth.js"></script>
+<script>
+// If already logged in, redirect
+if (NLE_AUTH.isLoggedIn()) {
+  window.location.href = '/';
+}
+
+const form = document.getElementById('registerForm');
+const errorMsg = document.getElementById('errorMsg');
+const successMsg = document.getElementById('successMsg');
+const senhaInput = document.getElementById('senhaInput');
+const senha2Input = document.getElementById('senha2Input');
+const showPass = document.getElementById('showPass');
+const strengthFill = document.getElementById('strengthFill');
+const whatsappInput = document.getElementById('whatsappInput');
+
+// Mask WhatsApp input
+whatsappInput.addEventListener('input', () => {
+  let v = whatsappInput.value.replace(/\D/g, '');
+  if (v.length > 11) v = v.slice(0, 11);
+  if (v.length > 7) {
+    v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+  } else if (v.length > 2) {
+    v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+  } else if (v.length > 0) {
+    v = '(' + v;
+  }
+  whatsappInput.value = v;
+});
+
+// Show/hide passwords
+showPass.addEventListener('change', () => {
+  const t = showPass.checked ? 'text' : 'password';
+  senhaInput.type = t;
+  senha2Input.type = t;
+});
+
+// Password strength
+senhaInput.addEventListener('input', () => {
+  const s = senhaInput.value;
+  let score = 0;
+  if (s.length >= 6) score++;
+  if (s.length >= 8) score++;
+  if (/[A-Z]/.test(s) && /[a-z]/.test(s)) score++;
+  if (/\d/.test(s)) score++;
+  if (/[^A-Za-z0-9]/.test(s)) score++;
+  const pct = Math.min(score, 4) * 25;
+  const colors = ['#f85149', '#f0883e', '#d29922', '#2ea043'];
+  strengthFill.style.width = pct + '%';
+  strengthFill.style.background = colors[Math.min(score, 4) - 1] || '#30363d';
+});
+
+// Sanitize login input (only allow alphanumeric, dots, underscores)
+document.getElementById('loginInput').addEventListener('input', function() {
+  this.value = this.value.toLowerCase().replace(/[^a-z0-9._]/g, '');
+});
+
+function showError(msg) {
+  errorMsg.textContent = msg;
+  errorMsg.style.display = 'block';
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  errorMsg.style.display = 'none';
+
+  const nome = document.getElementById('nomeInput').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
+  const whatsapp = whatsappInput.value.replace(/\D/g, '');
+  const login = document.getElementById('loginInput').value.trim();
+  const senha = senhaInput.value;
+  const senha2 = senha2Input.value;
+
+  // Validations
+  if (!nome || !email || !whatsapp || !login || !senha || !senha2) {
+    showError('Preencha todos os campos obrigatorios.');
+    return;
+  }
+  if (nome.split(' ').length < 2) {
+    showError('Informe seu nome completo (nome e sobrenome).');
+    return;
+  }
+  if (whatsapp.length < 10 || whatsapp.length > 11) {
+    showError('WhatsApp invalido. Use DDD + numero (10 ou 11 digitos).');
+    return;
+  }
+  if (login.length < 3) {
+    showError('Login deve ter no minimo 3 caracteres.');
+    return;
+  }
+  if (senha.length < 6) {
+    showError('Senha deve ter no minimo 6 caracteres.');
+    return;
+  }
+  if (senha !== senha2) {
+    showError('As senhas nao conferem.');
+    return;
+  }
+
+  // Create user via auth module
+  const result = NLE_AUTH.createUser(nome, login, senha, 'vendedor', {
+    email: email,
+    whatsapp: whatsapp
+  });
+
+  if (!result.ok) {
+    showError(result.msg || 'Erro ao criar conta. Tente novamente.');
+    return;
+  }
+
+  // Success
+  form.style.display = 'none';
+  successMsg.style.display = 'block';
+});
+</script>
+</body>
+</html>

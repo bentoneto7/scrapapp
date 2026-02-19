@@ -24,6 +24,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
 .info-box strong{color:#ffd740}
 .show-pass{display:flex;align-items:center;gap:.4rem;margin-top:.4rem;cursor:pointer;font-size:.78rem;color:#8b949e;user-select:none}
 .show-pass input{width:auto;margin:0}
+.forgot-link{text-align:center;margin-top:1.2rem;font-size:.85rem}
+.forgot-link a{color:#58a6ff;text-decoration:none;cursor:pointer}
+.forgot-link a:hover{text-decoration:underline}
+.forgot-box{margin-top:1.2rem;background:#1c2333;border:1px solid #30363d;border-radius:8px;padding:1.2rem}
+.forgot-text{font-size:.82rem;color:#8b949e;margin-bottom:1rem;line-height:1.5}
+.forgot-error{background:#f8514920;border:1px solid #f85149;color:#f85149;padding:.5rem .8rem;border-radius:6px;font-size:.82rem;margin-top:.8rem}
+.forgot-success{background:#2ea04320;border:1px solid #2ea043;color:#2ea043;padding:.5rem .8rem;border-radius:6px;font-size:.82rem;margin-top:.8rem}
 </style>
 </head>
 <body>
@@ -49,10 +56,35 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6
       <button type="submit" class="btn-login" id="btnLogin">Entrar</button>
     </form>
 
-    <div class="info-box">
-      <strong>Primeiro acesso?</strong><br>
-      Login: <strong>admin</strong> | Senha: <strong>admin123</strong><br>
-      Troque a senha no painel de administracao.
+    <div class="forgot-link">
+      <a href="#" id="forgotPassLink">Esqueci minha senha</a>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="forgot-box" id="forgotBox" style="display:none;">
+      <p class="forgot-text">Informe seu login e e-mail cadastrado para redefinir a senha:</p>
+      <div class="form-group">
+        <label>Login</label>
+        <input type="text" id="forgotLogin" placeholder="Seu login">
+      </div>
+      <div class="form-group">
+        <label>E-mail cadastrado</label>
+        <input type="email" id="forgotEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Nova Senha</label>
+        <input type="password" id="forgotSenha" placeholder="Minimo 6 caracteres">
+      </div>
+      <div class="form-group">
+        <label>Confirmar Nova Senha</label>
+        <input type="password" id="forgotSenha2" placeholder="Repita a nova senha">
+      </div>
+      <button type="button" class="btn-login" id="btnResetPass">Redefinir Senha</button>
+      <div class="forgot-error" id="forgotError" style="display:none;"></div>
+      <div class="forgot-success" id="forgotSuccess" style="display:none;"></div>
+      <div class="forgot-link" style="margin-top:.8rem;">
+        <a href="#" id="backToLogin">Voltar ao login</a>
+      </div>
     </div>
   </div>
 </div>
@@ -71,6 +103,81 @@ const senhaInput = document.getElementById('senhaInput');
 
 showPass.addEventListener('change', () => {
   senhaInput.type = showPass.checked ? 'text' : 'password';
+});
+
+// Forgot password toggle
+const forgotLink = document.getElementById('forgotPassLink');
+const forgotBox = document.getElementById('forgotBox');
+const backToLogin = document.getElementById('backToLogin');
+const btnReset = document.getElementById('btnResetPass');
+const forgotError = document.getElementById('forgotError');
+const forgotSuccess = document.getElementById('forgotSuccess');
+
+forgotLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  form.style.display = 'none';
+  document.querySelector('.forgot-link').style.display = 'none';
+  forgotBox.style.display = 'block';
+  document.querySelector('.sub').textContent = 'Redefinir senha';
+});
+
+backToLogin.addEventListener('click', (e) => {
+  e.preventDefault();
+  form.style.display = 'block';
+  document.querySelector('.forgot-link').style.display = 'block';
+  forgotBox.style.display = 'none';
+  document.querySelector('.sub').textContent = 'Acesse sua conta';
+  forgotError.style.display = 'none';
+  forgotSuccess.style.display = 'none';
+});
+
+btnReset.addEventListener('click', () => {
+  forgotError.style.display = 'none';
+  forgotSuccess.style.display = 'none';
+
+  const login = document.getElementById('forgotLogin').value.trim().toLowerCase();
+  const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+  const novaSenha = document.getElementById('forgotSenha').value;
+  const novaSenha2 = document.getElementById('forgotSenha2').value;
+
+  if (!login || !email || !novaSenha || !novaSenha2) {
+    forgotError.textContent = 'Preencha todos os campos.';
+    forgotError.style.display = 'block';
+    return;
+  }
+  if (novaSenha.length < 6) {
+    forgotError.textContent = 'A nova senha deve ter no minimo 6 caracteres.';
+    forgotError.style.display = 'block';
+    return;
+  }
+  if (novaSenha !== novaSenha2) {
+    forgotError.textContent = 'As senhas nao conferem.';
+    forgotError.style.display = 'block';
+    return;
+  }
+
+  // Find user by login + email
+  const users = NLE_AUTH.getUsers();
+  const user = users.find(u => u.login === login && u.email === email);
+  if (!user) {
+    forgotError.textContent = 'Login e e-mail nao correspondem a nenhuma conta.';
+    forgotError.style.display = 'block';
+    return;
+  }
+
+  // Update password
+  const result = NLE_AUTH.updateUser(user.id, { senha: novaSenha });
+  if (result.ok) {
+    forgotSuccess.textContent = 'Senha redefinida com sucesso! Volte ao login para acessar.';
+    forgotSuccess.style.display = 'block';
+    document.getElementById('forgotLogin').value = '';
+    document.getElementById('forgotEmail').value = '';
+    document.getElementById('forgotSenha').value = '';
+    document.getElementById('forgotSenha2').value = '';
+  } else {
+    forgotError.textContent = 'Erro ao redefinir senha. Tente novamente.';
+    forgotError.style.display = 'block';
+  }
 });
 
 form.addEventListener('submit', (e) => {
