@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Plano de Captacao - NLE 2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+.header a{color:#8b949e;text-decoration:none;font-size:.9rem}
+.header a:hover{color:#ffd740}
+.header h1{font-size:1.3rem;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+.tabs{display:flex;gap:0;background:#161b22;border-bottom:1px solid #30363d;overflow-x:auto;padding:0 1rem}
+.tab{padding:.8rem 1.2rem;cursor:pointer;color:#8b949e;border-bottom:2px solid transparent;white-space:nowrap;font-size:.9rem;transition:all .2s}
+.tab:hover{color:#e6edf3}
+.tab.active{color:#ffd740;border-bottom-color:#ffd740}
+
+.content{max-width:900px;margin:0 auto;padding:1.5rem}
+.panel{display:none}
+.panel.active{display:block}
+
+/* Desafio Cards */
+.desafio-header{text-align:center;margin-bottom:2rem}
+.desafio-header h2{font-size:1.8rem;margin-bottom:.5rem}
+.desafio-header p{color:#8b949e;font-size:1rem;max-width:600px;margin:0 auto}
+
+.dia-card{background:#161b22;border:1px solid #30363d;border-radius:12px;margin-bottom:1.2rem;overflow:hidden;transition:all .2s}
+.dia-card:hover{border-color:#ffd740}
+.dia-header{display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;cursor:pointer;user-select:none}
+.dia-num{background:linear-gradient(135deg,#ffd740,#ff6d00);color:#000;font-weight:700;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.dia-info h3{font-size:1rem;margin-bottom:.2rem}
+.dia-info span{font-size:.8rem;color:#8b949e}
+.dia-arrow{margin-left:auto;color:#8b949e;transition:transform .3s;font-size:1.2rem}
+.dia-card.open .dia-arrow{transform:rotate(180deg)}
+.dia-body{display:none;padding:0 1.2rem 1.2rem;border-top:1px solid #30363d}
+.dia-card.open .dia-body{display:block}
+
+.post-block{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:1rem;margin:.8rem 0;position:relative}
+.post-block p{font-size:.9rem;line-height:1.6;white-space:pre-wrap}
+.post-label{font-size:.75rem;color:#ffd740;text-transform:uppercase;font-weight:600;margin-bottom:.5rem;letter-spacing:.5px}
+.post-tip{background:#1c2333;border-left:3px solid #ffd740;padding:.6rem .8rem;margin:.6rem 0;font-size:.82rem;color:#8b949e;border-radius:0 6px 6px 0}
+
+.btn-copy{position:absolute;top:.6rem;right:.6rem;background:#30363d;border:none;color:#e6edf3;padding:.3rem .6rem;border-radius:6px;cursor:pointer;font-size:.75rem;transition:all .2s}
+.btn-copy:hover{background:#ffd740;color:#000}
+.btn-copy.copied{background:#2ea043;color:#fff}
+
+/* Mapa de Leads */
+.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+@media(max-width:600px){.source-grid{grid-template-columns:1fr}}
+.source-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.2rem;transition:all .2s}
+.source-card:hover{border-color:#ffd740;transform:translateY(-2px)}
+.source-icon{font-size:2rem;margin-bottom:.5rem}
+.source-card h3{font-size:1rem;margin-bottom:.3rem}
+.source-card p{font-size:.82rem;color:#8b949e;line-height:1.4;margin-bottom:.6rem}
+.source-tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.tag{font-size:.7rem;padding:.2rem .5rem;border-radius:20px;background:#1c2333}
+.tag.hot{background:#3d1a1a;color:#ff6b6b}
+.tag.warm{background:#3d2e1a;color:#ffd740}
+.tag.big{background:#1a2d3d;color:#58a6ff}
+
+.search-terms{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1.2rem;margin-bottom:1.5rem}
+.search-terms h3{font-size:1rem;margin-bottom:.8rem}
+.term-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+@media(max-width:600px){.term-grid{grid-template-columns:1fr 1fr}}
+.term{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:.4rem .6rem;font-size:.8rem;cursor:pointer;text-align:center;transition:all .2s}
+.term:hover{border-color:#ffd740;color:#ffd740}
+.term.copied-term{background:#2ea043;border-color:#2ea043;color:#fff}
+
+/* Plano */
+.week-block{background:#161b22;border:1px solid #30363d;border-radius:12px;margin-bottom:1.5rem;overflow:hidden}
+.week-header{padding:1rem 1.2rem;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:.8rem}
+.week-num{background:linear-gradient(135deg,#ffd740,#ff6d00);color:#000;font-weight:700;padding:.3rem .8rem;border-radius:20px;font-size:.85rem}
+.week-header h3{font-size:1rem}
+.week-body{padding:1rem 1.2rem}
+.task-row{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 0;border-bottom:1px solid #21262d}
+.task-row:last-child{border-bottom:none}
+.task-check{width:20px;height:20px;border:2px solid #30363d;border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .2s}
+.task-check.done{background:#2ea043;border-color:#2ea043}
+.task-check.done::after{content:"✓";color:#fff;font-size:.7rem}
+.task-text{font-size:.88rem;line-height:1.5}
+.task-text small{display:block;color:#8b949e;font-size:.78rem;margin-top:.15rem}
+.task-text.struck{text-decoration:line-through;color:#484f58}
+
+.metric-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+@media(max-width:600px){.metric-row{grid-template-columns:1fr}}
+.metric-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem;text-align:center}
+.metric-card .num{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#ffd740,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric-card .label{font-size:.8rem;color:#8b949e;margin-top:.2rem}
+
+/* Rotina */
+.rotina-timeline{position:relative;padding-left:2rem}
+.rotina-timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:#30363d}
+.rotina-item{position:relative;margin-bottom:1.5rem;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem 1.2rem}
+.rotina-item::before{content:"";position:absolute;left:-1.65rem;top:1.2rem;width:12px;height:12px;border-radius:50%;background:#ffd740;border:2px solid #0d1117}
+.rotina-time{font-size:.8rem;color:#ffd740;font-weight:600;margin-bottom:.3rem}
+.rotina-item h4{font-size:.95rem;margin-bottom:.3rem}
+.rotina-item p{font-size:.82rem;color:#8b949e;line-height:1.4}
+.rotina-item ul{margin:.4rem 0 0 1rem;font-size:.82rem;color:#8b949e}
+.rotina-item li{margin-bottom:.2rem}
+
+.section-title{font-size:1.3rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #30363d}
+.section-sub{color:#8b949e;font-size:.9rem;margin-bottom:1.2rem}
+
+.alert-box{background:#1c2333;border:1px solid #ffd740;border-radius:8px;padding:1rem;margin:1rem 0;font-size:.85rem}
+.alert-box strong{color:#ffd740}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/">← Voltar</a>
+  <h1>Plano de Captacao</h1>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="desafio">Desafio 5 Dias</div>
+  <div class="tab" data-tab="fontes">Mapa de Leads</div>
+  <div class="tab" data-tab="plano">Plano de Acao</div>
+  <div class="tab" data-tab="rotina">Rotina Diaria</div>
+</div>
+
+<!-- ==================== TAB 1: DESAFIO 5 DIAS ==================== -->
+<div class="content">
+<div class="panel active" id="desafio">
+  <div class="desafio-header">
+    <h2>Desafio: Nome Limpo em 5 Dias</h2>
+    <p>Posts prontos para usar em grupos do Facebook. Cada dia cria curiosidade e leva a pessoa a te chamar no privado.</p>
+  </div>
+
+  <div class="alert-box">
+    <strong>Como funciona:</strong> Voce posta 1 por dia no grupo. Cada post gera engajamento e prepara o terreno pro proximo. No dia 5 a pessoa ja confia em voce e chama no privado.
+  </div>
+
+  <!-- DIA 1 -->
+  <div class="dia-card">
+    <div class="dia-header" onclick="toggleDia(this)">
+      <div class="dia-num">D1</div>
+      <div class="dia-info">
+        <h3>A Pergunta que Gera Debate</h3>
+        <span>Objetivo: Gerar comentarios e aparecer no feed de todos</span>
+      </div>
+      <span class="dia-arrow">▼</span>
+    </div>
+    <div class="dia-body">
+      <div class="post-tip">Poste entre 19h-21h. Responda TODOS os comentarios pra aumentar alcance.</div>
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Post Principal</div>
+        <p>Deixa eu fazer uma pergunta sincera pra quem ta aqui no grupo:
+
+Quanto tempo voce ta com o nome sujo?
+
+( ) Menos de 1 ano
+( ) 1 a 3 anos
+( ) Mais de 3 anos
+( ) Ja perdi a conta
+
+Pergunto porque muita gente nao sabe, mas dependendo do tempo, a situacao muda COMPLETAMENTE. Tem coisa que prescreve, tem coisa que pode ser contestada legalmente.
+
+Comenta ai embaixo que amanha eu trago uma informacao que pode mudar a forma como voce ve essa divida.</p>
+      </div>
+      <div class="post-tip">Se alguem comentar com tempo + situacao, responda: "Interessante seu caso, posso te mandar uma analise no privado?"</div>
+
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Variacao A - Mais Curto</div>
+        <p>Pergunta rapida pro grupo:
+
+Voce sabia que dependendo do TEMPO que sua divida existe, voce pode ter direitos que nunca te contaram?
+
+Comenta quanto tempo faz que voce ta negativado que eu te falo o que pode ser feito no seu caso especifico.</p>
+      </div>
+
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Variacao B - Tom Provocativo</div>
+        <p>Voce ta pagando uma divida que talvez nem devesse mais?
+
+Nao to brincando. Tem gente nesse grupo agora que ta com o nome sujo por uma divida que JA PRESCREVEU e nao sabe.
+
+Se voce ta negativado ha mais de 3 anos, comenta "EU" aqui embaixo que amanha eu explico o que a lei diz sobre isso.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIA 2 -->
+  <div class="dia-card">
+    <div class="dia-header" onclick="toggleDia(this)">
+      <div class="dia-num">D2</div>
+      <div class="dia-info">
+        <h3>O Conteudo de Valor (Educacao)</h3>
+        <span>Objetivo: Mostrar conhecimento e criar autoridade</span>
+      </div>
+      <span class="dia-arrow">▼</span>
+    </div>
+    <div class="dia-body">
+      <div class="post-tip">Referencia o post do dia anterior. Quem comentou ontem vai receber notificacao.</div>
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Post Principal</div>
+        <p>Ontem eu perguntei sobre tempo de negativacao e muita gente respondeu. Agora vou cumprir o que prometi.
+
+3 COISAS QUE O BANCO NAO TE CONTA:
+
+1. Divida prescreve em 5 anos (Art. 206 do Codigo Civil). Depois disso, seu nome TEM que sair do SPC/Serasa. Se nao saiu, voce pode contestar.
+
+2. Cobranca com juros abusivos pode ser revisada. O CDC (Art. 6) garante isso. Ja vi caso de divida de R$3.000 que virou R$15.000 so de juros ilegais.
+
+3. Negativacao indevida gera direito a indenizacao. Se voce ja pagou e continua negativado, ou se a divida prescreveu e nao tiraram seu nome, voce TEM direitos.
+
+Amanha eu vou contar o caso de uma pessoa que devia R$12.000 e resolveu por uma fracao. Fica de olho.
+
+Alguem aqui se identificou com alguma dessas situacoes?</p>
+      </div>
+
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Variacao - Lista Rapida</div>
+        <p>Prometi ontem e to cumprindo. Bora la:
+
+Voce sabia que:
+
+→ Divida de cartao com juros acima de 14% ao mes pode ser contestada?
+→ Seu nome so pode ficar negativado por no maximo 5 anos?
+→ Se o banco nao consegue provar a divida original, ela pode ser anulada?
+
+Isso nao sou eu inventando. E o Codigo de Defesa do Consumidor + jurisprudencia do STJ.
+
+Quem quiser entender melhor como isso se aplica no seu caso, me chama no inbox que eu explico sem compromisso.
+
+Amanha tem mais.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIA 3 -->
+  <div class="dia-card">
+    <div class="dia-header" onclick="toggleDia(this)">
+      <div class="dia-num">D3</div>
+      <div class="dia-info">
+        <h3>O Caso Real (Prova Social)</h3>
+        <span>Objetivo: Mostrar resultado concreto e gerar desejo</span>
+      </div>
+      <span class="dia-arrow">▼</span>
+    </div>
+    <div class="dia-body">
+      <div class="post-tip">Historias reais convertem 3x mais que conteudo tecnico. Se tiver prints (com dados borrados), melhor ainda.</div>
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Post Principal</div>
+        <p>Vou contar um caso real (com autorizacao da pessoa, claro):
+
+Maria tinha 4 dividas negativadas:
+- Cartao de credito: R$8.200
+- Emprestimo pessoal: R$4.500
+- Financiamento: R$12.000
+- Conta de telefone: R$890
+
+Total: R$25.590 de divida
+
+O que aconteceu:
+→ A divida do telefone ja tinha prescrito. Tiramos o nome dela do SPC sem pagar nada.
+→ O cartao tinha juros abusivos de 18% ao mes. Contestamos e reduziu pra R$3.100.
+→ O emprestimo foi renegociado direto com o banco por R$1.800.
+→ O financiamento tinha clausula abusiva. Revisado pra R$7.500 em 12x.
+
+De R$25.590 ela pagou R$12.400. E o nome dela? LIMPO.
+
+Cada caso e um caso. Mas a maioria das pessoas paga mais do que deve simplesmente porque nao sabe dos seus direitos.
+
+Quem quiser que eu de uma olhada na situacao, me manda mensagem. Sem compromisso, sem custo pra analise inicial.</p>
+      </div>
+
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Variacao - Mais Curto</div>
+        <p>Caso real da semana:
+
+Pessoa com R$18.000 em dividas negativadas.
+Resultado: limpou o nome pagando R$6.200.
+
+Como? Prescricao + revisao de juros abusivos + negociacao direta.
+
+Nao e magica. E conhecer seus direitos.
+
+Se voce quer entender o que pode ser feito no SEU caso, me chama no privado. Analise inicial sem custo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIA 4 -->
+  <div class="dia-card">
+    <div class="dia-header" onclick="toggleDia(this)">
+      <div class="dia-num">D4</div>
+      <div class="dia-info">
+        <h3>Quebrando Objecoes</h3>
+        <span>Objetivo: Antecipar duvidas e remover barreiras</span>
+      </div>
+      <span class="dia-arrow">▼</span>
+    </div>
+    <div class="dia-body">
+      <div class="post-tip">Esse post prepara o terreno pro CTA do dia 5. Ataca as objecoes ANTES da pessoa pensar nelas.</div>
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Post Principal</div>
+        <p>Nos ultimos dias compartilhei bastante conteudo aqui e recebi muitas mensagens (obrigado pela confianca!).
+
+Percebi que as mesmas duvidas aparecem sempre, entao vou responder as 5 principais:
+
+"Isso e golpe?"
+→ Nao. Tudo e baseado no CDC, LGPD e jurisprudencia do STJ. Sao direitos seus que ja existem. So que ninguem te conta.
+
+"Preciso pagar pra consultar?"
+→ A analise inicial e gratuita. Eu olho sua situacao e te falo o que pode ser feito. Sem compromisso.
+
+"Funciona mesmo?"
+→ Depende do caso. Nem toda divida pode ser contestada. Por isso a analise e importante - pra te dar uma resposta honesta.
+
+"Quanto custa?"
+→ Varia conforme a complexidade. Mas pensa assim: se voce deve R$20.000 e resolve por R$8.000, o investimento se paga.
+
+"Quanto tempo demora?"
+→ Casos simples (prescricao): 15-30 dias. Casos com revisao: 60-90 dias. Cada situacao e diferente.
+
+Se voce tem outra duvida que nao ta aqui, comenta embaixo que eu respondo.
+
+Amanha eu vou abrir vagas limitadas pra analise gratuita. Fica ligado.</p>
+      </div>
+
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Variacao - Tom Direto</div>
+        <p>Vou ser direto com voces:
+
+Eu sei que quando alguem fala em "limpar nome" muita gente desconfia. Normal. Tem muito picareta por ai.
+
+A diferenca e simples:
+- Golpista pede dinheiro adiantado sem explicar nada
+- Profissional te mostra EXATAMENTE o que vai fazer e por que funciona
+
+Tudo que eu compartilhei aqui nos ultimos dias ta no Codigo de Defesa do Consumidor. Voce pode conferir.
+
+Amanha vou abrir algumas vagas pra analise gratuita de situacao. Se voce quer resolver de vez, fica de olho no grupo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIA 5 -->
+  <div class="dia-card">
+    <div class="dia-header" onclick="toggleDia(this)">
+      <div class="dia-num">D5</div>
+      <div class="dia-info">
+        <h3>O Fechamento (CTA Direto)</h3>
+        <span>Objetivo: Converter. Levar pro privado ou landing page.</span>
+      </div>
+      <span class="dia-arrow">▼</span>
+    </div>
+    <div class="dia-body">
+      <div class="post-tip">Esse e o post de conversao. Use URGENCIA (vagas limitadas) e ESCASSEZ (so hoje). Poste no horario de pico: 19h-20h.</div>
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Post Principal - Com Link</div>
+        <p>Essa semana eu compartilhei bastante conteudo aqui sobre direitos do consumidor negativado. Agora vou fazer algo especial:
+
+Vou abrir 10 VAGAS para analise gratuita da sua situacao.
+
+O que voce recebe:
+→ Consulta das suas negativacoes atuais
+→ Analise de quais dividas podem ser contestadas
+→ Plano personalizado do que pode ser feito
+→ Tudo isso SEM CUSTO e SEM COMPROMISSO
+
+Por que so 10 vagas?
+Porque cada analise leva tempo e eu quero dar atencao real pra cada pessoa. Nao e robozinho.
+
+Pra garantir sua vaga, e so preencher esse formulario rapido:
+[LINK DA LANDING PAGE]
+
+Ou se preferir, me chama direto no inbox.
+
+Depois que fechar as 10 vagas, so no mes que vem.
+
+Quem ja me mandou mensagem essa semana tem prioridade.</p>
+      </div>
+
+      <div class="post-block">
+        <button class="btn-copy" onclick="copyPost(this)">Copiar</button>
+        <div class="post-label">Variacao - Sem Link (grupos restritos)</div>
+        <p>Galera, essa semana falei bastante sobre direitos de quem ta negativado aqui no grupo.
+
+Agora vou abrir 10 vagas pra analise gratuita.
+
+Eu olho sua situacao, te falo o que pode ser feito e quanto voce pode economizar. Sem custo, sem compromisso.
+
+Quer participar? Comenta "EU QUERO" aqui embaixo que eu te chamo no privado.
+
+Sao so 10 vagas porque cada analise leva tempo. Quando fechar, fechou.
+
+Quem ja conversou comigo essa semana tem prioridade.</p>
+      </div>
+
+      <div class="post-tip">Depois que a pessoa comentar "EU QUERO", mande no privado: "Oi [nome]! Vi seu comentario. Me conta rapidinho: ha quanto tempo voce ta negativado e mais ou menos qual o valor total das dividas? Assim ja consigo te dar um panorama."</div>
+    </div>
+  </div>
+
+  <div class="alert-box" style="margin-top:1.5rem">
+    <strong>Depois do Dia 5:</strong> Espere 3-5 dias e comece o ciclo de novo com textos diferentes. O Gerador Anti-Padrao pode criar variacoes automaticas pra voce.
+  </div>
+</div>
+
+<!-- ==================== TAB 2: MAPA DE LEADS ==================== -->
+<div class="panel" id="fontes">
+  <h2 class="section-title">Mapa de Leads - Onde Encontrar</h2>
+  <p class="section-sub">Fontes rankeadas por volume e qualidade de leads. Foque nas fontes quentes primeiro.</p>
+
+  <div class="source-grid">
+    <div class="source-card">
+      <div class="source-icon">🔴</div>
+      <h3>Grupos "Nome Limpo / SPC / Serasa"</h3>
+      <p>Pessoas que JA estao buscando solucao. Lead mais quente que existe. Busque: "nome limpo", "limpar nome", "SPC Serasa", "negativado".</p>
+      <div class="source-tags">
+        <span class="tag hot">Lead Quente</span>
+        <span class="tag big">Alto Volume</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="source-icon">🟠</div>
+      <h3>Grupos "Emprestimo / Credito"</h3>
+      <p>Gente buscando credito = provavelmente negativada ou com score baixo. Busque: "emprestimo pessoal", "credito facil", "score baixo".</p>
+      <div class="source-tags">
+        <span class="tag hot">Lead Quente</span>
+        <span class="tag big">Alto Volume</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="source-icon">🟡</div>
+      <h3>Grupos "MEI / Microempreendedor"</h3>
+      <p>Empreendedores com CNPJ negativado nao conseguem conta PJ, maquininha, emprestimo. Dor forte. Busque: "MEI", "microempreendedor", "CNPJ negativado".</p>
+      <div class="source-tags">
+        <span class="tag warm">Lead Morno-Quente</span>
+        <span class="tag big">Alto Volume</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="source-icon">🟡</div>
+      <h3>Grupos "Renda Extra / Bico / Freelancer"</h3>
+      <p>Situacao financeira apertada = alta chance de estar negativado. Busque: "renda extra [cidade]", "bico", "freelancer", "trabalho informal".</p>
+      <div class="source-tags">
+        <span class="tag warm">Lead Morno</span>
+        <span class="tag big">Volume Muito Alto</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="source-icon">🟢</div>
+      <h3>Grupos "Compra e Venda [Cidade]"</h3>
+      <p>Volume ENORME. Muita gente vendendo coisas pra pagar divida. Ideal pro Desafio 5 Dias. Busque: "compra e venda [sua cidade]", "desapego".</p>
+      <div class="source-tags">
+        <span class="tag warm">Lead Morno</span>
+        <span class="tag big">Volume Gigante</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="source-icon">🟢</div>
+      <h3>Grupos "Financiamento / Imovel"</h3>
+      <p>Quem quer financiar e nao consegue por estar negativado. Dor clara. Busque: "financiamento [cidade]", "aluguel [cidade]", "imovel popular".</p>
+      <div class="source-tags">
+        <span class="tag warm">Lead Morno-Quente</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="source-icon">🔵</div>
+      <h3>Grupos "Desempregados [Cidade]"</h3>
+      <p>Alta inadimplencia. Mas cuidado: poder de pagamento menor. Bom pra volume. Busque: "emprego [cidade]", "desempregados", "vagas".</p>
+      <div class="source-tags">
+        <span class="tag big">Volume Alto</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="source-icon">🔵</div>
+      <h3>Grupos "Dicas Financeiras / Investimento"</h3>
+      <p>Publico mais educado financeiramente mas pode ter historico de negativacao. Bom pra conteudo educativo. Busque: "educacao financeira", "dicas economia".</p>
+      <div class="source-tags">
+        <span class="tag warm">Lead Morno</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-terms">
+    <h3>Termos de Busca Prontos (clique pra copiar)</h3>
+    <div class="term-grid" id="termGrid">
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin-top:2rem">Filtros de Qualidade do Grupo</h2>
+  <p class="section-sub">Antes de entrar, verifique esses criterios:</p>
+
+  <div class="source-grid">
+    <div class="source-card" style="border-color:#2ea043">
+      <h3 style="color:#2ea043">✅ Sinais POSITIVOS (entre)</h3>
+      <p style="color:#e6edf3;line-height:1.8">
+        → 50.000+ membros<br>
+        → Posts recentes com comentarios<br>
+        → Regras permitem divulgacao ou tem dia especifico<br>
+        → Membros fazendo perguntas sobre dividas<br>
+        → Admin ativo mas nao deletando tudo<br>
+        → Grupo publico (mais facil crescer)
+      </p>
+    </div>
+
+    <div class="source-card" style="border-color:#f85149">
+      <h3 style="color:#f85149">❌ Sinais NEGATIVOS (pule)</h3>
+      <p style="color:#e6edf3;line-height:1.8">
+        → "Proibido qualquer tipo de divulgacao"<br>
+        → Grupo morto (posts ha semanas)<br>
+        → So admins postam<br>
+        → Muito spam/bot (grupo queimado)<br>
+        → Menos de 10.000 membros<br>
+        → Grupo privado + admin rigoroso
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TAB 3: PLANO DE ACAO ==================== -->
+<div class="panel" id="plano">
+  <h2 class="section-title">Plano de Acao - 30 Dias</h2>
+  <p class="section-sub">De zero a maquina de leads em 4 semanas. Marque as tarefas conforme for completando.</p>
+
+  <div class="metric-row">
+    <div class="metric-card">
+      <div class="num" id="metricTotal">0</div>
+      <div class="label">Tarefas Totais</div>
+    </div>
+    <div class="metric-card">
+      <div class="num" id="metricDone">0</div>
+      <div class="label">Concluidas</div>
+    </div>
+    <div class="metric-card">
+      <div class="num" id="metricPerc">0%</div>
+      <div class="label">Progresso</div>
+    </div>
+  </div>
+
+  <!-- SEMANA 1 -->
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Semana 1</span>
+      <h3>Preparacao e Infiltracao</h3>
+    </div>
+    <div class="week-body" id="week1">
+    </div>
+  </div>
+
+  <!-- SEMANA 2 -->
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Semana 2</span>
+      <h3>Primeiros Desafios</h3>
+    </div>
+    <div class="week-body" id="week2">
+    </div>
+  </div>
+
+  <!-- SEMANA 3 -->
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Semana 3</span>
+      <h3>Escalar e Otimizar</h3>
+    </div>
+    <div class="week-body" id="week3">
+    </div>
+  </div>
+
+  <!-- SEMANA 4 -->
+  <div class="week-block">
+    <div class="week-header">
+      <span class="week-num">Semana 4</span>
+      <h3>Maquina Rodando</h3>
+    </div>
+    <div class="week-body" id="week4">
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TAB 4: ROTINA DIARIA ==================== -->
+<div class="panel" id="rotina">
+  <h2 class="section-title">Rotina Diaria - 30 Minutos</h2>
+  <p class="section-sub">Siga esse cronograma todo dia. Consistencia > intensidade.</p>
+
+  <div class="rotina-timeline">
+    <div class="rotina-item">
+      <div class="rotina-time">08:00 - 08:05 (5 min)</div>
+      <h4>Aquecimento de Perfil</h4>
+      <p>Antes de postar qualquer conteudo seu:</p>
+      <ul>
+        <li>Curta 3-5 posts de outras pessoas nos grupos</li>
+        <li>Comente algo genuino em 2 posts (nada de "otimo post!")</li>
+        <li>Isso "aquece" sua conta e evita bloqueio</li>
+      </ul>
+    </div>
+
+    <div class="rotina-item">
+      <div class="rotina-time">08:05 - 08:15 (10 min)</div>
+      <h4>Postagem da Manha</h4>
+      <p>Horario de quem acorda e checa o celular antes do trabalho:</p>
+      <ul>
+        <li>Poste em 2-3 grupos (NUNCA o mesmo texto)</li>
+        <li>Use o Gerador Anti-Padrao pra variar</li>
+        <li>Espere 3-5 min entre cada grupo</li>
+        <li>Se estiver no Desafio: poste o dia correspondente</li>
+      </ul>
+    </div>
+
+    <div class="rotina-item">
+      <div class="rotina-time">12:00 - 12:10 (10 min)</div>
+      <h4>Engajamento + Postagem do Almoco</h4>
+      <p>Horario de pico - pessoas no intervalo do trabalho:</p>
+      <ul>
+        <li>Responda TODOS os comentarios nos seus posts da manha</li>
+        <li>Poste em mais 2-3 grupos diferentes</li>
+        <li>Se alguem mandou DM, responda agora</li>
+        <li>Verifique novos membros em grupos quentes</li>
+      </ul>
+    </div>
+
+    <div class="rotina-item">
+      <div class="rotina-time">19:00 - 19:05 (5 min)</div>
+      <h4>Postagem da Noite (PICO)</h4>
+      <p>MELHOR horario do dia - maior engajamento:</p>
+      <ul>
+        <li>Poste em 3-4 grupos (seus melhores textos)</li>
+        <li>Se for Dia 5 do Desafio, poste AGORA</li>
+        <li>Responda comentarios do almoco</li>
+        <li>Mande follow-up pra quem demonstrou interesse</li>
+      </ul>
+    </div>
+
+    <div class="rotina-item">
+      <div class="rotina-time">21:00 (quando der)</div>
+      <h4>Fechamento do Dia</h4>
+      <p>Antes de dormir, rapido:</p>
+      <ul>
+        <li>Responda ultimos comentarios e DMs</li>
+        <li>Anote no Tracker quais grupos performaram melhor</li>
+        <li>Planeje o conteudo de amanha (ja deixe copiado)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert-box" style="margin-top:1.5rem">
+    <strong>Regras de Ouro:</strong><br><br>
+    1. NUNCA poste no mesmo grupo 2x no mesmo dia<br>
+    2. NUNCA use o mesmo texto em dois grupos no mesmo dia<br>
+    3. SEMPRE responda comentarios (algoritmo te recompensa)<br>
+    4. Espere 3-5 min entre posts em grupos diferentes<br>
+    5. Se um grupo deletar seu post, espere 1 semana pra postar la de novo<br>
+    6. Varie entre os 3 horarios - nao poste so de noite<br>
+    7. Nos fins de semana, poste so 1x (sabado manha ou domingo noite)
+  </div>
+</div>
+</div>
+
+<script>
+// Tab navigation
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  });
+});
+
+// Accordion
+function toggleDia(el){
+  el.parentElement.classList.toggle('open');
+}
+
+// Copy post
+function copyPost(btn){
+  const text=btn.parentElement.querySelector('p').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copiado!';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('copied');},2000);
+  });
+}
+
+// Search terms
+const terms=[
+  "nome limpo","negativado SPC Serasa","limpar nome","score baixo",
+  "divida prescrita","renegociacao dividas","emprestimo pessoal",
+  "credito negativado","MEI negativado","CNPJ negativado",
+  "microempreendedor divida","compra e venda","desapego",
+  "renda extra","bico freelancer","desempregados",
+  "financiamento casa","aluguel sem fiador","educacao financeira",
+  "dicas economia","cartao credito negativado","como aumentar score",
+  "Serasa limpa nome","SPC como resolver","divida banco"
+];
+
+const termGrid=document.getElementById('termGrid');
+terms.forEach(t=>{
+  const div=document.createElement('div');
+  div.className='term';
+  div.textContent=t;
+  div.onclick=()=>{
+    navigator.clipboard.writeText(t).then(()=>{
+      div.classList.add('copied-term');
+      setTimeout(()=>div.classList.remove('copied-term'),1500);
+    });
+  };
+  termGrid.appendChild(div);
+});
+
+// Plano de Acao - Tasks
+const weeks={
+  week1:[
+    {t:"Buscar e entrar em 20-30 grupos usando os termos do Mapa de Leads",s:"Foque nos grupos quentes (vermelhos e laranjas) primeiro"},
+    {t:"Criar 2-3 perfis no Facebook (ou usar os que ja tem)",s:"Cada perfil vai cobrir grupos diferentes pra nao parecer spam"},
+    {t:"Preencher perfis com foto, bio e alguns posts pessoais",s:"Perfil vazio = ban. Deixe parecer uma pessoa real"},
+    {t:"Nos primeiros 3 dias: so curtir e comentar nos grupos",s:"NAO poste nada seu ainda. Aqueça a conta primeiro"},
+    {t:"Cadastrar todos os grupos na Central de Operacoes",s:"Inclua categoria, membros, regras e nivel de moderacao"},
+    {t:"Preparar a Landing Page com seu numero de WhatsApp",s:"Teste o formulario e confirme que os leads estao chegando"},
+    {t:"Ler as regras de TODOS os grupos que entrou",s:"Anote quais permitem link, quais so texto, quais tem dia de divulgacao"}
+  ],
+  week2:[
+    {t:"Iniciar Desafio 5 Dias nos 3 melhores grupos",s:"Escolha os 3 com mais membros e mais atividade"},
+    {t:"Postar Dia 1 do Desafio (pergunta) nos 3 grupos",s:"Poste em horarios diferentes: manha, almoco e noite"},
+    {t:"Responder TODOS os comentarios dos posts do Dia 1",s:"Cada resposta aumenta o alcance do seu post"},
+    {t:"Seguir o Desafio ate o Dia 5 nos 3 grupos",s:"Nao pule dias. A sequencia cria expectativa"},
+    {t:"Em paralelo: postar conteudo educativo nos outros grupos",s:"Use o Gerador Anti-Padrao pra criar variacoes"},
+    {t:"Criar links UTM diferentes pra cada grupo",s:"Assim voce sabe de onde cada lead veio"},
+    {t:"No Dia 5: medir quantos leads vieram de cada grupo",s:"Anote no Tracker pra saber onde focar na semana 3"}
+  ],
+  week3:[
+    {t:"Analisar resultados: quais grupos geraram mais leads?",s:"Rankeie usando o Tracker de Grupos"},
+    {t:"Dobrar a frequencia nos grupos Tier S e A",s:"Se um grupo converte bem, poste la com mais frequencia"},
+    {t:"Iniciar novo ciclo de Desafio 5 Dias nos proximos 3 grupos",s:"Use variacoes diferentes dos textos"},
+    {t:"Comecar a usar a Onda Organica nos grupos mais rigorosos",s:"Grupos com moderacao forte precisam de abordagem mais sutil"},
+    {t:"Testar posts em horarios diferentes e medir engajamento",s:"Descubra o melhor horario pra CADA grupo"},
+    {t:"Criar scripts de WhatsApp personalizados pro seu estilo",s:"Adapte os scripts da Central de Operacoes"},
+    {t:"Meta: 5-10 leads por dia entrando pelo formulario ou inbox",s:"Se nao esta batendo, revise os textos ou mude de grupos"}
+  ],
+  week4:[
+    {t:"Automatizar: distribuir grupos entre perfis na Central",s:"Use a distribuicao automatica pra nao repetir grupo"},
+    {t:"Escalar pra 30-50 grupos ativos",s:"Agora voce ja sabe quais tipos de grupo funcionam"},
+    {t:"Manter 2-3 ciclos de Desafio rodando simultaneamente",s:"Cada ciclo em grupos diferentes, textos variados"},
+    {t:"Criar calendario semanal fixo de conteudo",s:"Defina o que posta cada dia da semana"},
+    {t:"Revisar metricas e cortar grupos que nao convertem",s:"Nao gaste tempo em grupo Tier C. Substitua por novos"},
+    {t:"Meta final: 10-20 leads por dia consistentemente",s:"Se bateu essa meta, o sistema esta funcionando"},
+    {t:"Documentar o que funcionou pra replicar no proximo mes",s:"Salve os melhores textos, horarios e grupos"}
+  ]
+};
+
+const STORAGE_KEY='nle_plano_tasks';
+
+function loadTasks(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch(e){return{}}
+}
+function saveTasks(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
+
+function renderWeeks(){
+  const saved=loadTasks();
+  let total=0,done=0;
+  Object.keys(weeks).forEach(wk=>{
+    const container=document.getElementById(wk);
+    container.innerHTML='';
+    weeks[wk].forEach((task,i)=>{
+      const key=wk+'_'+i;
+      const isDone=saved[key]||false;
+      total++;
+      if(isDone)done++;
+      const row=document.createElement('div');
+      row.className='task-row';
+      row.innerHTML=`
+        <div class="task-check${isDone?' done':''}" data-key="${key}"></div>
+        <div class="task-text${isDone?' struck':''}">
+          ${task.t}
+          <small>${task.s}</small>
+        </div>
+      `;
+      row.querySelector('.task-check').addEventListener('click',function(){
+        const s=loadTasks();
+        s[this.dataset.key]=!s[this.dataset.key];
+        saveTasks(s);
+        renderWeeks();
+      });
+      container.appendChild(row);
+    });
+  });
+  document.getElementById('metricTotal').textContent=total;
+  document.getElementById('metricDone').textContent=done;
+  document.getElementById('metricPerc').textContent=Math.round(done/total*100)+'%';
+}
+
+renderWeeks();
+</script>
+</body>
+</html>
