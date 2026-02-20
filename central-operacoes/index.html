@@ -75,6 +75,37 @@ h2{font-size:1.4rem;margin-bottom:18px;color:#1a237e}
   .stats-row{gap:8px}
   .stat-card{min-width:80px;padding:10px}
 }
+/* GAMIFICATION */
+.xp-bar-wrap{background:#e0e0e0;border-radius:12px;height:18px;overflow:hidden;position:relative;margin:8px 0}
+.xp-bar-wrap .xp-fill{height:100%;background:linear-gradient(90deg,#ffd740,#ff6d00);border-radius:12px;transition:width .6s}
+.xp-bar-wrap .xp-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#333}
+.level-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ffd740,#ff6d00);color:#333;font-weight:700;padding:4px 14px;border-radius:20px;font-size:.82rem}
+.achievement{display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid #e0e0e0;border-radius:10px;padding:10px 14px;margin:4px;transition:all .2s}
+.achievement.unlocked{border-color:#ffd740;box-shadow:0 2px 8px rgba(255,215,64,.3)}
+.achievement .ach-icon{font-size:1.5rem}
+.achievement .ach-info{text-align:left}
+.achievement .ach-info strong{font-size:.8rem;display:block}
+.achievement .ach-info small{font-size:.68rem;color:#888}
+.streak-flame{font-size:1.8rem;animation:flamePulse 1s infinite alternate}
+@keyframes flamePulse{0%{transform:scale(1)}100%{transform:scale(1.15)}}
+.xp-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#ffd740,#ff6d00);color:#333;padding:20px 40px;border-radius:16px;font-size:1.3rem;font-weight:700;z-index:400;opacity:0;pointer-events:none;transition:all .4s}
+.xp-popup.show{opacity:1;transform:translate(-50%,-60%)}
+/* ONBOARDING */
+.onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center}
+.onboard-box{background:#fff;border-radius:16px;padding:32px;max-width:520px;width:90%;text-align:center}
+.onboard-box h2{color:#1a237e;margin-bottom:12px}
+.onboard-box p{color:#555;font-size:.92rem;line-height:1.6;margin-bottom:20px}
+.onboard-steps{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
+.onboard-steps .dot{width:10px;height:10px;border-radius:50%;background:#ddd}
+.onboard-steps .dot.active{background:#ff6d00}
+.onboard-box .ob-icon{font-size:3rem;margin-bottom:12px;display:block}
+/* GUIDE */
+.guide-section{margin-bottom:20px}
+.guide-section h3{font-size:1rem;color:#1a237e;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.guide-step{display:flex;gap:12px;margin-bottom:12px;padding:12px;background:#f5f5f5;border-radius:8px}
+.guide-step .step-num{background:var(--green);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.guide-step .step-text{font-size:.85rem;line-height:1.5}
+.guide-tip{background:#fff3e0;border-left:4px solid #ff6d00;padding:12px;border-radius:0 8px 8px 0;margin-bottom:12px;font-size:.83rem}
 </style>
 </head>
 <body>
@@ -171,6 +202,67 @@ h2{font-size:1.4rem;margin-bottom:18px;color:#1a237e}
       </div>
     </div>
   </div>
+  <!-- PAGE: CONQUISTAS -->
+  <div class="page" id="pg-conquistas">
+    <h2>Conquistas & Ranking</h2>
+    <div class="card" style="text-align:center;padding:24px">
+      <div id="levelDisplay"></div>
+      <div class="xp-bar-wrap" style="max-width:400px;margin:12px auto;height:22px">
+        <div class="xp-fill" id="xpFill" style="width:0%"></div>
+        <div class="xp-text" id="xpText">0 / 100 XP</div>
+      </div>
+      <div id="streakDisplay" style="margin-top:12px"></div>
+    </div>
+    <div class="stats-row" id="gamifyStats"></div>
+    <h3 style="font-size:1rem;margin-bottom:12px;color:#1a237e">Conquistas</h3>
+    <div id="achievementList" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+  </div>
+  <!-- PAGE: GUIA FACEBOOK -->
+  <div class="page" id="pg-guia">
+    <h2>Guia Facebook - Grupos</h2>
+    <div class="card guide-section">
+      <h3>1. Como Encontrar Grupos de Qualidade</h3>
+      <div class="guide-step"><div class="step-num">1</div><div class="step-text"><strong>Pesquise no Facebook:</strong> Use termos como "nome sujo", "negativado", "limpar nome", "credito negado", "SPC Serasa". Va em Grupos nos filtros.</div></div>
+      <div class="guide-step"><div class="step-num">2</div><div class="step-text"><strong>Filtre por tamanho:</strong> Priorize grupos com 10k+ membros. Mais membros = mais alcance potencial.</div></div>
+      <div class="guide-step"><div class="step-num">3</div><div class="step-text"><strong>Verifique atividade:</strong> Veja se tem posts recentes (ultimas 24h). Grupo morto nao vale o esforco.</div></div>
+      <div class="guide-step"><div class="step-num">4</div><div class="step-text"><strong>Leia as regras:</strong> Antes de entrar, veja se permite posts de servicos. Cadastre as regras aqui na Central.</div></div>
+      <div class="guide-tip">Dica: Grupos de "emprego", "MEI" e "financas pessoais" tambem tem muitos negativados buscando solucao.</div>
+    </div>
+    <div class="card guide-section">
+      <h3>2. Estrategia de Entrada</h3>
+      <div class="guide-step"><div class="step-num">1</div><div class="step-text"><strong>Nao poste logo:</strong> Entre no grupo e observe 1-2 dias. Entenda o tom e o que funciona.</div></div>
+      <div class="guide-step"><div class="step-num">2</div><div class="step-text"><strong>Comente primeiro:</strong> Responda duvidas de outros membros com informacoes uteis. Isso gera autoridade.</div></div>
+      <div class="guide-step"><div class="step-num">3</div><div class="step-text"><strong>Post de valor:</strong> Seu primeiro post deve ser 100% educativo. Zero venda. Use o Gerador com Onda 1.</div></div>
+      <div class="guide-tip">Regra de ouro: 80% valor, 20% CTA. Se voce so vende, e banido rapido.</div>
+    </div>
+    <div class="card guide-section">
+      <h3>3. Evitando Bloqueios</h3>
+      <div class="guide-step"><div class="step-num">1</div><div class="step-text"><strong>Nao use o mesmo texto:</strong> O Facebook detecta copy-paste. Use o Gerador Anti-Padrao pra variar.</div></div>
+      <div class="guide-step"><div class="step-num">2</div><div class="step-text"><strong>Espaco entre posts:</strong> Minimo 30 min entre grupos. Ideal: 1-2h. Nao poste em 10 grupos em 5 minutos.</div></div>
+      <div class="guide-step"><div class="step-num">3</div><div class="step-text"><strong>Alterne perfis:</strong> Use 2-3 perfis e distribua os grupos. A Central faz isso automaticamente.</div></div>
+      <div class="guide-step"><div class="step-num">4</div><div class="step-text"><strong>Links com cuidado:</strong> Se o grupo nao permite links, use "inbox" ou "me chama no privado".</div></div>
+      <div class="guide-step"><div class="step-num">5</div><div class="step-text"><strong>Perfil completo:</strong> Foto real, bio preenchida, alguns posts pessoais. Perfil vazio = ban rapido.</div></div>
+      <div class="guide-tip">Se tomou block temporario: pare por 24-48h. Nao tente burlar, piora a situacao.</div>
+    </div>
+    <div class="card guide-section">
+      <h3>4. Convertendo Comentarios em Leads</h3>
+      <div class="guide-step"><div class="step-num">1</div><div class="step-text"><strong>Monitore respostas:</strong> Quando alguem comenta no seu post, responda em ate 1h.</div></div>
+      <div class="guide-step"><div class="step-num">2</div><div class="step-text"><strong>Leve pro privado:</strong> "Te mandei mensagem no inbox com mais detalhes" - Nunca negocie nos comentarios.</div></div>
+      <div class="guide-step"><div class="step-num">3</div><div class="step-text"><strong>Use os Scripts:</strong> Abra a aba Scripts WhatsApp e use os scripts prontos de abordagem e qualificacao.</div></div>
+      <div class="guide-step"><div class="step-num">4</div><div class="step-text"><strong>Follow-up:</strong> Se nao respondeu em 24h, manda a reativacao. Muitos leads fecham no follow-up.</div></div>
+      <div class="guide-tip">Melhor horario pra postar: 7h-9h (manha), 12h-13h (almoco), 19h-21h (noite). E quando o pessoal esta no celular.</div>
+    </div>
+    <div class="card guide-section">
+      <h3>5. Ciclo Semanal Ideal</h3>
+      <div class="guide-step"><div class="step-num">S</div><div class="step-text"><strong>Segunda:</strong> Gerar missoes, posts educativos (Onda 1-2)</div></div>
+      <div class="guide-step"><div class="step-num">T</div><div class="step-text"><strong>Terca:</strong> Comentar em posts de outros, gerar autoridade</div></div>
+      <div class="guide-step"><div class="step-num">Q</div><div class="step-text"><strong>Quarta:</strong> Posts de mitos/perguntas (engajamento alto)</div></div>
+      <div class="guide-step"><div class="step-num">Q</div><div class="step-text"><strong>Quinta:</strong> Posts com CTA suave (Onda 2-3)</div></div>
+      <div class="guide-step"><div class="step-num">S</div><div class="step-text"><strong>Sexta:</strong> Posts de conversao + historias de sucesso (Onda 3-4)</div></div>
+      <div class="guide-step"><div class="step-num">S</div><div class="step-text"><strong>Sabado:</strong> Follow-up de leads da semana</div></div>
+      <div class="guide-step"><div class="step-num">D</div><div class="step-text"><strong>Domingo:</strong> Descanso + planejamento da proxima semana</div></div>
+    </div>
+  </div>
   <!-- PAGE: METRICAS -->
   <div class="page" id="pg-metricas">
     <h2>Metricas</h2>
@@ -237,7 +329,9 @@ h2{font-size:1.4rem;margin-bottom:18px;color:#1a237e}
     </div>
   </div>
 </div>
+<div class="xp-popup" id="xpPopup"></div>
 <div class="toast" id="toast"></div>
+<div id="onboardContainer"></div>
 <script>
 /* ==================== UTILITIES ==================== */
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
@@ -354,15 +448,161 @@ var SCRIPTS={
   }
 };
 
+/* ==================== GAMIFICATION ==================== */
+var gamify=load('nle_gamify',{xp:0,level:1,streak:0,lastActiveDate:'',totalMissions:0,totalPosts:0,achievements:{}});
+var LEVELS=[
+  {name:'Recruta',minXp:0},
+  {name:'Soldado',minXp:100},
+  {name:'Cabo',minXp:300},
+  {name:'Sargento',minXp:600},
+  {name:'Tenente',minXp:1000},
+  {name:'Capitao',minXp:1600},
+  {name:'Major',minXp:2500},
+  {name:'Coronel',minXp:4000},
+  {name:'General',minXp:6000},
+  {name:'Marechal',minXp:10000}
+];
+var ACHIEVEMENTS=[
+  {id:'first_mission',icon:'\uD83C\uDF1F',name:'Primeira Missao',desc:'Complete sua primeira missao',check:function(){return gamify.totalMissions>=1;}},
+  {id:'missions_10',icon:'\uD83D\uDCAA',name:'Dedicado',desc:'Complete 10 missoes',check:function(){return gamify.totalMissions>=10;}},
+  {id:'missions_50',icon:'\uD83D\uDD25',name:'Imparavel',desc:'Complete 50 missoes',check:function(){return gamify.totalMissions>=50;}},
+  {id:'missions_100',icon:'\uD83C\uDFC6',name:'Centuriao',desc:'Complete 100 missoes',check:function(){return gamify.totalMissions>=100;}},
+  {id:'streak_3',icon:'\u26A1',name:'Sequencia',desc:'3 dias consecutivos',check:function(){return gamify.streak>=3;}},
+  {id:'streak_7',icon:'\uD83D\uDCA5',name:'Semana de Fogo',desc:'7 dias consecutivos',check:function(){return gamify.streak>=7;}},
+  {id:'streak_30',icon:'\uD83D\uDC8E',name:'Lenda',desc:'30 dias consecutivos',check:function(){return gamify.streak>=30;}},
+  {id:'level_5',icon:'\uD83C\uDF96\uFE0F',name:'Capitao',desc:'Alcance nivel 5',check:function(){return gamify.level>=5;}},
+  {id:'groups_10',icon:'\uD83D\uDCCB',name:'Explorador',desc:'Cadastre 10 grupos',check:function(){return grupos.length>=10;}},
+  {id:'groups_50',icon:'\uD83C\uDF0D',name:'Dominador',desc:'Cadastre 50 grupos',check:function(){return grupos.length>=50;}},
+  {id:'profiles_3',icon:'\uD83D\uDC65',name:'Multi-perfil',desc:'Cadastre 3 perfis',check:function(){return perfis.length>=3;}}
+];
+
+function getLevel(xp){
+  var lvl=LEVELS[0];
+  for(var i=LEVELS.length-1;i>=0;i--){if(xp>=LEVELS[i].minXp){lvl=LEVELS[i];lvl.num=i+1;break;}}
+  return lvl;
+}
+
+function getXpForNext(xp){
+  for(var i=0;i<LEVELS.length;i++){if(xp<LEVELS[i].minXp)return{needed:LEVELS[i].minXp,prev:i>0?LEVELS[i-1].minXp:0};}
+  return{needed:LEVELS[LEVELS.length-1].minXp,prev:LEVELS[LEVELS.length-2].minXp};
+}
+
+function addXp(amount,reason){
+  var oldLevel=getLevel(gamify.xp).num;
+  gamify.xp+=amount;
+  gamify.level=getLevel(gamify.xp).num||1;
+  save('nle_gamify',gamify);
+  showXpPopup('+'+amount+' XP'+(reason?' - '+reason:''));
+  if(gamify.level>oldLevel){
+    setTimeout(function(){showXpPopup('LEVEL UP! '+LEVELS[gamify.level-1].name);},1200);
+  }
+  checkAchievements();
+}
+
+function showXpPopup(text){
+  var el=document.getElementById('xpPopup');
+  el.textContent=text;
+  el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show');},1000);
+}
+
+function updateStreak(){
+  var today=new Date().toISOString().slice(0,10);
+  if(gamify.lastActiveDate===today)return;
+  var yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(gamify.lastActiveDate===yesterday){gamify.streak++;}
+  else if(gamify.lastActiveDate!==today){gamify.streak=1;}
+  gamify.lastActiveDate=today;
+  save('nle_gamify',gamify);
+}
+
+function checkAchievements(){
+  var newOnes=false;
+  ACHIEVEMENTS.forEach(function(a){
+    if(!gamify.achievements[a.id]&&a.check()){
+      gamify.achievements[a.id]=new Date().toISOString();
+      newOnes=true;
+      setTimeout(function(){toast('Conquista desbloqueada: '+a.name+'!');},500);
+    }
+  });
+  if(newOnes)save('nle_gamify',gamify);
+}
+
+function renderConquistas(){
+  var lvl=getLevel(gamify.xp);
+  var next=getXpForNext(gamify.xp);
+  var pct=next.needed>next.prev?Math.round(((gamify.xp-next.prev)/(next.needed-next.prev))*100):100;
+  document.getElementById('levelDisplay').innerHTML='<span class="level-badge">Nivel '+gamify.level+' - '+(lvl.name||'Recruta')+'</span>';
+  document.getElementById('xpFill').style.width=Math.min(pct,100)+'%';
+  document.getElementById('xpText').textContent=gamify.xp+' / '+next.needed+' XP';
+  document.getElementById('streakDisplay').innerHTML=gamify.streak>0?'<span class="streak-flame">\uD83D\uDD25</span> <strong>'+gamify.streak+' dia'+(gamify.streak>1?'s':'')+' seguido'+(gamify.streak>1?'s':'')+'!</strong>':'<span style="color:#999">Complete missoes hoje para iniciar sua sequencia!</span>';
+  document.getElementById('gamifyStats').innerHTML=
+    '<div class="stat-card"><div class="val" style="color:#ff6d00">'+gamify.xp+'</div><div class="lbl">XP Total</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:#1a237e">'+gamify.level+'</div><div class="lbl">Nivel</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:#c62828">'+gamify.streak+'</div><div class="lbl">Streak</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:var(--green)">'+gamify.totalMissions+'</div><div class="lbl">Missoes Feitas</div></div>'+
+    '<div class="stat-card"><div class="val" style="color:#6a1b9a">'+Object.keys(gamify.achievements).length+'/'+ACHIEVEMENTS.length+'</div><div class="lbl">Conquistas</div></div>';
+  var achHtml='';
+  ACHIEVEMENTS.forEach(function(a){
+    var unlocked=!!gamify.achievements[a.id];
+    achHtml+='<div class="achievement'+(unlocked?' unlocked':'')+'">';
+    achHtml+='<div class="ach-icon">'+(unlocked?a.icon:'\uD83D\uDD12')+'</div>';
+    achHtml+='<div class="ach-info"><strong>'+a.name+'</strong><small>'+a.desc+'</small></div></div>';
+  });
+  document.getElementById('achievementList').innerHTML=achHtml;
+}
+
+/* ==================== ONBOARDING ==================== */
+var onboardDone=load('nle_onboard',false);
+var ONBOARD_STEPS=[
+  {icon:'\uD83D\uDE80',title:'Bem-vindo a Central de Operacoes!',text:'Aqui voce gerencia toda sua operacao de captacao de leads: perfis, grupos, missoes diarias, scripts e metricas. Tudo num so lugar.'},
+  {icon:'\uD83D\uDC64',title:'1. Cadastre seus Perfis',text:'Perfis sao suas contas do Facebook. Cadastre cada uma com um nome e cor pra organizar. Defina quantos grupos cada perfil vai postar por dia.'},
+  {icon:'\uD83D\uDCCB',title:'2. Adicione os Grupos',text:'Cadastre os grupos do Facebook onde voce vai atuar. Inclua nome, categoria, regras e se permite links. Pode importar em lote!'},
+  {icon:'\uD83C\uDFAF',title:'3. Gere Missoes Diarias',text:'Clique em "Gerar Missoes" e o sistema distribui os grupos entre seus perfis automaticamente, com conteudo pronto pra postar.'},
+  {icon:'\uD83C\uDFC6',title:'4. Ganhe XP e Suba de Nivel!',text:'Cada missao concluida da XP. Mantenha uma sequencia diaria pra ganhar bonus. Desbloqueie conquistas e acompanhe seu progresso!'}
+];
+
+function showOnboarding(){
+  if(onboardDone)return;
+  var step=0;
+  function render(){
+    var s=ONBOARD_STEPS[step];
+    var dots='';
+    for(var i=0;i<ONBOARD_STEPS.length;i++){dots+='<div class="dot'+(i===step?' active':'')+'"></div>';}
+    document.getElementById('onboardContainer').innerHTML=
+      '<div class="onboard-overlay">'+
+      '<div class="onboard-box">'+
+      '<span class="ob-icon">'+s.icon+'</span>'+
+      '<h2>'+s.title+'</h2>'+
+      '<p>'+s.text+'</p>'+
+      '<div class="onboard-steps">'+dots+'</div>'+
+      '<div style="display:flex;gap:10px;justify-content:center">'+
+      (step>0?'<button class="btn btn-secondary" onclick="obPrev()">Anterior</button>':'')+
+      (step<ONBOARD_STEPS.length-1?'<button class="btn btn-primary" onclick="obNext()">Proximo</button>':'<button class="btn btn-primary" onclick="obFinish()">Comecar!</button>')+
+      '</div></div></div>';
+  }
+  window.obNext=function(){step++;render();};
+  window.obPrev=function(){step--;render();};
+  window.obFinish=function(){
+    onboardDone=true;
+    save('nle_onboard',true);
+    document.getElementById('onboardContainer').innerHTML='';
+    addXp(10,'Completou onboarding');
+  };
+  render();
+}
+
 /* ==================== SIDEBAR ==================== */
 var pages=[
   {id:'missoes',icon:'\uD83C\uDFAF',label:'Missoes'},
+  {id:'conquistas',icon:'\uD83C\uDFC6',label:'Conquistas'},
   {id:'perfis',icon:'\uD83D\uDC64',label:'Perfis'},
   {id:'grupos',icon:'\uD83D\uDCCB',label:'Grupos'},
+  {id:'guia',icon:'\uD83D\uDCD6',label:'Guia Facebook'},
   {id:'scripts',icon:'\uD83D\uDCAC',label:'Scripts WhatsApp'},
   {id:'gerador',icon:'\u270F\uFE0F',label:'Gerador'},
-  {id:'config',icon:'\u2699\uFE0F',label:'Config'},
-  {id:'metricas',icon:'\uD83D\uDCCA',label:'Metricas'}
+  {id:'metricas',icon:'\uD83D\uDCCA',label:'Metricas'},
+  {id:'config',icon:'\u2699\uFE0F',label:'Config'}
 ];
 
 function buildSidebar(){
@@ -383,6 +623,7 @@ function goTo(id){
   });
   if(window.innerWidth<=768){var sb=document.getElementById('sidebar');sb.classList.remove('open');document.getElementById('overlay').classList.remove('show');}
   if(id==='missoes')renderMissoes();
+  if(id==='conquistas')renderConquistas();
   if(id==='perfis')renderPerfis();
   if(id==='grupos')renderGrupos();
   if(id==='scripts')renderScripts();
@@ -622,6 +863,7 @@ function gerarMissoes(){
   });
   save('nle_ms',missoes);
   renderMissoes();
+  addXp(5,'Missoes geradas');
   toast(missoes.length+' missoes geradas!');
 }
 
@@ -725,9 +967,22 @@ function switchMTab(prefix,idx,btn){
 }
 
 function toggleMission(idx){
+  var wasDone=missoes[idx].done;
   missoes[idx].done=!missoes[idx].done;
   save('nle_ms',missoes);
   saveToHistory();
+  if(!wasDone&&missoes[idx].done){
+    gamify.totalMissions++;
+    updateStreak();
+    var streakBonus=gamify.streak>=7?5:gamify.streak>=3?2:0;
+    addXp(10+streakBonus,'Missao concluida'+(streakBonus?' +bonus streak':''));
+    save('nle_gamify',gamify);
+  }else if(wasDone&&!missoes[idx].done){
+    gamify.totalMissions=Math.max(0,gamify.totalMissions-1);
+    gamify.xp=Math.max(0,gamify.xp-10);
+    gamify.level=getLevel(gamify.xp).num||1;
+    save('nle_gamify',gamify);
+  }
   renderMissoes();
 }
 
@@ -905,6 +1160,8 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 /* ==================== INIT ==================== */
 buildSidebar();
 goTo('missoes');
+showOnboarding();
+checkAchievements();
 </script>
 </body>
 </html>
